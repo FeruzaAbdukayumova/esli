@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /login
+Allow: /register
+Allow: /browse
+Allow: /browse/
+Allow: /pricing
+Disallow: /dashboard
+Disallow: /deck/
+Disallow: /study/
+Disallow: /decks
+Disallow: /settings
+Disallow: /profile
+Disallow: /admin
+Disallow: /auth/
+Disallow: /subscription/
+
+Sitemap: https://flashcards-app.com/sitemap.xml

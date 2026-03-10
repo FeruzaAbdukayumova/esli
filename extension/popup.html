@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=400">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Login Section -->
+    <div id="login-section" class="hidden">
+      <div class="logo">
+        <img src="icons/icon48.png" alt="Esli" width="32" height="32">
+        <h1>Esli</h1>
+      </div>
+      <form id="login-form">
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" required placeholder="you@example.com" autocomplete="email">
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="password-wrapper">
+            <input type="password" id="password" required placeholder="Password" autocomplete="current-password">
+            <button type="button" class="password-toggle" id="password-toggle" aria-label="Show password">👁</button>
+          </div>
+        </div>
+        <div id="login-error" class="error hidden"></div>
+        <button type="submit" id="login-btn" class="btn primary">Sign In</button>
+      </form>
+      <div class="divider-text"><span>or</span></div>
+      <button type="button" id="google-signin-btn" class="btn google-btn">
+        <svg class="google-icon" viewBox="0 0 24 24" width="16" height="16">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Sign in via App
+      </button>
+    </div>
+
+    <!-- Card Creation Section -->
+    <div id="card-section" class="hidden">
+      <div class="header">
+        <h1><img src="icons/icon48.png" alt="Esli" width="24" height="24"> Esli</h1>
+        <button id="logout-btn" class="btn-text" title="Sign out">Sign Out</button>
+      </div>
+
+      <!-- Sign-up CTA for guests -->
+      <div id="guest-cta" class="guest-cta hidden">
+        <p>Create a free account to save cards and study with spaced repetition</p>
+        <a id="guest-cta-link" class="btn primary" target="_blank">Sign Up Free</a>
+      </div>
+
+      <!-- Tab bar -->
+      <div class="tab-bar">
+        <button type="button" class="tab active" data-tab="ai">AI Generate</button>
+        <button type="button" class="tab" data-tab="manual">Manual</button>
+      </div>
+
+      <!-- AI Generate tab (default) -->
+      <div id="tab-ai" class="tab-content">
+        <!-- AI Form -->
+        <div id="ai-form">
+          <div class="field">
+            <p class="hint">Generate cards from the current page's content. If you've selected text, only that text will be used.</p>
+            <button type="button" id="extract-page-btn" class="btn secondary">Extract from Page</button>
+          </div>
+          <div id="page-text-preview" class="hidden">
+            <div class="field">
+              <label>Extracted text <span id="page-text-length" style="font-weight:400;text-transform:none"></span></label>
+              <textarea id="page-text" rows="3" readonly></textarea>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Card count + language -->
+          <div class="field">
+            <label for="ai-count">Number of cards</label>
+            <select id="ai-count">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="ai-language">Card language</label>
+            <select id="ai-language">
+              <option value="">Auto (match content)</option>
+              <option value="English">English</option>
+              <option value="Spanish">Spanish</option>
+              <option value="French">French</option>
+              <option value="German">German</option>
+              <option value="Portuguese">Portuguese</option>
+              <option value="Russian">Russian</option>
+              <option value="Chinese">Chinese</option>
+              <option value="Japanese">Japanese</option>
+              <option value="Korean">Korean</option>
+              <option value="Arabic">Arabic</option>
+              <option value="Hindi">Hindi</option>
+              <option value="Turkish">Turkish</option>
+              <option value="Vietnamese">Vietnamese</option>
+              <option value="Uzbek">Uzbek</option>
+            </select>
+          </div>
+
+          <!-- Deck selector -->
+          <div class="field">
+            <label for="ai-deck-select">Deck</label>
+            <div class="deck-row">
+              <select id="ai-deck-select">
+                <option value="">Loading decks...</option>
+              </select>
+              <button id="ai-new-deck-btn" class="btn-icon" title="Create new deck">+</button>
+            </div>
+          </div>
+
+          <!-- Inline new deck form -->
+          <div id="ai-new-deck-form" class="field hidden">
+            <label for="ai-new-deck-name">New deck name</label>
+            <div class="deck-row">
+              <input type="text" id="ai-new-deck-name" placeholder="e.g. Biology Chapter 5" maxlength="255">
+              <button id="ai-create-deck-btn" class="btn-small primary">Create</button>
+              <button id="ai-cancel-deck-btn" class="btn-small secondary">Cancel</button>
+            </div>
+          </div>
+
+          <div id="ai-error" class="error hidden"></div>
+
+          <button type="button" id="ai-generate-btn" class="btn primary">Generate Cards</button>
+        </div>
+
+        <!-- Loading state -->
+        <div id="ai-loading" class="hidden">
+          <div class="loading-box">
+            <div class="spinner"></div>
+            <p class="loading-message">Generating cards...</p>
+            <p class="loading-sub">This may take 10–30 seconds</p>
+          </div>
+        </div>
+
+        <!-- Preview section -->
+        <div id="ai-preview" class="hidden">
+          <div class="preview-header">
+            <span id="ai-preview-count">0 cards</span>
+            <div style="display:flex;gap:6px;align-items:center">
+              <button type="button" id="ai-remove-all-btn" class="btn-danger-text">Remove all</button>
+              <button type="button" id="ai-back-btn" class="btn-text">← Back</button>
+            </div>
+          </div>
+          <div id="ai-card-list"></div>
+          <div id="ai-save-error" class="error hidden"></div>
+          <div id="ai-save-success" class="success hidden"><span class="success-icon">✓</span> <span id="ai-save-success-text">Cards saved!</span></div>
+          <button type="button" id="ai-save-btn" class="btn primary">Save All to Deck</button>
+          <div id="ai-guest-save-cta" class="save-cta hidden">
+            <p>Sign up to save these cards to your account</p>
+            <a id="ai-guest-save-link" class="btn primary" target="_blank">Create Free Account</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manual tab -->
+      <div id="tab-manual" class="tab-content hidden">
+        <div class="field">
+          <label for="front-input">Front side</label>
+          <textarea id="front-input" rows="2" placeholder="Select text on a page → right-click → As Front side"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="back-input">Back side</label>
+          <textarea id="back-input" rows="2" placeholder="Select text on a page → right-click → As Back side"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="deck-select">Deck</label>
+          <div class="deck-row">
+            <select id="deck-select">
+              <option value="">Loading decks...</option>
+            </select>
+            <button id="new-deck-btn" class="btn-icon" title="Create new deck">+</button>
+          </div>
+        </div>
+
+        <!-- Inline new deck form -->
+        <div id="new-deck-form" class="field hidden">
+          <label for="new-deck-name">New deck name</label>
+          <div class="deck-row">
+            <input type="text" id="new-deck-name" placeholder="e.g. Spanish Vocab" maxlength="255">
+            <button id="create-deck-btn" class="btn-small primary">Create</button>
+            <button id="cancel-deck-btn" class="btn-small secondary">Cancel</button>
+          </div>
+        </div>
+
+        <div id="card-error" class="error hidden"></div>
+        <div id="card-success" class="success hidden"><span class="success-icon">✓</span><span id="card-success-text"> Card added!</span></div>
+
+        <button id="add-card-btn" class="btn primary">Add Card</button>
+        <div id="manual-guest-cta" class="save-cta hidden">
+          <p>Sign up to save cards and study with spaced repetition</p>
+          <a id="manual-guest-link" class="btn primary" target="_blank">Create Free Account</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
