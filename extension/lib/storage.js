@@ -16,7 +16,7 @@ export const tokenStorage = {
 
   async getApiBaseUrl() {
     const data = await browserAPI.storage.local.get('api_base_url');
-    return data.api_base_url || 'http://localhost:8000';
+    return data.api_base_url || 'https://api.esli.app';
   },
 
   // Persists both front and back — each selection merges into the draft

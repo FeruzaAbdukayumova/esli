@@ -44,7 +44,7 @@ export const BrowsePage = () => {
       'provider': {
         '@type': 'WebApplication',
         'name': 'Esli',
-        'url': 'https://flashcards-app.com',
+        'url': 'https://app.esli.app',
       },
     },
   })

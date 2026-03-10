@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 
-const APP_URL = 'https://flashcards-app.com'
+const APP_URL = 'https://app.esli.app'
 
 const footerLinks = [
   { key: 'footer.features', href: '#features' },

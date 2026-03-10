@@ -4,7 +4,7 @@ import { login, fetchMe, fetchDecks, createDeck, createCard, generateCards, batc
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
 
 // App URL for sign-up links
-const APP_URL = 'http://localhost:5173';
+const APP_URL = 'https://app.esli.app';
 
 // DOM elements — Login
 const loginSection = document.getElementById('login-section');

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ArrowRight, Sparkles } from 'lucide-react'
 
-const APP_URL = 'https://flashcards-app.com'
+const APP_URL = 'https://app.esli.app'
 
 export default function Hero() {
   const { t } = useTranslation()

@@ -11,7 +11,7 @@ interface PageMeta {
 }
 
 const SITE_NAME = 'Esli'
-const BASE_URL = 'https://flashcards-app.com'
+const BASE_URL = 'https://app.esli.app'
 const JSON_LD_ID = 'page-jsonld'
 
 function setMetaTag(attr: 'name' | 'property', key: string, content: string) {

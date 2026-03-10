@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Menu, X } from 'lucide-react'
 import LanguageSwitcher from '../components/LanguageSwitcher'
 
-const APP_URL = 'https://flashcards-app.com'
+const APP_URL = 'https://app.esli.app'
 
 const navLinks = [
   { key: 'nav.features', href: '#features' },
