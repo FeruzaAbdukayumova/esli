@@ -1,7 +1,19 @@
+import subprocess
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import api_router
 from app.core.config import settings
+
+
+def run_migrations():
+    try:
+        subprocess.run(["alembic", "upgrade", "head"], check=True)
+        print("Migrations completed successfully")
+    except Exception as e:
+        print(f"Migration failed: {e}")
+
+
+run_migrations()
 
 app = FastAPI(
     title=settings.APP_NAME,
