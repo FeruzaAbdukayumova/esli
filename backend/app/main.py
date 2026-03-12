@@ -13,7 +13,16 @@ def run_migrations():
         print(f"Migration failed: {e}")
 
 
+def run_seeds():
+    try:
+        subprocess.run(["python", "-m", "app.db.seeds.seed_decks"], check=True)
+        print("Seeding completed successfully")
+    except Exception as e:
+        print(f"Seeding failed: {e}")
+
+
 run_migrations()
+run_seeds()
 
 app = FastAPI(
     title=settings.APP_NAME,
