@@ -75,7 +75,7 @@ export async function generateCardsFromPDF(
     formData.append('existing_fronts', JSON.stringify(req.existingFronts))
   }
 
-  const response = await fetch('/api/v1/ai/generate-cards-from-pdf', {
+  const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/v1/ai/generate-cards-from-pdf`, {
     method: 'POST',
     body: formData,
     signal: req.signal,

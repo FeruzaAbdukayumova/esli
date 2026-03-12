@@ -14,15 +14,15 @@ export function useChatWebSocket(
   const connect = useCallback(() => {
     if (!conversationId) return
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const host = window.location.host
+    const apiUrl = import.meta.env.VITE_API_URL || ''
+    const wsBase = apiUrl ? apiUrl.replace(/^http/, 'ws') : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`
     const params = new URLSearchParams()
 
     const token = storage.getToken()
     if (token) params.set('token', token)
     if (guestId) params.set('guest_id', guestId)
 
-    const ws = new WebSocket(`${protocol}//${host}/api/v1/chat/ws/${conversationId}?${params.toString()}`)
+    const ws = new WebSocket(`${wsBase}/api/v1/chat/ws/${conversationId}?${params.toString()}`)
 
     ws.onmessage = (event) => {
       try {

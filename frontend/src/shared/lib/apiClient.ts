@@ -1,6 +1,6 @@
 import { storage } from './storage'
 
-const API_BASE_URL = '/api/v1'
+const API_BASE_URL = (import.meta.env.VITE_API_URL || '') + '/api/v1'
 
 let isRefreshing = false
 let refreshPromise: Promise<string | null> | null = null
