@@ -41,7 +41,7 @@ export function DistributionChart({ data, height = 300 }: DistributionChartProps
             color: '#f1f5f9',
             fontSize: 13,
           }}
-          formatter={(value: number | undefined) => [`${value ?? 0} (${total > 0 ? Math.round(((value ?? 0) / total) * 100) : 0}%)`, '']}
+          formatter={(value) => [`${value ?? 0} (${total > 0 ? Math.round(((Number(value) || 0) / total) * 100) : 0}%)`, '']}
         />
         <Legend />
       </PieChart>

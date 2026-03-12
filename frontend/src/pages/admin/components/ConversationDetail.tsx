@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, MessageCircle } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
