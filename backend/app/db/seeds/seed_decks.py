@@ -99,9 +99,9 @@ async def get_or_create_system_user(session: AsyncSession):
     await session.execute(
         text(
             "INSERT INTO users (id, email, password_hash, auth_provider, username, "
-            "preferred_language, daily_new_card_limit, theme, dark_mode, created_at) "
+            "preferred_language, daily_new_card_limit, theme, dark_mode, is_admin, created_at) "
             "VALUES (:id, :email, NULL, :auth_provider, :username, "
-            "'en', 20, 'indigo', 'system', :created_at)"
+            "'en', 20, 'indigo', 'system', false, :created_at)"
         ),
         {
             "id": user_id,
