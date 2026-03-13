@@ -16,6 +16,19 @@ from app.db.models.subscription import Subscription
 from app.db.models.user import User
 
 
+def _effective_tier_expr():
+    """SQL expression returning the effective tier (higher of plan_tier and active promo_tier)."""
+    now = datetime.now(timezone.utc)
+    base = func.coalesce(Subscription.plan_tier, "free")
+    promo_active = (Subscription.promo_tier.isnot(None)) & (Subscription.promo_expires_at > now)
+    # Pick the higher tier: premium > pro > free
+    return case(
+        (promo_active & (Subscription.promo_tier == "premium"), "premium"),
+        (promo_active & (Subscription.promo_tier == "pro") & (base != "premium"), "pro"),
+        else_=base,
+    )
+
+
 # ---------------------------------------------------------------------------
 # Platform stats
 # ---------------------------------------------------------------------------
@@ -54,7 +67,7 @@ async def get_platform_stats(db: AsyncSession) -> dict:
     # Users by tier
     tier_result = await db.execute(
         select(
-            func.coalesce(Subscription.plan_tier, "free").label("tier"),
+            _effective_tier_expr().label("tier"),
             func.count(User.id).label("count"),
         )
         .select_from(User)
@@ -144,7 +157,7 @@ async def list_users_paginated(
     query = (
         select(
             User,
-            func.coalesce(Subscription.plan_tier, "free").label("tier"),
+            _effective_tier_expr().label("tier"),
             func.coalesce(deck_count_sq.c.deck_count, 0).label("deck_count"),
             func.coalesce(card_count_sq.c.card_count, 0).label("card_count"),
             last_activity_sq.c.last_activity,
@@ -162,7 +175,7 @@ async def list_users_paginated(
             or_(User.email.ilike(term), User.username.ilike(term))
         )
     if tier_filter:
-        query = query.where(func.coalesce(Subscription.plan_tier, "free") == tier_filter)
+        query = query.where(_effective_tier_expr() == tier_filter)
     if provider_filter:
         query = query.where(User.auth_provider == provider_filter)
     if is_admin_filter is not None:
