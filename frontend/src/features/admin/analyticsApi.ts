@@ -8,6 +8,8 @@ export interface TimeSeriesPoint {
 export interface UserGrowthData {
   signups: TimeSeriesPoint[]
   active_users: TimeSeriesPoint[]
+  app_opens: TimeSeriesPoint[]
+  unique_visitors: TimeSeriesPoint[]
   total_users: number
   retention_rate: number
 }

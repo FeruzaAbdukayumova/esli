@@ -9,6 +9,7 @@ import {
   Loader2,
   TrendingUp,
   Activity,
+  Eye,
 } from 'lucide-react'
 import { usePageMeta } from '@/shared/lib/usePageMeta'
 import {
@@ -109,6 +110,21 @@ export function AdminAnalyticsPage() {
       const existing = map.get(p.date)
       if (existing) existing.active = p.value
       else map.set(p.date, { date: p.date, signups: 0, active: p.value })
+    }
+    return [...map.values()].sort((a, b) => a.date.localeCompare(b.date))
+  }, [userGrowth.data])
+
+  // App opens + unique visitors chart data
+  const visitorChartData = useMemo(() => {
+    if (!userGrowth.data) return []
+    const map = new Map<string, { date: string; app_opens: number; unique_visitors: number }>()
+    for (const p of userGrowth.data.app_opens) {
+      map.set(p.date, { date: p.date, app_opens: p.value, unique_visitors: 0 })
+    }
+    for (const p of userGrowth.data.unique_visitors) {
+      const existing = map.get(p.date)
+      if (existing) existing.unique_visitors = p.value
+      else map.set(p.date, { date: p.date, app_opens: 0, unique_visitors: p.value })
     }
     return [...map.values()].sort((a, b) => a.date.localeCompare(b.date))
   }, [userGrowth.data])
@@ -234,11 +250,23 @@ export function AdminAnalyticsPage() {
       {activeTab === 'userGrowth' && (
         userGrowth.isLoading ? <LoadingState /> : (
           <div className="space-y-6">
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard
                 label={t('admin.analytics.userGrowth.totalUsers', 'Total Users')}
                 value={userGrowth.data?.total_users ?? 0}
                 icon={Users}
+              />
+              <StatCard
+                label={t('admin.analytics.userGrowth.appOpens', 'App Opens')}
+                value={userGrowth.data?.app_opens.reduce((s, p) => s + p.value, 0) ?? 0}
+                icon={Eye}
+                color="text-amber-600 dark:text-amber-400"
+              />
+              <StatCard
+                label={t('admin.analytics.userGrowth.uniqueVisitors', 'Unique Visitors')}
+                value={userGrowth.data?.unique_visitors.reduce((s, p) => s + p.value, 0) ?? 0}
+                icon={Activity}
+                color="text-violet-600 dark:text-violet-400"
               />
               <StatCard
                 label={t('admin.analytics.userGrowth.retentionRate', 'Retention Rate')}
@@ -246,13 +274,16 @@ export function AdminAnalyticsPage() {
                 icon={TrendingUp}
                 color="text-emerald-600 dark:text-emerald-400"
               />
-              <StatCard
-                label={t('admin.analytics.userGrowth.activeUsers', 'Active Users')}
-                value={userGrowth.data?.active_users.reduce((s, p) => s + p.value, 0) ?? 0}
-                icon={Activity}
-                color="text-violet-600 dark:text-violet-400"
-              />
             </div>
+            <ChartCard title={t('admin.analytics.userGrowth.visitors', 'App Opens & Unique Visitors')}>
+              <TimeSeriesChart
+                data={visitorChartData}
+                series={[
+                  { dataKey: 'app_opens', name: t('admin.analytics.userGrowth.appOpens', 'App Opens'), color: '#f59e0b' },
+                  { dataKey: 'unique_visitors', name: t('admin.analytics.userGrowth.uniqueVisitors', 'Unique Visitors'), color: '#8b5cf6' },
+                ]}
+              />
+            </ChartCard>
             <ChartCard title={t('admin.analytics.userGrowth.signups', 'Signups & Active Users')}>
               <TimeSeriesChart
                 data={userGrowthChartData}

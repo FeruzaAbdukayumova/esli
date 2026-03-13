@@ -17,6 +17,8 @@ class TimeSeriesPoint(BaseModel):
 class UserGrowthResponse(BaseModel):
     signups: list[TimeSeriesPoint]
     active_users: list[TimeSeriesPoint]
+    app_opens: list[TimeSeriesPoint]
+    unique_visitors: list[TimeSeriesPoint]
     total_users: int
     retention_rate: float
 

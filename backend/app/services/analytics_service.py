@@ -20,6 +20,7 @@ from app.db.models.user import User
 # ---------------------------------------------------------------------------
 
 ALLOWED_EVENTS = {
+    "app.open",
     "deck.create",
     "card.add",
     "pricing.upgrade_click",
@@ -100,6 +101,29 @@ async def get_user_growth(
         active_query = active_query.where(ReviewLog.reviewed_at >= start)
     active_users = [{"date": r.date, "value": r.value} for r in (await db.execute(active_query)).all()]
 
+    # App opens over time (all visitors, including guests)
+    app_opens_query = select(
+        func.to_char(_trunc_expr(granularity, AnalyticsEvent.created_at), "YYYY-MM-DD").label("date"),
+        func.count(AnalyticsEvent.id).label("value"),
+    ).where(
+        AnalyticsEvent.event_name == "app.open"
+    ).group_by("date").order_by("date")
+    if start:
+        app_opens_query = app_opens_query.where(AnalyticsEvent.created_at >= start)
+    app_opens = [{"date": r.date, "value": r.value} for r in (await db.execute(app_opens_query)).all()]
+
+    # Unique visitors (distinct session_ids for app.open)
+    unique_visitors_query = select(
+        func.to_char(_trunc_expr(granularity, AnalyticsEvent.created_at), "YYYY-MM-DD").label("date"),
+        func.count(distinct(AnalyticsEvent.session_id)).label("value"),
+    ).where(
+        AnalyticsEvent.event_name == "app.open",
+        AnalyticsEvent.session_id.isnot(None),
+    ).group_by("date").order_by("date")
+    if start:
+        unique_visitors_query = unique_visitors_query.where(AnalyticsEvent.created_at >= start)
+    unique_visitors = [{"date": r.date, "value": r.value} for r in (await db.execute(unique_visitors_query)).all()]
+
     # Retention rate: % of users who signed up in period and have at least 1 review
     if start:
         new_users_count = (await db.execute(
@@ -124,6 +148,8 @@ async def get_user_growth(
     return {
         "signups": signups,
         "active_users": active_users,
+        "app_opens": app_opens,
+        "unique_visitors": unique_visitors,
         "total_users": total_users,
         "retention_rate": retention_rate,
     }

@@ -1,10 +1,12 @@
 import '@/shared/i18n/config'
+import { useEffect } from 'react'
 import { RouterProvider } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './providers/AuthProvider'
 import { ThemeProvider } from './providers/ThemeProvider'
 import { ChatWidget } from '@/features/chat/components/ChatWidget'
+import { trackEvent } from '@/shared/lib/analytics'
 import { router } from './router'
 
 const queryClient = new QueryClient({
@@ -17,6 +19,14 @@ const queryClient = new QueryClient({
 })
 
 function App() {
+  useEffect(() => {
+    const key = 'flashcards-app-open-tracked'
+    if (!sessionStorage.getItem(key)) {
+      trackEvent('app.open')
+      sessionStorage.setItem(key, '1')
+    }
+  }, [])
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
