@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import select, func, distinct, text, case, literal_column
+from sqlalchemy import Integer, select, func, distinct, text, case, literal_column
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models.analytics_event import AnalyticsEvent
@@ -189,7 +189,7 @@ async def get_study_engagement(
 
     # Peak hours (0-23)
     hours_query = select(
-        func.extract("hour", ReviewLog.reviewed_at).cast(type_=text("integer")).label("hour"),
+        func.extract("hour", ReviewLog.reviewed_at).cast(Integer).label("hour"),
         func.count(ReviewLog.id).label("count"),
     ).group_by("hour").order_by("hour")
     if start:
