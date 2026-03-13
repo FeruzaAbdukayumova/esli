@@ -30,7 +30,7 @@ export const OAuthCallbackPage = () => {
 
     sessionStorage.removeItem('oauth_state')
 
-    if (provider !== 'google' && provider !== 'github') {
+    if (provider !== 'google') {
       setError(t('auth.oauthFailed'))
       return
     }

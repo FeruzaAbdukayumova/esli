@@ -30,11 +30,11 @@ export const authApi = {
     return apiClient.get<SupportedLanguages>('/cards/languages/supported')
   },
 
-  oauthAuthorize: (provider: 'google' | 'github'): Promise<{ authorize_url: string; state: string }> => {
+  oauthAuthorize: (provider: 'google'): Promise<{ authorize_url: string; state: string }> => {
     return apiClient.get<{ authorize_url: string; state: string }>(`/oauth/${provider}/authorize`)
   },
 
-  oauthCallback: (provider: 'google' | 'github', code: string, state: string): Promise<TokenResponse> => {
+  oauthCallback: (provider: 'google', code: string, state: string): Promise<TokenResponse> => {
     return apiClient.post<TokenResponse>(`/oauth/${provider}/callback`, { code, state }, { credentials: 'include' })
   },
 }

@@ -16,7 +16,6 @@ class User(Base):
     password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
     auth_provider: Mapped[str] = mapped_column(String(32), nullable=False, default="password")
     google_sub: Mapped[str | None] = mapped_column(String, nullable=True, unique=True)
-    github_id: Mapped[str | None] = mapped_column(String, nullable=True, unique=True)
     username: Mapped[str | None] = mapped_column(String(50), nullable=True, unique=True)
     theme: Mapped[str] = mapped_column(String(20), nullable=False, default="indigo")
     dark_mode: Mapped[str] = mapped_column(String(10), nullable=False, default="system")
