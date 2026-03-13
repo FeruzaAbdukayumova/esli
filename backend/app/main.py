@@ -15,8 +15,17 @@ def run_migrations():
 
 def run_seeds():
     try:
-        subprocess.run(["python", "-m", "app.db.seeds.seed_decks"], check=True)
-        print("Seeding completed successfully")
+        result = subprocess.run(
+            ["python", "-m", "app.db.seeds.seed_decks"],
+            capture_output=True, text=True
+        )
+        print(f"Seed stdout: {result.stdout}")
+        if result.stderr:
+            print(f"Seed stderr: {result.stderr}")
+        if result.returncode != 0:
+            print(f"Seeding failed with code {result.returncode}")
+        else:
+            print("Seeding completed successfully")
     except Exception as e:
         print(f"Seeding failed: {e}")
 
