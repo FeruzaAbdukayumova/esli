@@ -1,5 +1,7 @@
 """Analytics routes — event tracking and admin dashboard data."""
 
+import asyncio
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,6 +17,7 @@ from app.schemas.analytics import (
     UserGrowthResponse,
 )
 from app.services import analytics_service
+from app.services import telegram_service
 
 router = APIRouter()
 
@@ -46,6 +49,13 @@ async def track_event(
         session_id=payload.session_id,
         properties=payload.properties,
     )
+
+    uid = str(user.id) if user else None
+    if payload.event_name == "app.open":
+        asyncio.create_task(telegram_service.notify_app_open(uid, payload.session_id))
+    elif payload.event_name == "pricing.upgrade_click":
+        tier = payload.properties.get("tier") if payload.properties else None
+        asyncio.create_task(telegram_service.notify_upgrade_click(tier, uid))
 
 
 # ---------------------------------------------------------------------------

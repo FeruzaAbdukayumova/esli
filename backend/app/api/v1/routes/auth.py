@@ -1,3 +1,5 @@
+import asyncio
+
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,6 +16,7 @@ from app.services.refresh_token_service import (
 )
 from app.api.v1.deps import get_current_user
 from app.services import subscription_service
+from app.services.telegram_service import notify_registration
 
 router = APIRouter()
 
@@ -64,6 +67,7 @@ async def register(
 
         user = await create_user(db, payload.email, hash_password(payload.password), username=payload.username)
         await subscription_service.create_free_subscription(db, user.id)
+        asyncio.create_task(notify_registration(payload.email, payload.username))
         access_token = create_access_token(str(user.id))
         raw_refresh = await create_refresh_token(db, user.id)
         _set_refresh_cookie(response, raw_refresh)

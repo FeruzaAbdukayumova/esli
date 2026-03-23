@@ -1,3 +1,4 @@
+import asyncio
 import uuid
 from math import ceil
 
@@ -17,6 +18,7 @@ from app.schemas.deck import (
 )
 from app.schemas.card import CardResponse
 from app.services import deck_service
+from app.services.telegram_service import notify_deck_copy
 
 router = APIRouter()
 
@@ -110,6 +112,8 @@ async def copy_public_deck(
         )
 
     new_deck, card_count = result
+
+    asyncio.create_task(notify_deck_copy(new_deck.title, card_count, current_user.username))
 
     return DeckCopyResponse(
         id=new_deck.id,

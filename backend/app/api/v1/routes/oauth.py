@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import secrets
 
@@ -10,6 +11,7 @@ from app.core.security import create_access_token
 from app.db.session import get_db
 from app.schemas.auth import OAuthCallbackRequest, TokenResponse
 from app.services import subscription_service
+from app.services.telegram_service import notify_oauth_signup
 from app.services.oauth_service import (
     exchange_google_code,
     get_google_authorize_url,
@@ -109,5 +111,6 @@ async def google_callback(
                     username=None,
                 )
             await subscription_service.create_free_subscription(db, user.id)
+            asyncio.create_task(notify_oauth_signup(email, "google", name))
 
     return await _issue_tokens(response, db, user.id)

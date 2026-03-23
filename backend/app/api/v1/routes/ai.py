@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 import re
@@ -21,6 +22,7 @@ from app.schemas.ai_generation import (
     AIEditedCard,
 )
 from app.services import ai_generation_service, subscription_service, usage_service
+from app.services.telegram_service import notify_ai_generation
 
 MAX_PDF_SIZE = 10 * 1024 * 1024  # 10 MB
 
@@ -114,6 +116,12 @@ async def generate_cards(
     # Record usage for authenticated users
     if current_user:
         await usage_service.increment_ai_usage(db, current_user.id)
+
+    asyncio.create_task(notify_ai_generation(
+        topic=payload.topic,
+        card_count=len(result["cards"]),
+        user_id=str(current_user.id) if current_user else None,
+    ))
 
     return AIGenerateResponse(
         cards=[AIGeneratedCard(**c) for c in result["cards"]],
@@ -222,6 +230,13 @@ async def generate_cards_from_pdf(
     # Record usage
     if current_user:
         await usage_service.increment_ai_usage(db, current_user.id)
+
+    asyncio.create_task(notify_ai_generation(
+        topic=topic.strip() or file.filename or "PDF upload",
+        card_count=len(result["cards"]),
+        user_id=str(current_user.id) if current_user else None,
+        is_pdf=True,
+    ))
 
     return AIGenerateResponse(
         cards=[AIGeneratedCard(**c) for c in result["cards"]],

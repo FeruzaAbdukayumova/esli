@@ -1,3 +1,4 @@
+import asyncio
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect, Query
@@ -17,6 +18,7 @@ from app.schemas.chat import (
     ChatMessageSend,
 )
 from app.services import chat_service
+from app.services.telegram_service import notify_support_message
 from app.services.user_service import get_user_by_id
 from app.services.ws_manager import ws_manager
 
@@ -106,6 +108,8 @@ async def send_support_message(
     _verify_ownership(conv, user, payload.guest_id)
     msg = await chat_service.add_message(db, conversation_id, "user", payload.content)
     await ws_manager.broadcast(conversation_id, msg)
+    user_info = user.email if user else f"Guest ({payload.guest_id or 'unknown'})"
+    asyncio.create_task(notify_support_message(payload.content, user_info))
     return msg
 
 
