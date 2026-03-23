@@ -5,16 +5,18 @@ Creates a system user and inserts shared public decks from JSON fixtures.
 Idempotent — skips decks that already exist (matched by title + system user).
 
 Usage (from backend dir):
-    python3 -m app.db.seeds.seed_decks
+    python3 -m app.db.seeds.seed_decks           # add new decks only
+    python3 -m app.db.seeds.seed_decks --reset    # delete old shared decks, then re-seed
 
-Or with Docker:
-    docker compose exec backend python -m app.db.seeds.seed_decks
+Or with Railway:
+    railway run python -m app.db.seeds.seed_decks --reset
 """
 from __future__ import annotations
 
 import asyncio
 import json
 import os
+import sys
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -166,8 +168,36 @@ async def seed_deck(session: AsyncSession, user_id: str, fixture_path: Path) -> 
     return True
 
 
+async def reset_shared_decks(session: AsyncSession, user_id: str):
+    """Delete all shared decks (and their cards) owned by the system user."""
+    result = await session.execute(
+        text("SELECT id, title FROM decks WHERE owner_id = :owner_id AND is_shared = TRUE"),
+        {"owner_id": user_id},
+    )
+    decks = result.fetchall()
+    if not decks:
+        print("  No existing shared decks to delete.")
+        return
+
+    deck_ids = [str(row[0]) for row in decks]
+    for deck_id in deck_ids:
+        await session.execute(
+            text("DELETE FROM cards WHERE deck_id = :deck_id"),
+            {"deck_id": deck_id},
+        )
+        await session.execute(
+            text("DELETE FROM decks WHERE id = :id"),
+            {"id": deck_id},
+        )
+
+    print(f"  Deleted {len(decks)} shared deck(s) and their cards.")
+
+
 async def main():
+    reset = "--reset" in sys.argv
     print("Seeding premade decks...")
+    if reset:
+        print("  (--reset flag: will delete existing shared decks first)")
     print()
 
     fixture_files = sorted(FIXTURES_DIR.glob("*.json"))
@@ -179,6 +209,10 @@ async def main():
         async with session.begin():
             user_id = await get_or_create_system_user(session)
             print()
+
+            if reset:
+                await reset_shared_decks(session, user_id)
+                print()
 
             added = 0
             for fixture_path in fixture_files:
