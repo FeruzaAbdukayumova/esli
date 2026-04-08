@@ -1,12 +1,15 @@
 import { renderToString } from 'react-dom/server'
 import { StrictMode } from 'react'
+import { StaticRouter } from 'react-router'
 import './i18n/config'
 import App from './App'
 
-export function render() {
+export function render(url: string) {
   return renderToString(
     <StrictMode>
-      <App />
+      <StaticRouter location={url}>
+        <App />
+      </StaticRouter>
     </StrictMode>,
   )
 }
