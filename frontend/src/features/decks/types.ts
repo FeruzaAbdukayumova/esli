@@ -80,6 +80,7 @@ export interface UpdateCardInput {
 export interface PublicDeckOwner {
   id: string
   email: string
+  username?: string
 }
 
 export interface PublicDeck {

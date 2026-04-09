@@ -2,9 +2,20 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
+import { motion } from 'framer-motion'
 import { Globe, ChevronRight, Layers, Copy, User, Loader2, AlertTriangle } from 'lucide-react'
 import { usePublicDecks, useCopyDeck } from '@/features/decks/publicHooks'
 import type { PublicDeck } from '@/features/decks/types'
+
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' as const } },
+}
 
 const CARD_GRADIENTS = [
   'from-primary-600 to-primary-500',
@@ -43,7 +54,7 @@ function FeaturedCard({ deck, index, onCopy, isCopying }: FeaturedCardProps) {
               <span key={idx} className="text-[10px] font-medium rounded-full px-2 py-0.5 bg-white/20 text-white">{tag}</span>
             ))}
             {tags.length > 2 && (
-              <span className="text-[10px] font-medium rounded-full px-2 py-0.5 bg-white/15 text-white/80">+{tags.length - 2}</span>
+              <span className="text-[10px] font-medium rounded-full px-2 py-0.5 bg-white/15 text-white/80" title={tags.slice(2).join(', ')}>+{tags.length - 2} more</span>
             )}
           </div>
         )}
@@ -52,17 +63,17 @@ function FeaturedCard({ deck, index, onCopy, isCopying }: FeaturedCardProps) {
       {/* Body */}
       <div className="flex-1 flex flex-col px-3 py-2.5">
         <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mb-2">
-          <span className="flex items-center gap-1">
+          <span className="flex items-center gap-1" title={t('dashboard.cardCount')}>
             <Layers className="w-3.5 h-3.5 shrink-0" aria-hidden />
-            {deck.cardCount}
+            {deck.cardCount} {t('dashboard.cards')}
           </span>
-          <span className="flex items-center gap-1">
+          <span className="flex items-center gap-1" title={t('dashboard.copies')}>
             <Copy className="w-3.5 h-3.5 shrink-0" aria-hidden />
             {deck.copyCount}
           </span>
-          <span className="flex items-center gap-1 ml-auto">
+          <span className="flex items-center gap-1 ml-auto" title={deck.owner.username || deck.owner.email}>
             <User className="w-3 h-3 shrink-0" aria-hidden />
-            <span className="truncate max-w-[80px]">{deck.owner.email}</span>
+            <span className="truncate max-w-[100px]">{deck.owner.username || t('dashboard.esliTeam')}</span>
           </span>
         </div>
 
@@ -128,11 +139,11 @@ export function SharedDecksSection({ categoryFilter }: SharedDecksSectionProps) 
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 animate-pulse" aria-hidden>
-              <div className="h-14 bg-slate-200 dark:bg-slate-700" />
+            <div key={i} className="rounded-2xl overflow-hidden bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700" aria-hidden>
+              <div className="h-14 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 bg-[length:200%_100%] animate-shimmer" />
               <div className="p-3">
-                <div className="h-3 bg-slate-200 dark:bg-slate-600 rounded w-1/2 mb-2" />
-                <div className="h-8 bg-slate-200 dark:bg-slate-600 rounded-lg w-full" />
+                <div className="h-3 rounded w-1/2 mb-2 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 bg-[length:200%_100%] animate-shimmer" />
+                <div className="h-8 rounded-lg w-full bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 bg-[length:200%_100%] animate-shimmer" />
               </div>
             </div>
           ))}
@@ -186,17 +197,23 @@ export function SharedDecksSection({ categoryFilter }: SharedDecksSectionProps) 
       {sectionHeader}
 
       {/* Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3"
+      >
         {data.decks.map((deck, index) => (
-          <FeaturedCard
-            key={deck.id}
-            deck={deck}
-            index={index}
-            onCopy={handleCopy}
-            isCopying={copyingDeckId === deck.id}
-          />
+          <motion.div key={deck.id} variants={itemVariants}>
+            <FeaturedCard
+              deck={deck}
+              index={index}
+              onCopy={handleCopy}
+              isCopying={copyingDeckId === deck.id}
+            />
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </section>
   )
 }

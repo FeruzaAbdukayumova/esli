@@ -2,8 +2,8 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
+import { motion } from 'framer-motion'
 import {
-  AlertTriangle,
   X,
   Plus,
   Search,
@@ -15,6 +15,7 @@ import {
   Globe,
   FileSpreadsheet,
   Upload,
+  User,
 } from 'lucide-react'
 import { useDecks, useCreateDeck, useDeleteDeck } from '@/features/decks/hooks'
 import { DeckCard } from './components/DeckCard'
@@ -22,6 +23,16 @@ import { CreateDeckModal, type CreateMethod } from './components/CreateDeckModal
 import { DeleteDeckModal } from './components/DeleteDeckModal'
 import { AIGenerateDeckModal } from './components/AIGenerateDeckModal'
 import type { ViewMode } from './components/DeckCard'
+
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.06 } },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' as const } },
+}
 
 const CONFETTI_COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'] as const
 
@@ -185,7 +196,7 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
       <button
         type="button"
         onClick={() => setShowCreateModal(true)}
-        className="md:hidden fixed bottom-6 right-6 z-40 min-w-[56px] min-h-[56px] flex items-center justify-center rounded-full bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-primary-500/50"
+        className="md:hidden fixed bottom-20 right-4 z-40 min-w-[56px] min-h-[56px] flex items-center justify-center rounded-full bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-primary-500/50"
         aria-label={t('dashboard.createNewDeck')}
         title={t('dashboard.createNewDeck')}
       >
@@ -273,20 +284,19 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
         )}
       </div>
 
-      {/* Guest Mode Warning */}
+      {/* Guest Mode Info */}
       {isGuest && !guestWarningDismissed && (
-        <div className="mb-6 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 p-6 transition-all duration-200 animate-fade-in">
-          <div className="flex items-start gap-4">
-            <AlertTriangle className="w-6 h-6 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" aria-hidden />
+        <div className="mb-6 rounded-xl border border-primary-200 dark:border-primary-800/50 bg-primary-50 dark:bg-primary-900/10 p-5 animate-fade-in">
+          <div className="flex items-start gap-3">
+            <div className="shrink-0 w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mt-0.5">
+              <User className="w-4 h-4 text-primary-600 dark:text-primary-400" aria-hidden />
+            </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-amber-900 dark:text-amber-200 mb-2">{t('dashboard.guestMode')}</h3>
-              <p className="text-sm text-amber-800 dark:text-amber-300 mb-4">
-                {t('dashboard.guestWarning')}
+              <h3 className="font-semibold text-slate-800 dark:text-slate-100 mb-1">{t('dashboard.guestModeInfo')}</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                {t('dashboard.guestInfoMessage')}
               </p>
-              <div className="flex flex-wrap gap-2">
-                <Link to="/register" className="inline-flex items-center justify-center min-h-[44px] px-4 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800">{t('dashboard.createAccount')}</Link>
-                <Link to="/login" className="inline-flex items-center justify-center min-h-[44px] px-4 py-2.5 rounded-lg bg-white dark:bg-slate-700 border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800">{t('nav.login')}</Link>
-              </div>
+              <Link to="/register" className="inline-flex items-center justify-center min-h-[40px] px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800">{t('dashboard.createFreeAccount')}</Link>
             </div>
             <button
               type="button"
@@ -294,10 +304,10 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
                 setGuestWarningDismissed(true)
                 localStorage.setItem('flashcards-guest-warning-dismissed', '1')
               }}
-              className="shrink-0 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-amber-500 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-800/30 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="shrink-0 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
               aria-label={t('dashboard.dismissGuestWarning')}
             >
-              <X className="w-5 h-5" aria-hidden />
+              <X className="w-4 h-4" aria-hidden />
             </button>
           </div>
         </div>
@@ -316,17 +326,42 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
       {isLoading ? (
         <div className={`grid grid-cols-1 ${limit ? 'sm:grid-cols-2 gap-4 flex-1' : 'sm:grid-cols-2 lg:grid-cols-3 gap-6'}`}>
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-slate-100 dark:bg-slate-700/50 rounded-xl border border-slate-200 dark:border-slate-600 p-6 animate-pulse" aria-hidden>
-              <div className="h-6 bg-slate-200 dark:bg-slate-600 rounded w-3/4 mb-3" />
-              <div className="flex gap-2 mb-3"><div className="h-5 bg-slate-200 dark:bg-slate-600 rounded-full w-16" /><div className="h-5 bg-slate-200 dark:bg-slate-600 rounded-full w-20" /></div>
-              <div className="flex gap-3 mb-4"><div className="h-4 bg-slate-200 dark:bg-slate-600 rounded w-20" /><div className="h-4 bg-slate-200 dark:bg-slate-600 rounded w-24" /></div>
-              <div className="flex gap-2"><div className="h-8 bg-slate-200 dark:bg-slate-600 rounded-lg w-16" /><div className="h-8 bg-slate-200 dark:bg-slate-600 rounded-lg w-14" /></div>
+            <div key={i} className="bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 border-t-4 border-t-slate-200 dark:border-t-slate-600" aria-hidden>
+              <div className="h-6 rounded w-3/4 mb-3 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 bg-[length:200%_100%] animate-shimmer" />
+              <div className="flex gap-2 mb-3">
+                <div className="h-5 rounded-full w-16 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 bg-[length:200%_100%] animate-shimmer" />
+                <div className="h-5 rounded-full w-20 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 bg-[length:200%_100%] animate-shimmer" />
+              </div>
+              <div className="flex gap-3 mb-4">
+                <div className="h-4 rounded w-20 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 bg-[length:200%_100%] animate-shimmer" />
+                <div className="h-4 rounded w-24 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 bg-[length:200%_100%] animate-shimmer" />
+              </div>
+              <div className="flex gap-2">
+                <div className="h-9 rounded-lg w-16 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 bg-[length:200%_100%] animate-shimmer" />
+                <div className="h-9 rounded-lg w-14 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 bg-[length:200%_100%] animate-shimmer" />
+              </div>
             </div>
           ))}
         </div>
       ) : decks.length === 0 ? (
-        <div className="py-10 px-4">
-          <p className="text-lg font-medium text-slate-700 dark:text-slate-300 text-center mb-2">{t('dashboard.getStarted.title')}</p>
+        <div className="py-12 px-4">
+          <div className="flex justify-center mb-6">
+            <div className="relative">
+              <motion.div
+                className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/30 flex items-center justify-center"
+                animate={{ y: [0, -6, 0] }}
+                transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
+              >
+                <FolderOpen className="w-10 h-10 text-primary-500 dark:text-primary-400" />
+              </motion.div>
+              <motion.div
+                className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-primary-400"
+                animate={{ y: [0, -4, 0] }}
+                transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+              />
+            </div>
+          </div>
+          <p className="text-xl font-bold text-slate-800 dark:text-slate-100 text-center mb-2 tracking-tight">{t('dashboard.getStarted.title')}</p>
           <p className="text-sm text-slate-500 dark:text-slate-400 text-center mb-8 max-w-md mx-auto">{t('dashboard.getStarted.subtitle')}</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 max-w-4xl mx-auto">
             {/* Create Manually */}
@@ -406,25 +441,33 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
         </div>
       ) : filteredAndSortedDecks.length === 0 ? (
         <div className="text-center py-12 px-4">
-          <FolderOpen className="w-16 h-16 mx-auto text-slate-300 dark:text-slate-600 mb-3" aria-hidden />
-          <p className="text-base font-medium text-slate-600 dark:text-slate-400">{t('dashboard.noDecksInCategory')}</p>
+          <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4">
+            <FolderOpen className="w-8 h-8 text-slate-400 dark:text-slate-500" aria-hidden />
+          </div>
+          <p className="text-base font-medium text-slate-600 dark:text-slate-400 mb-1">{t('dashboard.noDecksInCategory')}</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500">{searchQuery ? t('dashboard.tryDifferentSearch') : t('dashboard.tryDifferentCategory')}</p>
         </div>
       ) : (
-        <div className={!limit && viewMode === 'list' ? 'flex flex-col gap-4' : `grid grid-cols-1 ${limit ? 'sm:grid-cols-2 gap-4 flex-1' : 'sm:grid-cols-2 lg:grid-cols-3 gap-6'}`}>
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className={!limit && viewMode === 'list' ? 'flex flex-col gap-4' : `grid grid-cols-1 ${limit ? 'sm:grid-cols-2 gap-4 flex-1' : 'sm:grid-cols-2 lg:grid-cols-3 gap-6'}`}
+        >
           {filteredAndSortedDecks.map((deck, index) => (
-            <DeckCard
-              key={deck.id}
-              deck={deck}
-              index={index}
-              onStudy={handleStudyDeck}
-              onEdit={handleEditDeck}
-              onDelete={handleDeleteDeckClick}
-              isDeleting={deleteDeckMutation.isPending && deckToDelete === deck.id}
-              viewMode={viewMode}
-              animationDelay={index * 80}
-            />
+            <motion.div key={deck.id} variants={itemVariants}>
+              <DeckCard
+                deck={deck}
+                index={index}
+                onStudy={handleStudyDeck}
+                onEdit={handleEditDeck}
+                onDelete={handleDeleteDeckClick}
+                isDeleting={deleteDeckMutation.isPending && deckToDelete === deck.id}
+                viewMode={viewMode}
+              />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
 
       {/* Bottom "View all" link when limited */}

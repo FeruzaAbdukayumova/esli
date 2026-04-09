@@ -193,7 +193,7 @@ export function DashboardNavbar({ user, isApiMode, hasGuestDecksToSave, isSyncin
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 border-b border-slate-100 dark:border-slate-700/50">
+      <header className="sticky top-0 z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-sm shadow-black/5 dark:shadow-black/20 border-b border-white/20 dark:border-slate-700/50">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-14 sm:h-16">
             <Link to="/" className="text-xl font-bold text-slate-800 dark:text-slate-100 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-200 flex items-center gap-2 shrink-0">
@@ -212,11 +212,11 @@ export function DashboardNavbar({ user, isApiMode, hasGuestDecksToSave, isSyncin
                 href="https://github.com/feruzaabdukayumova/flashcards-extension"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 shrink-0"
-                aria-label={t('nav.extension')}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shrink-0"
                 title={t('nav.extension')}
               >
-                <Puzzle className="w-5 h-5" />
+                <Puzzle className="w-4 h-4" />
+                {t('nav.extension')}
               </a>
               {!isApiMode && (
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 transition-all duration-200 shrink-0" title="Guest mode">
@@ -294,21 +294,20 @@ export function DashboardNavbar({ user, isApiMode, hasGuestDecksToSave, isSyncin
                     <button
                       type="button"
                       onClick={() => setAppearanceOpen((o) => !o)}
-                      className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      className="min-w-[44px] min-h-[44px] flex items-center gap-1.5 justify-center px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
                       aria-label={t('nav.appearance')}
-                      title={t('nav.appearance')}
                     >
-                      <Palette className="w-5 h-5" />
+                      <Palette className="w-4 h-4" />
+                      {t('nav.appearance')}
                     </button>
                     {appearanceOpen && (
-                      <div className="absolute right-0 top-full mt-1 w-64 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-600 shadow-lg p-3 z-50 animate-fade-in space-y-3">
+                      <div className="absolute right-0 top-full mt-1 w-64 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-600 shadow-elevation-lg p-3 z-50 animate-fade-in space-y-3">
                         <AppearanceSection />
                         <LanguageDropdown />
                       </div>
                     )}
                   </div>
-                  <Link to="/login" className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 shrink-0">{t('nav.login')}</Link>
-                  <Link to="/register" className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 shrink-0">{t('nav.register')}</Link>
+                  <Link to="/register" className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 shrink-0 active:scale-[0.97]">{t('nav.getStarted')}</Link>
                 </>
               )}
             </div>
@@ -397,8 +396,8 @@ export function DashboardNavbar({ user, isApiMode, hasGuestDecksToSave, isSyncin
                       <Puzzle className="w-4 h-4 text-rose-500 dark:text-rose-400" />
                       {t('nav.extension')}
                     </a>
-                    <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-center min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-center transition-all duration-200">{t('nav.login')}</Link>
-                    <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-center min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-center transition-all duration-200">{t('nav.register')}</Link>
+                    <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-center min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-center transition-colors">{t('nav.getStarted')}</Link>
+                    <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-center min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 text-center transition-colors">{t('nav.alreadyHaveAccount')}</Link>
                     <div className="pt-2 border-t border-slate-200 dark:border-slate-600 space-y-3">
                       <AppearanceSection />
                       <LanguageDropdown />
