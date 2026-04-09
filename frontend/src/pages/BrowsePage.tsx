@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import {
@@ -75,10 +75,20 @@ export const BrowsePage = () => {
     })
   }
 
+  const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<SortBy>('popular')
   const [page, setPage] = useState(1)
   const [copyingDeckId, setCopyingDeckId] = useState<string | null>(null)
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>()
+
+  useEffect(() => {
+    debounceRef.current = setTimeout(() => {
+      setSearchQuery(searchInput)
+      setPage(1)
+    }, 300)
+    return () => clearTimeout(debounceRef.current)
+  }, [searchInput])
 
   const { data, isLoading, error } = usePublicDecks({
     page,
@@ -162,8 +172,8 @@ export const BrowsePage = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none" aria-hidden />
                 <input
                   type="search"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
                   placeholder={t('browse.searchPlaceholder')}
                   className="w-full pl-9 pr-4 py-2.5 min-h-[44px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200"
                   aria-label={t('browse.searchLabel')}

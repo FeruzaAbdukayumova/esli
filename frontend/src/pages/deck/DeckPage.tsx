@@ -338,39 +338,25 @@ export const DeckPage = () => {
     const lines = bulkText.trim().split('\n').filter((line) => line.trim())
     if (lines.length === 0) return
 
-    let imported = 0
-    let failed = 0
-    for (const line of lines) {
-      const delimiter = line.includes('\t') ? '\t' : '|'
-      const parts = line.split(delimiter).map((p) => p.trim())
-      const front = parts[0] || ''
-      const back = parts[1] || ''
+    const cards = lines
+      .map((line) => {
+        const delimiter = line.includes('\t') ? '\t' : '|'
+        const parts = line.split(delimiter).map((p) => p.trim())
+        return { frontText: parts[0] || undefined, backText: parts[1] || undefined }
+      })
+      .filter((c) => c.frontText || c.backText)
 
-      if (front || back) {
-        try {
-          await addCardMutation.mutateAsync({
-            deckId,
-            cardInput: {
-              frontText: front || undefined,
-              backText: back || undefined,
-            },
-          })
-          imported++
-        } catch {
-          failed++
-        }
-      }
-    }
+    if (cards.length === 0) return
 
-    if (failed > 0) {
-      toast.error(t('toast.cardsFailed', { count: failed }))
-    }
-    if (imported > 0) {
+    try {
+      await addCardsBatchMutation.mutateAsync({ deckId, cards })
       setBulkText('')
-      setAddedCount((c) => c + imported)
+      setAddedCount((c) => c + cards.length)
       setShowSuccess(true)
       trackEvent('card.add', { method: 'bulk' })
-      toast.success(t('toast.cardsImported', { count: imported }))
+      toast.success(t('toast.cardsImported', { count: cards.length }))
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t('toast.cardsFailed', { count: cards.length }))
     }
   }
 
@@ -489,13 +475,19 @@ export const DeckPage = () => {
 
   const handleSaveCard = async () => {
     if (!editingCard) return
+    const hasFront = stripHtml(editCardFront).trim().length > 0
+    const hasBack = stripHtml(editCardBack).trim().length > 0
+    if (!hasFront && !hasBack) {
+      toast.error(t('deck.cardCannotBeEmpty'))
+      return
+    }
     try {
       await updateCardMutation.mutateAsync({
         deckId,
         cardId: editingCard.id,
         patch: {
-          frontText: stripHtml(editCardFront).trim() ? editCardFront : undefined,
-          backText: stripHtml(editCardBack).trim() ? editCardBack : undefined,
+          frontText: hasFront ? editCardFront : undefined,
+          backText: hasBack ? editCardBack : undefined,
         },
       })
       setEditingCard(null)
@@ -1017,7 +1009,7 @@ export const DeckPage = () => {
                   onToggleSelect={() => toggleSelect(card.id)}
                   onEdit={() => openEditCardModal(card)}
                   onDelete={() => handleDeleteCard(card.id)}
-                  isDeleting={deleteCardMutation.isPending}
+                  isDeleting={deleteCardMutation.isPending && deleteCardMutation.variables?.cardId === card.id}
                 />
               ))}
             </div>
@@ -1109,6 +1101,7 @@ export const DeckPage = () => {
                     type="text"
                     value={editDeckTitle}
                     onChange={(e) => setEditDeckTitle(e.target.value)}
+                    maxLength={255}
                     className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     placeholder={t('deck.deckTitlePlaceholder')}
                   />

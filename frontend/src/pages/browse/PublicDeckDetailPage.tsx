@@ -295,7 +295,7 @@ export function PublicDeckDetailPage() {
                           <div className="flex-1 min-w-0">
                             <span className="sm:hidden text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1 block">{t('deck.backLabel')}</span>
                             <p className="text-sm text-slate-700 dark:text-slate-200 whitespace-pre-wrap break-words">
-                              {card.backText || <span className="italic text-slate-400 dark:text-slate-500">{t('deck.noFrontText')}</span>}
+                              {card.backText || <span className="italic text-slate-400 dark:text-slate-500">{t('deck.noBackText')}</span>}
                             </p>
                             {card.backImageUrl && (
                               <img src={card.backImageUrl} alt="" className="mt-2 max-h-24 rounded border border-slate-200 dark:border-slate-600" />

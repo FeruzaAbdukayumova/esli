@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useCallback, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { ArrowLeft, ChevronLeft, ChevronRight, Loader2, XCircle, Globe, RotateCcw, ThumbsDown, ThumbsUp, Zap, Shuffle, Keyboard, X, Trophy, Pencil } from 'lucide-react'
+import { ArrowLeft, ChevronLeft, ChevronRight, Loader2, XCircle, Globe, RotateCcw, ThumbsDown, ThumbsUp, Zap, Shuffle, Keyboard, X, Trophy, Pencil, Layers } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { useDeck, useCards, useReviewCard } from '@/features/decks/hooks'
 import { getDueCardsWithLimit, getEarliestNextReview, RESPONSE_INFO } from '@/features/study/scheduler'
@@ -260,17 +260,16 @@ export const StudyPage = () => {
     return () => document.removeEventListener('click', handleClick)
   }, [showLangDropdown])
 
-  // Fetch card intervals when current card changes
+  // Fetch card intervals when current card changes (auth users only)
   useEffect(() => {
-    if (!currentCard?.id) {
+    if (!currentCard?.id || !user) {
       setCardIntervals(null)
       return
     }
-    // Fetch intervals from API
     apiDeckRepo.getCardIntervals(currentCard.id)
       .then(setCardIntervals)
       .catch(() => setCardIntervals(null))
-  }, [currentCard?.id])
+  }, [currentCard?.id, user])
 
   const startPracticeMode = () => {
     const practiceCards = [...cards].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
@@ -339,7 +338,9 @@ export const StudyPage = () => {
     if (!currentCard || !deckId) return
     setErrorMessage(null)
     try {
-      await reviewCardMutation.mutateAsync({ cardId: currentCard.id, response })
+      if (!practiceMode) {
+        await reviewCardMutation.mutateAsync({ cardId: currentCard.id, response })
+      }
       setSessionStats(prev => ({ ...prev, [response]: prev[response] + 1 }))
       setIsFlipped(false)
       if (response === 'again' && !practiceMode) {
@@ -412,7 +413,7 @@ export const StudyPage = () => {
 
   if (!deckId) {
     return studyPageShell(
-      <main className="relative z-10 flex-1 flex items-center justify-center px-4 py-8">
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-8">
         <p className="text-slate-600 dark:text-slate-400">{t('deck.invalidDeckId')}</p>
         <Button onClick={() => navigate('/dashboard')} className="mt-4">{t('deck.backToDashboard')}</Button>
       </main>
@@ -528,7 +529,7 @@ export const StudyPage = () => {
           )}
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button
-              onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/dashboard')}
+              onClick={() => navigate(`/deck/${deckId}`)}
               className="bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white"
             >
               {t('study.backToDeck')}
@@ -545,27 +546,41 @@ export const StudyPage = () => {
   }
 
   if (dueCount === 0 && !practiceMode && !sessionInitialized) {
+    const isEmpty = totalCards === 0
     return studyPageShell(
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-8">
         <div className="max-w-md w-full mx-auto text-center animate-fade-in">
-          <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mx-auto mb-4">
-            <Trophy className="w-8 h-8 text-emerald-600 dark:text-emerald-400" aria-hidden />
+          <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isEmpty ? 'bg-slate-100 dark:bg-slate-800' : 'bg-emerald-100 dark:bg-emerald-900/30'}`}>
+            {isEmpty
+              ? <Layers className="w-8 h-8 text-slate-400 dark:text-slate-500" aria-hidden />
+              : <Trophy className="w-8 h-8 text-emerald-600 dark:text-emerald-400" aria-hidden />
+            }
           </div>
-          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">{t('study.allDone')}</h1>
-          <p className="text-lg text-slate-600 dark:text-slate-400 mb-2">{t('study.allDoneMessage')}</p>
-          {earliestNextReview && (
+          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">
+            {isEmpty ? t('study.noCards') : t('study.allDone')}
+          </h1>
+          <p className="text-lg text-slate-600 dark:text-slate-400 mb-2">
+            {isEmpty ? t('study.noCardsMessage') : t('study.allDoneMessage')}
+          </p>
+          {!isEmpty && earliestNextReview && (
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
               {formatRelativeTime(earliestNextReview, t)}
             </p>
           )}
           <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6">
-            <Button onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/dashboard')} className="bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white">
-              {t('study.backToDeck')}
-            </Button>
-            {totalCards > 0 && (
-              <Button onClick={startPracticeMode} variant="secondary">
-                {t('study.studyAgainAll', { count: totalCards })}
+            {isEmpty ? (
+              <Button onClick={() => navigate(`/deck/${deckId}`)} className="bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white">
+                {t('study.addCards')}
               </Button>
+            ) : (
+              <>
+                <Button onClick={() => navigate(`/deck/${deckId}`)} className="bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white">
+                  {t('study.backToDeck')}
+                </Button>
+                <Button onClick={startPracticeMode} variant="secondary">
+                  {t('study.studyAgainAll', { count: totalCards })}
+                </Button>
+              </>
             )}
           </div>
         </div>
@@ -609,7 +624,7 @@ export const StudyPage = () => {
         <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-20 flex items-center justify-between gap-3">
           <button
             type="button"
-            onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/dashboard')}
+            onClick={() => navigate(`/deck/${deckId}`)}
             className="flex items-center gap-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors min-w-0"
           >
             <ArrowLeft className="w-4 h-4 shrink-0" />
