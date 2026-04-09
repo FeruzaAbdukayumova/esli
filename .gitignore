@@ -15,7 +15,6 @@ venv/
 node_modules/
 dist/
 dist-ssr/
-*.local
 
 # IDE
 .vscode/
@@ -26,3 +25,10 @@ dist-ssr/
 # Logs
 *.log
 npm-debug.log*
+
+# Agent secrets
+agents/config/.env
+
+# Claude Code local overrides
+CLAUDE.local.md
+.claude/settings.local.json
