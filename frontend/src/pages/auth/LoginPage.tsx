@@ -1,5 +1,4 @@
 import { useState, FormEvent, useId } from 'react'
-import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 import { useAuth } from '@/features/auth/hooks/useAuth'
@@ -25,7 +24,6 @@ export const LoginPage = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [rememberMe, setRememberMe] = useState(false)
   const [emailTouched, setEmailTouched] = useState(false)
   const [passwordTouched, setPasswordTouched] = useState(false)
   const [oauthLoading, setOauthLoading] = useState<'google' | null>(null)
@@ -199,23 +197,14 @@ export const LoginPage = () => {
         </div>
 
         <div className="flex flex-col sm:flex-row items-start justify-between gap-2 text-sm">
-          <label className="flex items-center gap-2 cursor-pointer group">
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              disabled={isLoggingIn}
-              aria-label={t('auth.rememberMe')}
-              className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-primary-600 focus:ring-primary-500 focus-visible:ring-2 focus-visible:ring-primary-500 transition-colors duration-200"
-            />
-            <span className="text-slate-600 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors duration-200">{t('auth.rememberMe')}</span>
-          </label>
-          <Link
-            to="/forgot-password"
+          <div />
+          <button
+            type="button"
+            onClick={() => toast(t('auth.forgotPasswordComingSoon'), { icon: '🔒' })}
             className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium hover:underline transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded"
           >
             {t('auth.forgotPassword')}
-          </Link>
+          </button>
         </div>
 
         {loginError && (

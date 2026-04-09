@@ -1,4 +1,5 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Outlet } from 'react-router-dom'
+import { BottomNav } from '@/shared/ui/BottomNav'
 import { LoginPage } from '@/pages/auth/LoginPage'
 import { RegisterPage } from '@/pages/auth/RegisterPage'
 import { DashboardPage } from '@/pages/dashboard/DashboardPage'
@@ -21,7 +22,16 @@ import { AdminSupportPage } from '@/pages/admin/AdminSupportPage'
 import { AdminAnalyticsPage } from '@/pages/admin/AdminAnalyticsPage'
 import { OAuthCallbackPage } from '@/pages/auth/OAuthCallbackPage'
 import { ExtensionAuthDonePage } from '@/pages/auth/ExtensionAuthDonePage'
+import { NotFoundPage } from '@/pages/NotFoundPage'
 
+function AppLayout() {
+  return (
+    <>
+      <Outlet />
+      <BottomNav />
+    </>
+  )
+}
 
 export const router = createBrowserRouter([
   {
@@ -41,48 +51,57 @@ export const router = createBrowserRouter([
     element: <ExtensionAuthDonePage />,
   },
   {
-    path: '/dashboard',
-    element: <DashboardPage />,
-  },
-  {
-    path: '/deck/:deckId',
-    element: <DeckPage />,
-  },
-  {
-    path: '/study/:deckId',
-    element: <StudyPage />,
-  },
-  {
-    path: '/decks',
-    element: <DecksPage />,
-  },
-  {
-    path: '/browse',
-    element: <BrowsePage />,
-  },
-  {
-    path: '/browse/:deckId',
-    element: <PublicDeckDetailPage />,
-  },
-  {
-    path: '/settings',
-    element: <SettingsPage />,
-  },
-  {
-    path: '/profile',
-    element: <ProfilePage />,
-  },
-  {
-    path: '/pricing',
-    element: <PricingPage />,
-  },
-  {
-    path: '/subscription/success',
-    element: <SubscriptionSuccessPage />,
-  },
-  {
-    path: '/subscription/canceled',
-    element: <SubscriptionCanceledPage />,
+    element: <AppLayout />,
+    children: [
+      {
+        path: '/dashboard',
+        element: <DashboardPage />,
+      },
+      {
+        path: '/deck/:deckId',
+        element: <DeckPage />,
+      },
+      {
+        path: '/study/:deckId',
+        element: <StudyPage />,
+      },
+      {
+        path: '/decks',
+        element: <DecksPage />,
+      },
+      {
+        path: '/browse',
+        element: <BrowsePage />,
+      },
+      {
+        path: '/browse/:deckId',
+        element: <PublicDeckDetailPage />,
+      },
+      {
+        path: '/settings',
+        element: <SettingsPage />,
+      },
+      {
+        path: '/profile',
+        element: <ProfilePage />,
+      },
+      {
+        path: '/pricing',
+        element: <PricingPage />,
+      },
+      {
+        path: '/subscription/success',
+        element: <SubscriptionSuccessPage />,
+      },
+      {
+        path: '/subscription/canceled',
+        element: <SubscriptionCanceledPage />,
+      },
+      {
+        path: '/',
+        element: <DashboardPage />,
+      },
+    ],
   },
   {
     path: '/admin',
@@ -115,7 +134,7 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    path: '/',
-    element: <DashboardPage />,
+    path: '*',
+    element: <NotFoundPage />,
   },
 ])

@@ -76,19 +76,25 @@ function DueChipWithLimit({ stats }: StatsProps) {
   }
 
   const newCount = Math.min(stats.newCardsAvailable, limitValue)
-  const reviewCount = stats.cardsDueToday - newCount
+  const reviewCount = Math.max(0, stats.cardsDueToday - newCount)
 
   return (
     <div className="relative" ref={popoverRef}>
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-700 text-sm hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors group"
+        className="flex items-center gap-3 rounded-2xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 px-4 py-3 min-w-0 transition-all duration-200 hover:shadow-md group w-full text-left"
       >
-        <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-        <span className="font-semibold text-slate-800 dark:text-slate-100">{stats.cardsDueToday}</span>
-        <span className="text-slate-500 dark:text-slate-400 text-xs hidden sm:inline">{t('stats.due')}</span>
-        <Settings2 className="w-3 h-3 text-slate-400 dark:text-slate-500 group-hover:text-amber-500 transition-colors ml-0.5" />
+        <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-amber-600 dark:text-amber-400 shrink-0">
+          <Clock className="w-5 h-5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-xl font-bold text-slate-800 dark:text-slate-100 leading-tight tabular-nums tracking-tight">
+            {stats.cardsDueToday}
+            <Settings2 className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 group-hover:text-amber-500 transition-colors inline ml-1.5 -mt-1" />
+          </p>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{t('stats.due')}</p>
+        </div>
       </button>
 
       {open && (
@@ -143,32 +149,32 @@ function DueChipWithLimit({ stats }: StatsProps) {
   )
 }
 
-/** Compact row of 4 stat chips for the top strip */
+/** Bento-style stats strip */
 export function StatsStrip({ stats }: StatsProps) {
   const { t } = useTranslation()
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
       <DueChipWithLimit stats={stats} />
       <StatCard
         icon={CheckCircle}
         value={stats.cardsReviewedToday}
         label={t('stats.reviewed')}
         color="text-emerald-600 dark:text-emerald-400"
-        compact
+        variant="bento"
       />
       <StatCard
         icon={Flame}
         value={`${stats.streakDays}d`}
         label={t('stats.streak')}
         color="text-orange-600 dark:text-orange-400"
-        compact
+        variant="bento"
       />
       <StatCard
         icon={Trophy}
         value={`${stats.masteryPercent}%`}
         label={t('stats.mastery')}
         color="text-primary-600 dark:text-primary-400"
-        compact
+        variant="bento"
       />
     </div>
   )
@@ -188,14 +194,6 @@ export function StatsSidebar({ stats }: StatsProps) {
 
   return (
     <div className="space-y-3">
-      {/* Quick stat chips */}
-      <div className="flex flex-wrap gap-2">
-        <DueChipWithLimit stats={stats} />
-        <StatCard icon={CheckCircle} value={stats.cardsReviewedToday} label={t('stats.reviewed')} color="text-emerald-600 dark:text-emerald-400" compact />
-        <StatCard icon={Flame} value={`${stats.streakDays}d`} label={t('stats.streak')} color="text-orange-600 dark:text-orange-400" compact />
-        <StatCard icon={Trophy} value={`${stats.masteryPercent}%`} label={t('stats.mastery')} color="text-primary-600 dark:text-primary-400" compact />
-      </div>
-
       {/* Retention & Total Cards */}
       <div className="grid grid-cols-2 gap-2">
         <StatCard
