@@ -7,7 +7,8 @@ from fastapi.responses import Response
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.v1.deps import get_current_user
+from app.api.v1.deps import get_current_user, get_current_user_with_tier
+from app.core.tier_limits import get_limits
 from app.db.models.deck import Deck
 from app.db.models.user import User
 from app.db.session import get_db
@@ -97,12 +98,24 @@ async def get_public_deck_cards(
 async def copy_public_deck(
     deck_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    user_tier: tuple[User, str] = Depends(get_current_user_with_tier),
 ):
     """
     Copy a public deck to your library.
     Requires authentication.
     """
+    current_user, tier = user_tier
+    limits = get_limits(tier)
+
+    # Check deck count limit
+    if limits.max_decks != -1:
+        deck_count = await deck_service.count_decks_by_owner(db, current_user.id)
+        if deck_count >= limits.max_decks:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Deck limit reached ({limits.max_decks}). Upgrade your plan for more.",
+            )
+
     result = await deck_service.copy_deck(db, deck_id, current_user.id)
 
     if result is None:

@@ -1,7 +1,9 @@
 import { useState, FormEvent, useId } from 'react'
+import { Navigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 import { useAuth } from '@/features/auth/hooks/useAuth'
+import { useAuthContext } from '@/app/providers/AuthProvider'
 import { authApi } from '@/features/auth/api'
 import { isValidEmail, getEmailValidationMessage } from '@/shared/lib/validation'
 import { usePageMeta } from '@/shared/lib/usePageMeta'
@@ -16,6 +18,7 @@ const inputDefault = 'border-slate-300 dark:border-slate-600'
 
 export const LoginPage = () => {
   const { t } = useTranslation()
+  const { user } = useAuthContext()
   usePageMeta({
     title: t('seo.login.title', 'Log In'),
     description: t('seo.login.description', 'Log in to Esli to access your flashcard decks and continue studying.'),
@@ -28,6 +31,8 @@ export const LoginPage = () => {
   const [passwordTouched, setPasswordTouched] = useState(false)
   const [oauthLoading, setOauthLoading] = useState<'google' | null>(null)
   const { login, isLoggingIn, loginError } = useAuth()
+
+  if (user) return <Navigate to="/dashboard" replace />
 
   const handleOAuth = async (provider: 'google') => {
     try {

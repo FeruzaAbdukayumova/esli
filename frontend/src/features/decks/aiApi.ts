@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/lib/apiClient'
+import { storage } from '@/shared/lib/storage'
 
 export interface AIGenerateRequest {
   topic: string
@@ -75,9 +76,17 @@ export async function generateCardsFromPDF(
     formData.append('existing_fronts', JSON.stringify(req.existingFronts))
   }
 
+  const headers: Record<string, string> = {}
+  const token = storage.getToken()
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+
   const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/v1/ai/generate-cards-from-pdf`, {
     method: 'POST',
     body: formData,
+    headers,
+    credentials: 'include',
     signal: req.signal,
   })
 

@@ -82,9 +82,12 @@ class ApiDeckRepository implements DeckRepository {
   }
 
   async getDeck(deckId: string): Promise<Deck | null> {
-    const list = await this.listDecks()
-    const deck = list.find((d) => d.id === deckId) ?? null
-    return deck
+    try {
+      const api = await apiClient.get<ApiDeck>(`/decks/${deckId}`)
+      return api ? apiDeckToDeck(api) : null
+    } catch {
+      return null
+    }
   }
 
   async createDeck(input: CreateDeckInput): Promise<Deck> {

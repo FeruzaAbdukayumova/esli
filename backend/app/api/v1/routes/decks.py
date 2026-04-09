@@ -25,6 +25,20 @@ async def list_decks(
     return [DeckResponse.model_validate(d) for d in decks]
 
 
+@router.get("/{deck_id}", response_model=DeckResponse)
+async def get_deck(
+    deck_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    user_tier: tuple[User, str] = Depends(get_current_user_with_tier),
+):
+    """Return a single deck owned by the current user."""
+    current_user, tier = user_tier
+    deck = await deck_service.get_deck_by_id_for_user(db, deck_id, current_user.id)
+    if not deck:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Deck not found")
+    return DeckResponse.model_validate(deck)
+
+
 @router.post("", response_model=DeckResponse, status_code=status.HTTP_201_CREATED)
 async def create_deck(
     payload: DeckCreate,

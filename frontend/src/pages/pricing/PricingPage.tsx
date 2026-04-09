@@ -43,8 +43,9 @@ const PLAN_COLORS: Record<PlanTier, { bg: string; border: string; icon: string; 
   },
 }
 
-function formatLimit(value: number): string {
-  if (value === -1) return 'Unlimited'
+// Declared outside component; receives `t` at call site
+function formatLimit(value: number, unlimitedLabel: string): string {
+  if (value === -1) return unlimitedLabel
   return value.toLocaleString()
 }
 
@@ -234,19 +235,19 @@ export function PricingPage() {
                   <ul className="space-y-3 mb-6 flex-1">
                     <li className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
                       <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-                      {formatLimit(plan.limits.ai_generations_per_month)} {t('pricing.features.aiGenerations')}
+                      {formatLimit(plan.limits.ai_generations_per_month, t('common.unlimited'))} {t('pricing.features.aiGenerations')}
                     </li>
                     <li className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
                       <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-                      {formatLimit(plan.limits.max_decks)} {t('pricing.features.maxDecks')}
+                      {formatLimit(plan.limits.max_decks, t('common.unlimited'))} {t('pricing.features.maxDecks')}
                     </li>
                     <li className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
                       <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-                      {formatLimit(plan.limits.max_cards_per_deck)} {t('pricing.features.maxCardsPerDeck')}
+                      {formatLimit(plan.limits.max_cards_per_deck, t('common.unlimited'))} {t('pricing.features.maxCardsPerDeck')}
                     </li>
                     <li className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
                       <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-                      {formatLimit(plan.limits.max_total_cards)} {t('pricing.features.maxTotalCards')}
+                      {formatLimit(plan.limits.max_total_cards, t('common.unlimited'))} {t('pricing.features.maxTotalCards')}
                     </li>
                     {plan.limits.pdf_ai_generation && (
                       <li className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">

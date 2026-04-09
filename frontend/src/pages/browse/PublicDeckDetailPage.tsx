@@ -65,7 +65,7 @@ export function PublicDeckDetailPage() {
       '@type': 'CreativeWork',
       'name': deck.title,
       'description': seoDescription,
-      'url': `https://flashcards-app.com/browse/${deck.id}`,
+      'url': `https://app.esli.app/browse/${deck.id}`,
       'learningResourceType': 'Flashcard Deck',
       'educationalUse': 'Self-study',
       'isAccessibleForFree': true,

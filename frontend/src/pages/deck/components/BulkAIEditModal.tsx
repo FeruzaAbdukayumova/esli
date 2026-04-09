@@ -384,10 +384,10 @@ export function BulkAIEditModal({
                           {t('ai.bulkEditEdited')}
                         </p>
                         <div className={`text-sm text-slate-700 dark:text-slate-300 ${frontChanged ? 'bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded' : ''}`}>
-                          {edited.frontText}
+                          <RichTextDisplay content={edited.frontText || ''} />
                         </div>
                         <div className={`text-sm text-slate-500 dark:text-slate-400 ${backChanged ? 'bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded' : ''}`}>
-                          {edited.backText}
+                          <RichTextDisplay content={edited.backText || ''} />
                         </div>
                       </div>
                     </div>

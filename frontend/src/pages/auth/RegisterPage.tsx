@@ -1,7 +1,9 @@
 import { useState, FormEvent, useId } from 'react'
+import { Navigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 import { useAuth } from '@/features/auth/hooks/useAuth'
+import { useAuthContext } from '@/app/providers/AuthProvider'
 import { authApi } from '@/features/auth/api'
 import {
   isValidEmail,
@@ -38,6 +40,7 @@ const inputDefault = 'border-slate-300 dark:border-slate-600'
 
 export const RegisterPage = () => {
   const { t } = useTranslation()
+  const { user } = useAuthContext()
   usePageMeta({
     title: t('seo.register.title', 'Sign Up Free'),
     description: t('seo.register.description', 'Create a free Esli account. AI-powered flashcards with spaced repetition.'),
@@ -55,6 +58,8 @@ export const RegisterPage = () => {
   const [passwordTouched, setPasswordTouched] = useState(false)
   const [confirmTouched, setConfirmTouched] = useState(false)
   const { register, isRegistering, registerError } = useAuth()
+
+  if (user) return <Navigate to="/dashboard" replace />
 
   const handleOAuth = async (provider: 'google') => {
     try {
@@ -77,9 +82,11 @@ export const RegisterPage = () => {
   const emailError = emailTouched ? getEmailValidationMessage(email, t) : null
   const emailValid = email.length > 0 && isValidEmail(email)
   const strength = getPasswordStrength(password)
-  const passwordError = passwordTouched && password.length > 0 && password.length < 8
-    ? t('auth.passwordMinLength')
-    : null
+  const passwordError = passwordTouched && !password.trim()
+    ? t('auth.passwordRequired')
+    : passwordTouched && password.length > 0 && password.length < 8
+      ? t('auth.passwordMinLength')
+      : null
   const confirmError = confirmTouched
     ? (confirmPassword !== password ? t('auth.passwordsDoNotMatch') : !confirmPassword.trim() ? t('auth.pleaseConfirmPassword') : null)
     : null

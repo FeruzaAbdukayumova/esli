@@ -40,7 +40,7 @@ export const BrowsePage = () => {
       '@type': 'CollectionPage',
       'name': 'Browse Flashcard Decks',
       'description': 'Discover and copy community flashcard decks on any topic. Free to use with spaced repetition.',
-      'url': 'https://flashcards-app.com/browse',
+      'url': 'https://app.esli.app/browse',
       'provider': {
         '@type': 'WebApplication',
         'name': 'Esli',

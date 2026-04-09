@@ -64,9 +64,8 @@ export const apiClient = {
         })
         return this._handleResponse<T>(retryResponse)
       }
-      // Refresh failed — clear token and redirect
+      // Refresh failed — clear token, let auth context handle redirect
       storage.removeToken()
-      window.location.href = window.location.origin + '/login'
       throw new Error('Session expired')
     }
 
