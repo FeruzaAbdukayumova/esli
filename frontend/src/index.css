@@ -1,82 +1,100 @@
+@import '@fontsource-variable/plus-jakarta-sans';
+@import '@fontsource/source-serif-4/400.css';
+@import '@fontsource/source-serif-4/600.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --color-primary-50: 238 242 255;
-    --color-primary-100: 224 231 255;
-    --color-primary-200: 199 210 254;
-    --color-primary-300: 165 180 252;
-    --color-primary-400: 129 140 248;
-    --color-primary-500: 99 102 241;
-    --color-primary-600: 79 70 229;
-    --color-primary-700: 67 56 202;
-    --color-primary-800: 55 48 163;
-    --color-primary-900: 49 46 129;
+    /* Deep Violet primary palette */
+    --color-primary-50: 245 243 255;
+    --color-primary-100: 237 233 254;
+    --color-primary-200: 221 214 254;
+    --color-primary-300: 196 181 253;
+    --color-primary-400: 167 139 250;
+    --color-primary-500: 124 58 237;
+    --color-primary-600: 109 40 217;
+    --color-primary-700: 91 33 182;
+    --color-primary-800: 76 29 149;
+    --color-primary-900: 59 7 100;
+
+    /* Surface layers - light mode */
+    --surface-base: 250 250 250;
+    --surface-elevated: 255 255 255;
+    --surface-floating: 255 255 255;
+    --border-default: 0 0 0 / 0.06;
+    --border-subtle: 0 0 0 / 0.04;
+  }
+
+  .dark {
+    /* Surface layers - dark mode */
+    --surface-base: 15 15 17;
+    --surface-elevated: 24 24 27;
+    --surface-floating: 30 30 34;
+    --border-default: 255 255 255 / 0.06;
+    --border-subtle: 255 255 255 / 0.04;
   }
 }
 
+/* Keyframes */
 @keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(16px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(16px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .animate-slide-down {
-  animation: slideDown 0.25s ease-out;
+  animation: slideDown 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.perspective-1000 {
-  perspective: 1000px;
-}
+/* 3D card flip utilities */
+.perspective-1000 { perspective: 1000px; }
+.preserve-3d { transform-style: preserve-3d; }
+.backface-hidden { backface-visibility: hidden; }
 
-.preserve-3d {
-  transform-style: preserve-3d;
-}
+/* Progress bar */
+.progress-bar-fill { width: var(--progress, 0); }
 
-.backface-hidden {
-  backface-visibility: hidden;
-}
+/* Scrollbar */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
 
-.progress-bar-fill {
-  width: var(--progress, 0);
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+/* Reset */
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  font-family: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-weight: 500;
+}
+
+/* Heading font */
+h1, h2, h3, .font-display {
+  font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+}
+
+/* Safe area */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 #root {
   min-height: 100vh;
+}
+
+/* Grain texture overlay for depth */
+.grain::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.02;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
