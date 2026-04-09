@@ -175,7 +175,7 @@ export const BrowsePage = () => {
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   placeholder={t('browse.searchPlaceholder')}
-                  className="w-full pl-9 pr-4 py-2.5 min-h-[44px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200"
+                  className="w-full pl-9 pr-4 py-2.5 min-h-[44px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200"
                   aria-label={t('browse.searchLabel')}
                 />
               </form>
@@ -189,7 +189,7 @@ export const BrowsePage = () => {
                     setSortBy(e.target.value as SortBy)
                     setPage(1)
                   }}
-                  className="min-h-[44px] px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-slate-700 transition-all duration-200"
+                  className="min-h-[44px] px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-slate-700 transition-colors duration-200"
                 >
                   {SORT_OPTIONS.map(opt => (
                     <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>
@@ -263,7 +263,7 @@ export const BrowsePage = () => {
                     type="button"
                     onClick={() => setPage(p => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    className="inline-flex items-center gap-1 min-h-[44px] px-4 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-1 min-h-[44px] px-4 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     {t('browse.previous')}
@@ -277,7 +277,7 @@ export const BrowsePage = () => {
                     type="button"
                     onClick={() => setPage(p => Math.min(data.totalPages, p + 1))}
                     disabled={page === data.totalPages}
-                    className="inline-flex items-center gap-1 min-h-[44px] px-4 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-1 min-h-[44px] px-4 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {t('browse.next')}
                     <ChevronRight className="w-4 h-4" />

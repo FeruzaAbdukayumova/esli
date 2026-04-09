@@ -144,7 +144,7 @@ export function PricingPage() {
                 setBillingInterval('month')
                 trackEvent('pricing.billing_toggle', { interval: 'month' })
               }}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 billingInterval === 'month'
                   ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm'
                   : 'text-slate-600 dark:text-slate-400'
@@ -157,7 +157,7 @@ export function PricingPage() {
                 setBillingInterval('year')
                 trackEvent('pricing.billing_toggle', { interval: 'year' })
               }}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 billingInterval === 'year'
                   ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm'
                   : 'text-slate-600 dark:text-slate-400'

@@ -70,7 +70,7 @@ export function PromoCodeInput({ className = '' }: PromoCodeInputProps) {
           onKeyDown={(e) => e.key === 'Enter' && handleRedeem()}
           placeholder={t('promo.enterCode')}
           maxLength={50}
-          className="flex-1 px-3 py-2 min-h-[40px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+          className="flex-1 px-3 py-2 min-h-[40px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
         />
         <button
           type="button"

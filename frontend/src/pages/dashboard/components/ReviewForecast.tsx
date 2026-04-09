@@ -25,7 +25,7 @@ export function ReviewForecast({ forecast }: ReviewForecastProps) {
             </span>
             <div className="w-full flex items-end justify-center" style={{ height: '80px' }}>
               <div
-                className={`w-full max-w-[32px] rounded-t transition-all duration-500 ${
+                className={`w-full max-w-[32px] rounded-t transition-[height,background-color] duration-500 ${
                   day.count > 0
                     ? 'bg-primary-500 dark:bg-primary-400'
                     : 'bg-slate-200 dark:bg-slate-600'

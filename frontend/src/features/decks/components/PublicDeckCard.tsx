@@ -30,7 +30,7 @@ export function PublicDeckCard({ deck, index, onCopy, isCopying }: PublicDeckCar
   const tags = parseTags(deck.categoryTags)
 
   return (
-    <div className={`group relative flex flex-col bg-white dark:bg-slate-800/50 rounded-xl shadow-sm border border-slate-200 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-lg transition-all duration-200 p-4 md:p-6 border-t-4 ${accentClass} animate-fade-in`}>
+    <div className={`group relative flex flex-col bg-white dark:bg-slate-800/50 rounded-xl shadow-sm border border-slate-200 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-lg transition-[box-shadow,border-color] duration-200 p-4 md:p-6 border-t-4 ${accentClass} animate-fade-in`}>
       <Link to={`/browse/${deck.id}`} className="flex-1 min-h-0 flex flex-col">
         <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-2 pr-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{deck.title}</h3>
 
@@ -67,7 +67,7 @@ export function PublicDeckCard({ deck, index, onCopy, isCopying }: PublicDeckCar
           type="button"
           onClick={() => onCopy(deck.id)}
           disabled={isCopying}
-          className="flex-1 inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 rounded-lg text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
+          className="flex-1 inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 rounded-lg text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
           title={t('dashboard.copyToLibrary')}
         >
           {isCopying ? (

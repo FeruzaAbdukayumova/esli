@@ -91,7 +91,7 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
       aria-labelledby="welcome-title"
     >
       <div
-        className={`bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 border border-slate-100 dark:border-slate-700/50 max-w-lg w-full p-6 transition-all duration-300 max-h-[90vh] overflow-y-auto ${closing ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0 animate-slide-up'}`}
+        className={`bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 border border-slate-100 dark:border-slate-700/50 max-w-lg w-full p-6 transition-[transform,opacity] duration-300 max-h-[90vh] overflow-y-auto ${closing ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0 animate-slide-up'}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -102,7 +102,7 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
           <button
             type="button"
             onClick={handleClose}
-            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 shrink-0"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 shrink-0"
             aria-label={t('common.close')}
           >
             <X className="w-5 h-5" aria-hidden />
@@ -135,7 +135,7 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
         <button
           type="button"
           onClick={handleClose}
-          className="w-full min-h-[44px] px-4 py-3 rounded-lg text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
+          className="w-full min-h-[44px] px-4 py-3 rounded-lg text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
         >
           {t('welcome.getStarted')}
         </button>

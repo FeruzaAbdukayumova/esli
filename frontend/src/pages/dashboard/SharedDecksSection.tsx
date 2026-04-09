@@ -44,7 +44,7 @@ function FeaturedCard({ deck, index, onCopy, isCopying }: FeaturedCardProps) {
   const tags = parseTags(deck.categoryTags)
 
   return (
-    <div className="flex flex-col rounded-xl overflow-hidden bg-white dark:bg-slate-800/50 shadow-sm hover:shadow-md border border-slate-200 dark:border-slate-700 transition-all duration-200 group">
+    <div className="flex flex-col rounded-xl overflow-hidden bg-white dark:bg-slate-800/50 shadow-sm hover:shadow-md border border-slate-200 dark:border-slate-700 transition-[box-shadow] duration-200 group">
       {/* Gradient header */}
       <Link to={`/browse/${deck.id}`} className={`block bg-gradient-to-r ${gradient} px-4 py-3`}>
         <h3 className="text-sm font-bold text-white truncate group-hover:underline decoration-white/40 underline-offset-2">{deck.title}</h3>
@@ -81,7 +81,7 @@ function FeaturedCard({ deck, index, onCopy, isCopying }: FeaturedCardProps) {
           type="button"
           onClick={() => onCopy(deck.id)}
           disabled={isCopying}
-          className="mt-auto inline-flex items-center justify-center gap-1.5 min-h-[32px] px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
+          className="mt-auto inline-flex items-center justify-center gap-1.5 min-h-[32px] px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
           title={t('dashboard.copyToLibrary')}
         >
           {isCopying ? (

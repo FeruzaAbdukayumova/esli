@@ -196,7 +196,7 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
       <button
         type="button"
         onClick={() => setShowCreateModal(true)}
-        className="md:hidden fixed bottom-20 right-4 z-40 min-w-[56px] min-h-[56px] flex items-center justify-center rounded-full bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-primary-500/50"
+        className="md:hidden fixed bottom-20 right-4 z-40 min-w-[56px] min-h-[56px] flex items-center justify-center rounded-full bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 hover:shadow-xl transition-[box-shadow,background-color] duration-200 focus:outline-none focus:ring-4 focus:ring-primary-500/50"
         aria-label={t('dashboard.createNewDeck')}
         title={t('dashboard.createNewDeck')}
       >
@@ -218,7 +218,7 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
             <button
               type="button"
               onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
+              className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
               aria-label={t('dashboard.createNewDeckKeyboard')}
               title={t('dashboard.createNewDeckPress')}
             >
@@ -241,7 +241,7 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('dashboard.searchDecks')}
-                className="w-full pl-9 pr-4 py-2.5 min-h-[44px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200"
+                className="w-full pl-9 pr-4 py-2.5 min-h-[44px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200"
                 aria-label={t('dashboard.searchByTitleOrTag')}
               />
             </div>
@@ -251,7 +251,7 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
                 id="sort-decks"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortBy)}
-                className="min-h-[44px] px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-slate-700 transition-all duration-200"
+                className="min-h-[44px] px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-slate-700 transition-colors duration-200"
                 aria-label={t('dashboard.sortBy')}
               >
                 <option value="date">{t('dashboard.dateCreated')}</option>
@@ -261,7 +261,7 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
                 <button
                   type="button"
                   onClick={() => setViewMode('grid')}
-                  className={`min-w-[44px] min-h-[44px] flex items-center justify-center p-2 transition-all duration-200 ${viewMode === 'grid' ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-600'}`}
+                  className={`min-w-[44px] min-h-[44px] flex items-center justify-center p-2 transition-colors duration-200 ${viewMode === 'grid' ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-600'}`}
                   aria-label={t('dashboard.gridView')}
                   title={t('dashboard.gridView')}
                   aria-pressed={viewMode === 'grid'}
@@ -271,7 +271,7 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
                 <button
                   type="button"
                   onClick={() => setViewMode('list')}
-                  className={`min-w-[44px] min-h-[44px] flex items-center justify-center p-2 border-l border-slate-300 dark:border-slate-600 transition-all duration-200 ${viewMode === 'list' ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-600'}`}
+                  className={`min-w-[44px] min-h-[44px] flex items-center justify-center p-2 border-l border-slate-300 dark:border-slate-600 transition-colors duration-200 ${viewMode === 'list' ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-600'}`}
                   aria-label={t('dashboard.listView')}
                   title={t('dashboard.listView')}
                   aria-pressed={viewMode === 'list'}
@@ -368,7 +368,7 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
             <button
               type="button"
               onClick={() => openCreateModal('empty')}
-              className="flex flex-col items-center gap-3 p-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-md transition-all duration-200 text-center group focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
+              className="flex flex-col items-center gap-3 p-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-md transition-[box-shadow,border-color] duration-200 text-center group focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
             >
               <div className="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Plus className="w-6 h-6 text-primary-600 dark:text-primary-400" aria-hidden />
@@ -383,7 +383,7 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
             <button
               type="button"
               onClick={() => setShowAIModal(true)}
-              className="flex flex-col items-center gap-3 p-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-violet-300 dark:hover:border-violet-600 hover:shadow-md transition-all duration-200 text-center group focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
+              className="flex flex-col items-center gap-3 p-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-violet-300 dark:hover:border-violet-600 hover:shadow-md transition-[box-shadow,border-color] duration-200 text-center group focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
             >
               <div className="w-12 h-12 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Sparkles className="w-6 h-6 text-violet-600 dark:text-violet-400" aria-hidden />
@@ -398,7 +398,7 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
             <button
               type="button"
               onClick={() => openCreateModal('file')}
-              className="flex flex-col items-center gap-3 p-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-emerald-300 dark:hover:border-emerald-600 hover:shadow-md transition-all duration-200 text-center group focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
+              className="flex flex-col items-center gap-3 p-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-emerald-300 dark:hover:border-emerald-600 hover:shadow-md transition-[box-shadow,border-color] duration-200 text-center group focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
             >
               <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <FileSpreadsheet className="w-6 h-6 text-emerald-600 dark:text-emerald-400" aria-hidden />
@@ -413,7 +413,7 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
             <button
               type="button"
               onClick={() => openCreateModal('bulk')}
-              className="flex flex-col items-center gap-3 p-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-amber-300 dark:hover:border-amber-600 hover:shadow-md transition-all duration-200 text-center group focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
+              className="flex flex-col items-center gap-3 p-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-amber-300 dark:hover:border-amber-600 hover:shadow-md transition-[box-shadow,border-color] duration-200 text-center group focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
             >
               <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Upload className="w-6 h-6 text-amber-600 dark:text-amber-400" aria-hidden />
@@ -427,7 +427,7 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
             {/* Browse Shared Decks */}
             <Link
               to="/browse"
-              className="flex flex-col items-center gap-3 p-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-sky-300 dark:hover:border-sky-600 hover:shadow-md transition-all duration-200 text-center group focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 col-span-2 sm:col-span-1"
+              className="flex flex-col items-center gap-3 p-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-sky-300 dark:hover:border-sky-600 hover:shadow-md transition-[box-shadow,border-color] duration-200 text-center group focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 col-span-2 sm:col-span-1"
             >
               <div className="w-12 h-12 rounded-full bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Globe className="w-6 h-6 text-sky-600 dark:text-sky-400" aria-hidden />

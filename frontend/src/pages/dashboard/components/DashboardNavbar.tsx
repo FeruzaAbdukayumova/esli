@@ -75,7 +75,7 @@ function LanguageDropdown() {
         onChange={(e) => handleChange(e.target.value)}
         onPointerDown={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
-        className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 cursor-pointer"
+        className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 cursor-pointer"
         aria-label={t('nav.language')}
       >
         {SUPPORTED_LANGUAGES.map((lang) => (
@@ -102,7 +102,7 @@ function AppearanceSection() {
               key={opt.mode}
               type="button"
               onClick={() => setDarkMode(opt.mode)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors duration-200 ${
                 darkMode === opt.mode
                   ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
@@ -122,7 +122,7 @@ function AppearanceSection() {
               key={preset.name}
               type="button"
               onClick={() => setTheme(preset.name)}
-              className={`relative w-7 h-7 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-slate-800 ${
+              className={`relative w-7 h-7 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-slate-800 ${
                 theme === preset.name ? 'ring-2 ring-primary-500 ring-offset-2 scale-110' : 'hover:scale-110'
               }`}
               style={{ backgroundColor: `rgb(${preset.colors[500]})` }}
@@ -196,7 +196,7 @@ export function DashboardNavbar({ user, isApiMode, hasGuestDecksToSave, isSyncin
       <header className="sticky top-0 z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-sm shadow-black/5 dark:shadow-black/20 border-b border-white/20 dark:border-slate-700/50">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-14 sm:h-16">
-            <Link to="/" className="text-xl font-bold text-slate-800 dark:text-slate-100 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-200 flex items-center gap-2 shrink-0">
+            <Link to="/" className="text-xl font-bold text-slate-800 dark:text-slate-100 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 flex items-center gap-2 shrink-0">
               <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">E</span>
               </div>
@@ -204,7 +204,7 @@ export function DashboardNavbar({ user, isApiMode, hasGuestDecksToSave, isSyncin
             </Link>
 
             <div className="hidden md:flex items-center gap-3 sm:gap-4 min-w-0">
-              <Link to="/pricing" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 shrink-0">
+              <Link to="/pricing" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200 shrink-0">
                 <Sparkles className="w-4 h-4" />
                 {t('nav.pricing')}
               </Link>
@@ -219,7 +219,7 @@ export function DashboardNavbar({ user, isApiMode, hasGuestDecksToSave, isSyncin
                 {t('nav.extension')}
               </a>
               {!isApiMode && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 transition-all duration-200 shrink-0" title="Guest mode">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 transition-colors duration-200 shrink-0" title="Guest mode">
                   <span className="w-2 h-2 rounded-full shrink-0 bg-amber-500" aria-hidden />
                   <UserX className="w-4 h-4 shrink-0" />
                   {t('nav.guestMode')}
@@ -230,7 +230,7 @@ export function DashboardNavbar({ user, isApiMode, hasGuestDecksToSave, isSyncin
                   <button
                     type="button"
                     onClick={() => setUserMenuOpen((o) => !o)}
-                    className="flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 max-w-[240px]"
+                    className="flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 max-w-[240px]"
                     aria-expanded={userMenuOpen}
                     aria-haspopup="true"
                     aria-label={t('nav.accountMenu')}
@@ -320,7 +320,7 @@ export function DashboardNavbar({ user, isApiMode, hasGuestDecksToSave, isSyncin
                   {t('nav.guest')}
                 </span>
               )}
-              <button type="button" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500" aria-expanded={mobileMenuOpen} aria-label={t('nav.openMenu')} aria-haspopup="dialog">
+              <button type="button" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500" aria-expanded={mobileMenuOpen} aria-label={t('nav.openMenu')} aria-haspopup="dialog">
                 {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
             </div>
@@ -351,35 +351,35 @@ export function DashboardNavbar({ user, isApiMode, hasGuestDecksToSave, isSyncin
               <div className="flex flex-col gap-2 py-4">
                 {user ? (
                   <>
-                    <Link to="/pricing" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">
+                    <Link to="/pricing" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200">
                       <Sparkles className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                       {t('nav.pricing')}
                     </Link>
-                    <a href="https://github.com/feruzaabdukayumova/flashcards-extension" target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">
+                    <a href="https://github.com/feruzaabdukayumova/flashcards-extension" target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200">
                       <Puzzle className="w-4 h-4 text-rose-500 dark:text-rose-400" />
                       {t('nav.extension')}
                     </a>
-                    <Link to="/profile" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">
+                    <Link to="/profile" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200">
                       <UserCircle className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                       {t('nav.profile')}
                     </Link>
-                    <Link to="/settings" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">
+                    <Link to="/settings" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200">
                       <Settings className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                       {t('nav.settings')}
                     </Link>
                     {user.is_admin && (
-                      <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">
+                      <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200">
                         <Shield className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                         {t('admin.nav.title')}
                       </Link>
                     )}
                     {hasGuestDecksToSave && (
-                      <button type="button" onClick={handleSaveGuest} disabled={isSyncing} className="w-full text-left min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-all duration-200 disabled:opacity-60">
+                      <button type="button" onClick={handleSaveGuest} disabled={isSyncing} className="w-full text-left min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-colors duration-200 disabled:opacity-60">
                         {isSyncing ? t('nav.saving') : t('nav.saveGuestDecks')}
                       </button>
                     )}
                     <div className="pt-2 border-t border-slate-200 dark:border-slate-600">
-                      <button type="button" onClick={handleLogout} className="w-full text-left min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">{t('nav.logout')}</button>
+                      <button type="button" onClick={handleLogout} className="w-full text-left min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200">{t('nav.logout')}</button>
                     </div>
                     <div className="pt-2 border-t border-slate-200 dark:border-slate-600 space-y-3">
                       <AppearanceSection />
@@ -388,11 +388,11 @@ export function DashboardNavbar({ user, isApiMode, hasGuestDecksToSave, isSyncin
                   </>
                 ) : (
                   <>
-                    <Link to="/pricing" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">
+                    <Link to="/pricing" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200">
                       <Sparkles className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                       {t('nav.pricing')}
                     </Link>
-                    <a href="https://github.com/feruzaabdukayumova/flashcards-extension" target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">
+                    <a href="https://github.com/feruzaabdukayumova/flashcards-extension" target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200">
                       <Puzzle className="w-4 h-4 text-rose-500 dark:text-rose-400" />
                       {t('nav.extension')}
                     </a>

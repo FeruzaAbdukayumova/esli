@@ -15,7 +15,7 @@ export function ContinueStudying({ lastStudiedDeck, cardsDue }: ContinueStudying
   return (
     <Link
       to={`/study/${lastStudiedDeck.id}`}
-      className="group block w-full rounded-xl bg-gradient-to-r from-primary-600 to-primary-500 dark:from-primary-600 dark:to-primary-500 shadow-md shadow-primary-200/50 dark:shadow-primary-900/40 hover:shadow-lg hover:from-primary-700 hover:to-primary-600 dark:hover:from-primary-500 dark:hover:to-primary-400 transition-all duration-200 px-4 py-3"
+      className="group block w-full rounded-xl bg-gradient-to-r from-primary-600 to-primary-500 dark:from-primary-600 dark:to-primary-500 shadow-md shadow-primary-200/50 dark:shadow-primary-900/40 hover:shadow-lg hover:from-primary-700 hover:to-primary-600 dark:hover:from-primary-500 dark:hover:to-primary-400 transition-shadow duration-200 px-4 py-3"
     >
       <div className="flex items-center gap-3">
         <div className="shrink-0 w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">

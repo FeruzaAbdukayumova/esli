@@ -83,7 +83,7 @@ function DueChipWithLimit({ stats }: StatsProps) {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-3 rounded-2xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 px-4 py-3 min-w-0 transition-all duration-200 hover:shadow-md group w-full text-left"
+        className="flex items-center gap-3 rounded-2xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 px-4 py-3 min-w-0 transition-shadow duration-200 hover:shadow-md group w-full text-left"
       >
         <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-amber-600 dark:text-amber-400 shrink-0">
           <Clock className="w-5 h-5" />

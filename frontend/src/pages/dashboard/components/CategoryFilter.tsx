@@ -13,7 +13,7 @@ export function CategoryFilter({ categories, selected, onSelect }: CategoryFilte
       <button
         type="button"
         onClick={() => onSelect(null)}
-        className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 ${
+        className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 ${
           selected === null
             ? 'bg-primary-600 text-white shadow-sm'
             : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
@@ -27,7 +27,7 @@ export function CategoryFilter({ categories, selected, onSelect }: CategoryFilte
           key={category}
           type="button"
           onClick={() => onSelect(selected === category ? null : category)}
-          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 ${
+          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 ${
             selected === category
               ? 'bg-primary-600 text-white shadow-sm'
               : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'

@@ -32,7 +32,7 @@ const STRENGTH_COLORS: Record<PasswordStrength, string> = {
 }
 
 const inputBase =
-  'w-full px-4 py-2.5 sm:py-3 min-h-[44px] rounded-lg border bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:shadow-focus-primary dark:focus:shadow-focus-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:opacity-60 disabled:cursor-not-allowed hover:border-slate-400 dark:hover:border-slate-500'
+  'w-full px-4 py-2.5 sm:py-3 min-h-[44px] rounded-lg border bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:shadow-focus-primary dark:focus:shadow-focus-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:opacity-60 disabled:cursor-not-allowed hover:border-slate-400 dark:hover:border-slate-500'
 
 const inputError = 'border-red-500 dark:border-red-400'
 const inputValid = 'border-green-500 dark:border-green-400'
@@ -194,7 +194,7 @@ export const RegisterPage = () => {
             )}
           </div>
           {usernameError && (
-            <p id={usernameErrorId} className="mt-1.5 text-sm text-red-600 dark:text-red-400 transition-all duration-200 animate-fade-in" role="alert">
+            <p id={usernameErrorId} className="mt-1.5 text-sm text-red-600 dark:text-red-400 transition-colors duration-200 animate-fade-in" role="alert">
               {usernameError}
             </p>
           )}
@@ -230,7 +230,7 @@ export const RegisterPage = () => {
             )}
           </div>
           {emailError && (
-            <p id={emailErrorId} className="mt-1.5 text-sm text-red-600 dark:text-red-400 transition-all duration-200 animate-fade-in" role="alert">
+            <p id={emailErrorId} className="mt-1.5 text-sm text-red-600 dark:text-red-400 transition-colors duration-200 animate-fade-in" role="alert">
               {emailError}
             </p>
           )}
@@ -313,7 +313,7 @@ export const RegisterPage = () => {
             })}
           </ul>
           {passwordError && (
-            <p id={passwordErrorId} className="mt-1.5 text-sm text-red-600 dark:text-red-400 transition-all duration-200 animate-fade-in" role="alert">
+            <p id={passwordErrorId} className="mt-1.5 text-sm text-red-600 dark:text-red-400 transition-colors duration-200 animate-fade-in" role="alert">
               {passwordError}
             </p>
           )}
@@ -361,7 +361,7 @@ export const RegisterPage = () => {
             </button>
           </div>
           {confirmError && (
-            <p id={confirmErrorId} className="mt-1.5 text-sm text-red-600 dark:text-red-400 transition-all duration-200 animate-fade-in" role="alert">
+            <p id={confirmErrorId} className="mt-1.5 text-sm text-red-600 dark:text-red-400 transition-colors duration-200 animate-fade-in" role="alert">
               {confirmError}
             </p>
           )}
@@ -369,7 +369,7 @@ export const RegisterPage = () => {
 
         {registerError && (
           <div
-            className="flex items-start gap-3 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 text-red-600 dark:text-red-400 text-sm transition-all duration-200 animate-fade-in"
+            className="flex items-start gap-3 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 text-red-600 dark:text-red-400 text-sm transition-colors duration-200 animate-fade-in"
             role="alert"
             aria-live="assertive"
           >
@@ -383,7 +383,7 @@ export const RegisterPage = () => {
         <button
           type="submit"
           disabled={isRegistering}
-          className="w-full min-h-[44px] py-3 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white font-medium transition-all duration-200 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-800 disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100 flex items-center justify-center gap-2"
+          className="w-full min-h-[44px] py-3 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white font-medium transition-[color,background-color,transform] duration-200 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-800 disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100 flex items-center justify-center gap-2"
           aria-busy={isRegistering}
           aria-label={isRegistering ? t('auth.registering') : t('auth.register')}
         >

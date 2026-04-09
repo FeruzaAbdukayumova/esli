@@ -253,7 +253,7 @@ export function SettingsPage() {
                 key={lang.code}
                 type="button"
                 onClick={() => handleLanguageChange(lang.code)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-all ${
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-colors ${
                   isActive
                     ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                     : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
@@ -339,7 +339,7 @@ export function SettingsPage() {
                 key={opt.mode}
                 type="button"
                 onClick={() => handleDarkModeChange(opt.mode)}
-                className={`flex flex-col items-center gap-2 px-4 py-4 rounded-lg border-2 transition-all ${
+                className={`flex flex-col items-center gap-2 px-4 py-4 rounded-lg border-2 transition-colors ${
                   isActive
                     ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                     : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
@@ -384,7 +384,7 @@ export function SettingsPage() {
                 key={preset.name}
                 type="button"
                 onClick={() => handleThemeChange(preset.name)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-all ${
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-colors ${
                   isActive
                     ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                     : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'

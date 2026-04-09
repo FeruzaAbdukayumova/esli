@@ -87,7 +87,7 @@ export function EditPromoModal({ isOpen, promo, onClose }: EditPromoModalProps) 
       aria-labelledby="edit-promo-title"
     >
       <div
-        className={`bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 border border-slate-100 dark:border-slate-700/50 max-w-md w-full p-6 max-h-[90vh] overflow-y-auto transition-all duration-300 ${closing ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0 animate-slide-up'}`}
+        className={`bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 border border-slate-100 dark:border-slate-700/50 max-w-md w-full p-6 max-h-[90vh] overflow-y-auto transition-[transform,opacity] duration-300 ${closing ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0 animate-slide-up'}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4 mb-6">
@@ -103,7 +103,7 @@ export function EditPromoModal({ isOpen, promo, onClose }: EditPromoModalProps) 
             type="button"
             onClick={handleClose}
             disabled={isPending}
-            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-60 shrink-0"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-60 shrink-0"
             aria-label={t('common.close')}
           >
             <X className="w-5 h-5" aria-hidden />
@@ -141,7 +141,7 @@ export function EditPromoModal({ isOpen, promo, onClose }: EditPromoModalProps) 
                 type="button"
                 onClick={() => setIsActive(true)}
                 disabled={isPending}
-                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all text-sm font-medium ${
+                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-colors text-sm font-medium ${
                   isActive
                     ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300'
                     : 'border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-500'
@@ -153,7 +153,7 @@ export function EditPromoModal({ isOpen, promo, onClose }: EditPromoModalProps) 
                 type="button"
                 onClick={() => setIsActive(false)}
                 disabled={isPending}
-                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all text-sm font-medium ${
+                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-colors text-sm font-medium ${
                   !isActive
                     ? 'border-slate-500 bg-slate-100 dark:bg-slate-600 text-slate-700 dark:text-slate-300'
                     : 'border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-500'
@@ -176,7 +176,7 @@ export function EditPromoModal({ isOpen, promo, onClose }: EditPromoModalProps) 
               value={maxRedemptions}
               onChange={(e) => setMaxRedemptions(e.target.value)}
               disabled={isPending}
-              className="w-full px-4 py-2.5 min-h-[44px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-60 transition-all duration-200"
+              className="w-full px-4 py-2.5 min-h-[44px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-60 transition-colors duration-200"
             />
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{t('admin.promo.maxRedemptionsHelp')}</p>
           </div>
@@ -192,7 +192,7 @@ export function EditPromoModal({ isOpen, promo, onClose }: EditPromoModalProps) 
               value={validFrom}
               onChange={(e) => setValidFrom(e.target.value)}
               disabled={isPending}
-              className="w-full px-4 py-2.5 min-h-[44px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-60 transition-all duration-200"
+              className="w-full px-4 py-2.5 min-h-[44px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-60 transition-colors duration-200"
             />
           </div>
 
@@ -207,7 +207,7 @@ export function EditPromoModal({ isOpen, promo, onClose }: EditPromoModalProps) 
               value={validUntil}
               onChange={(e) => setValidUntil(e.target.value)}
               disabled={isPending}
-              className="w-full px-4 py-2.5 min-h-[44px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-60 transition-all duration-200"
+              className="w-full px-4 py-2.5 min-h-[44px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-60 transition-colors duration-200"
             />
           </div>
 
@@ -217,14 +217,14 @@ export function EditPromoModal({ isOpen, promo, onClose }: EditPromoModalProps) 
               type="button"
               onClick={handleClose}
               disabled={isPending}
-              className="min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-all duration-200 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
+              className="min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors duration-200 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
             >
               {t('common.cancel')}
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
+              className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
             >
               {isPending ? (
                 <>

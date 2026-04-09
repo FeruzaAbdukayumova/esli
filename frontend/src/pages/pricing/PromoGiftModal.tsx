@@ -87,7 +87,7 @@ export function PromoGiftModal({ isOpen, tier, onClose }: PromoGiftModalProps) {
       aria-labelledby="promo-gift-title"
     >
       <div
-        className={`bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 border border-slate-100 dark:border-slate-700/50 max-w-md w-full p-6 transition-all duration-300 ${closing ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0 animate-slide-up'}`}
+        className={`bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 border border-slate-100 dark:border-slate-700/50 max-w-md w-full p-6 transition-[transform,opacity] duration-300 ${closing ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0 animate-slide-up'}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
@@ -95,7 +95,7 @@ export function PromoGiftModal({ isOpen, tier, onClose }: PromoGiftModalProps) {
           <button
             type="button"
             onClick={handleClose}
-            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 shrink-0"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 shrink-0"
             aria-label={t('common.close')}
           >
             <X className="w-5 h-5" aria-hidden />
@@ -164,7 +164,7 @@ export function PromoGiftModal({ isOpen, tier, onClose }: PromoGiftModalProps) {
                 <button
                   type="button"
                   onClick={handleCopy}
-                  className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
                   aria-label={t('pricing.gift.copy')}
                 >
                   {copied ? (

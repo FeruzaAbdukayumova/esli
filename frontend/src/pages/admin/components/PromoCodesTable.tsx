@@ -104,7 +104,7 @@ export function PromoCodesTable() {
                     <button
                       type="button"
                       onClick={() => setEditPromo(promo)}
-                      className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all"
+                      className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                       title={t('admin.promo.editTitle')}
                     >
                       <Pencil className="w-4 h-4" />
@@ -113,7 +113,7 @@ export function PromoCodesTable() {
                       type="button"
                       onClick={() => handleToggle(promo)}
                       disabled={toggleMutation.isPending}
-                      className={`min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg transition-all ${
+                      className={`min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg transition-colors ${
                         promo.is_active
                           ? 'text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
                           : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700'
@@ -125,7 +125,7 @@ export function PromoCodesTable() {
                     <button
                       type="button"
                       onClick={() => setDeletePromo(promo)}
-                      className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+                      className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                       title={t('admin.promo.deleteTitle')}
                     >
                       <Trash2 className="w-4 h-4" />

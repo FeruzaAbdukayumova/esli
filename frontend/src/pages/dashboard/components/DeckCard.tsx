@@ -36,11 +36,10 @@ interface DeckCardProps {
   onEdit: (e: React.MouseEvent, deckId: string) => void
   onDelete: (e: React.MouseEvent, deckId: string) => void
   isDeleting: boolean
-  animationDelay?: number
   viewMode?: ViewMode
 }
 
-export function DeckCard({ deck, index, onStudy, onEdit, onDelete, isDeleting, animationDelay = 0, viewMode = 'grid' }: DeckCardProps) {
+export function DeckCard({ deck, index, onStudy, onEdit, onDelete, isDeleting, viewMode = 'grid' }: DeckCardProps) {
   const { t } = useTranslation()
   const { data: cards = [] } = useCards(deck.id)
   const accentClass = CARD_ACCENT_COLORS[index % CARD_ACCENT_COLORS.length]
@@ -53,7 +52,7 @@ export function DeckCard({ deck, index, onStudy, onEdit, onDelete, isDeleting, a
             type="button"
             onClick={(e) => onDelete(e, deck.id)}
             disabled={isDeleting}
-            className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-full text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-60"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-full text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-60"
             aria-label={t('deck.deleteDeck')}
             title={t('deck.deleteDeck')}
           >
@@ -94,7 +93,7 @@ export function DeckCard({ deck, index, onStudy, onEdit, onDelete, isDeleting, a
         <button
           type="button"
           onClick={(e) => onStudy(e, deck.id)}
-          className="inline-flex items-center gap-1.5 min-h-[44px] px-3 py-1.5 rounded-lg text-sm font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="inline-flex items-center gap-1.5 min-h-[44px] px-3 py-1.5 rounded-lg text-sm font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
           aria-label={t('deck.studyDeck')}
           title={t('deck.studyDeck')}
         >
@@ -104,7 +103,7 @@ export function DeckCard({ deck, index, onStudy, onEdit, onDelete, isDeleting, a
         <button
           type="button"
           onClick={(e) => onEdit(e, deck.id)}
-          className="inline-flex items-center gap-1.5 min-h-[44px] px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-400 dark:focus:ring-slate-500"
+          className="inline-flex items-center gap-1.5 min-h-[44px] px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-slate-400 dark:focus:ring-slate-500"
           aria-label={t('deck.editDeck')}
           title={t('deck.editDeck')}
         >
@@ -118,8 +117,8 @@ export function DeckCard({ deck, index, onStudy, onEdit, onDelete, isDeleting, a
   if (viewMode === 'list') {
     return (
       <div
-        className="group relative bg-white dark:bg-slate-800/50 rounded-xl shadow-sm border border-slate-200 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-md transition-all duration-200 p-4 cursor-pointer border-l-4 flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 animate-card-in opacity-0"
-        style={{ animationDelay: `${animationDelay}ms`, borderLeftColor: 'var(--tw-border-opacity, 1)' }}
+        className="group relative bg-white dark:bg-slate-800/50 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-md transition-[box-shadow,border-color,background-color] duration-200 p-4 cursor-pointer border-l-4 flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
+        style={{ borderLeftColor: 'var(--tw-border-opacity, 1)' }}
         onClick={(e) => {
           if ((e.target as HTMLElement).closest('button')) return
           onStudy(e, deck.id)
@@ -168,8 +167,7 @@ export function DeckCard({ deck, index, onStudy, onEdit, onDelete, isDeleting, a
 
   return (
     <div
-      className={`group relative flex flex-col min-h-full bg-white dark:bg-slate-800/50 rounded-xl shadow-sm border border-slate-200 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-lg transition-all duration-200 p-5 md:p-7 cursor-pointer border-t-4 hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 animate-card-in opacity-0 ${accentClass}`}
-      style={{ animationDelay: `${animationDelay}ms` }}
+      className={`group relative flex flex-col min-h-full bg-white dark:bg-slate-800/50 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-xl hover:shadow-primary-500/10 dark:hover:shadow-primary-500/5 transition-[transform,box-shadow,border-color] duration-200 p-5 md:p-7 cursor-pointer border-t-4 hover:scale-[1.02] hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 ${accentClass}`}
       onClick={(e) => {
         if ((e.target as HTMLElement).closest('button')) return
         onStudy(e, deck.id)

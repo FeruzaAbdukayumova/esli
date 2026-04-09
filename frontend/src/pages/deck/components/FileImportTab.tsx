@@ -177,7 +177,7 @@ export function FileImportTab({
           onDragLeave={() => setIsDragging(false)}
           onDrop={onDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`flex flex-col items-center justify-center gap-3 p-8 sm:p-12 border-2 border-dashed rounded-xl cursor-pointer transition-all ${
+          className={`flex flex-col items-center justify-center gap-3 p-8 sm:p-12 border-2 border-dashed rounded-xl cursor-pointer transition-colors ${
             isDragging
               ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
               : 'border-slate-300 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-slate-50 dark:hover:bg-slate-700/30'
@@ -390,7 +390,7 @@ export function FileImportTab({
         </p>
         <div className="w-full max-w-xs bg-slate-200 dark:bg-slate-700 rounded-full h-2">
           <div
-            className="bg-primary-600 dark:bg-primary-500 h-2 rounded-full transition-all duration-300"
+            className="bg-primary-600 dark:bg-primary-500 h-2 rounded-full transition-[width] duration-300"
             style={{ width: `${percent}%` }}
           />
         </div>

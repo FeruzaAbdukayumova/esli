@@ -80,7 +80,7 @@ interface FlashcardItemProps {
 function FlashcardItem({ card, isSelected, onToggleSelect, onEdit, onDelete, isDeleting }: FlashcardItemProps) {
   const { t } = useTranslation()
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-md hover:border-primary-300 dark:hover:border-primary-600 hover:scale-[1.02] transition-all p-6 flex justify-between items-start">
+    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-md hover:border-primary-300 dark:hover:border-primary-600 hover:scale-[1.02] transition-[transform,box-shadow,border-color] p-6 flex justify-between items-start">
       <div className="flex-1 min-w-0 flex flex-col">
         <div className="flex items-start gap-3">
           <input
@@ -587,7 +587,7 @@ export const DeckPage = () => {
                     })
                   }}
                   disabled={updateDeckMutation.isPending}
-                  className={`relative inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-slate-800 ${
+                  className={`relative inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-slate-800 ${
                     deck.isShared
                       ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 focus:ring-emerald-500'
                       : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 focus:ring-slate-500'
@@ -662,7 +662,7 @@ export const DeckPage = () => {
                 setShowAddCard(true)
                 setAddedCount(0)
               }}
-              className="inline-flex items-center justify-center min-h-[44px] px-4 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 gap-2"
+              className="inline-flex items-center justify-center min-h-[44px] px-4 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 gap-2"
             >
               <Plus className="w-5 h-5" aria-hidden />
               {t('deck.addCards')}
@@ -681,7 +681,7 @@ export const DeckPage = () => {
               </h2>
               <div className="flex items-center gap-3">
                 {addedCount > 0 && (
-                  <span className={`flex items-center gap-1.5 text-sm font-medium transition-all duration-300 ${showSuccess ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
+                  <span className={`flex items-center gap-1.5 text-sm font-medium transition-colors duration-300 ${showSuccess ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
                     <CheckCircle2 className={`w-4 h-4 transition-transform duration-300 ${showSuccess ? 'scale-110' : 'scale-100'}`} />
                     {addedCount} {t('deck.added')}
                   </span>
@@ -698,7 +698,7 @@ export const DeckPage = () => {
               <button
                 type="button"
                 onClick={() => setAddMode('single')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                   addMode === 'single'
                     ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -712,7 +712,7 @@ export const DeckPage = () => {
               <button
                 type="button"
                 onClick={() => setAddMode('bulk')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                   addMode === 'bulk'
                     ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -726,7 +726,7 @@ export const DeckPage = () => {
               <button
                 type="button"
                 onClick={() => setAddMode('file')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                   addMode === 'file'
                     ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -740,7 +740,7 @@ export const DeckPage = () => {
               <button
                 type="button"
                 onClick={() => setAddMode('ai')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                   addMode === 'ai'
                     ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -942,7 +942,7 @@ export const DeckPage = () => {
                       setShowAddCard(true)
                       setAddedCount(0)
                     }}
-                    className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 ${m.border} ${m.bg} transition-all duration-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                    className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 ${m.border} ${m.bg} transition-[color,background-color,border-color,box-shadow] duration-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500`}
                   >
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${m.color}`}>
                       <Icon className="w-6 h-6" />
@@ -968,7 +968,7 @@ export const DeckPage = () => {
                   <button
                     type="button"
                     onClick={() => setViewMode('list')}
-                    className={`min-w-[44px] min-h-[44px] flex items-center justify-center p-2 transition-all duration-200 ${viewMode === 'list' ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-600'}`}
+                    className={`min-w-[44px] min-h-[44px] flex items-center justify-center p-2 transition-colors duration-200 ${viewMode === 'list' ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-600'}`}
                     title={t('dashboard.listView')}
                     aria-pressed={viewMode === 'list'}
                   >
@@ -977,7 +977,7 @@ export const DeckPage = () => {
                   <button
                     type="button"
                     onClick={() => setViewMode('grid')}
-                    className={`min-w-[44px] min-h-[44px] flex items-center justify-center p-2 border-l border-slate-300 dark:border-slate-600 transition-all duration-200 ${viewMode === 'grid' ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-600'}`}
+                    className={`min-w-[44px] min-h-[44px] flex items-center justify-center p-2 border-l border-slate-300 dark:border-slate-600 transition-colors duration-200 ${viewMode === 'grid' ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-600'}`}
                     title={t('dashboard.gridView')}
                     aria-pressed={viewMode === 'grid'}
                   >

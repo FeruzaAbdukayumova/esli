@@ -31,21 +31,21 @@ export function DeckProgressBar({ deck }: DeckProgressBarProps) {
       <div className="flex-1 h-3 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden flex">
         {maturePct > 0 && (
           <div
-            className="h-full bg-emerald-500 transition-all duration-500"
+            className="h-full bg-emerald-500 transition-[width] duration-500"
             style={{ width: `${maturePct}%` }}
             title={t('deck.matureCount', { count: deck.matureCount })}
           />
         )}
         {learningPct > 0 && (
           <div
-            className="h-full bg-amber-400 transition-all duration-500"
+            className="h-full bg-amber-400 transition-[width] duration-500"
             style={{ width: `${learningPct}%` }}
             title={t('deck.learningCount', { count: deck.learningCount })}
           />
         )}
         {newPct > 0 && (
           <div
-            className="h-full bg-slate-300 dark:bg-slate-500 transition-all duration-500"
+            className="h-full bg-slate-300 dark:bg-slate-500 transition-[width] duration-500"
             style={{ width: `${newPct}%` }}
             title={t('deck.newCount', { count: deck.newCount })}
           />
