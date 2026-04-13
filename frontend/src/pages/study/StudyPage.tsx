@@ -646,7 +646,7 @@ export const StudyPage = () => {
               </button>
               {showLangDropdown && (
                 <div
-                  className="absolute right-0 top-full mt-1 w-44 max-h-64 overflow-y-auto rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl z-50"
+                  className="absolute right-0 top-full mt-1 w-44 max-h-64 overflow-y-auto rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-elevation-lg z-50"
                   onClick={(e) => e.stopPropagation()}
                 >
                   {SUPPORTED_LANGUAGES.map((lang) => (

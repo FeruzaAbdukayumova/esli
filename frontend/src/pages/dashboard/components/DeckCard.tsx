@@ -117,7 +117,7 @@ export function DeckCard({ deck, index, onStudy, onEdit, onDelete, isDeleting, v
   if (viewMode === 'list') {
     return (
       <div
-        className="group relative bg-white dark:bg-slate-800/50 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-md transition-[box-shadow,border-color,background-color] duration-200 p-4 cursor-pointer border-l-4 flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
+        className="group relative bg-white dark:bg-slate-800/50 rounded-2xl shadow-elevation-sm border border-slate-200 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-elevation-md transition-[box-shadow,border-color,background-color] duration-200 p-4 cursor-pointer border-l-4 flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
         style={{ borderLeftColor: 'var(--tw-border-opacity, 1)' }}
         onClick={(e) => {
           if ((e.target as HTMLElement).closest('button')) return
@@ -167,7 +167,7 @@ export function DeckCard({ deck, index, onStudy, onEdit, onDelete, isDeleting, v
 
   return (
     <div
-      className={`group relative flex flex-col min-h-full bg-white dark:bg-slate-800/50 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-xl hover:shadow-primary-500/10 dark:hover:shadow-primary-500/5 transition-[transform,box-shadow,border-color] duration-200 p-5 md:p-7 cursor-pointer border-t-4 hover:scale-[1.02] hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 ${accentClass}`}
+      className={`group relative flex flex-col min-h-full bg-white dark:bg-slate-800/50 rounded-2xl shadow-elevation-sm border border-slate-200 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-xl hover:shadow-primary-500/10 dark:hover:shadow-primary-500/5 transition-[transform,box-shadow,border-color] duration-200 p-5 md:p-7 cursor-pointer border-t-4 hover:scale-[1.02] hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 ${accentClass}`}
       onClick={(e) => {
         if ((e.target as HTMLElement).closest('button')) return
         onStudy(e, deck.id)

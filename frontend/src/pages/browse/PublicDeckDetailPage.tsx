@@ -138,7 +138,7 @@ export function PublicDeckDetailPage() {
       />
 
       <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-6 md:py-8">
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 border border-slate-100 dark:border-slate-700/50 p-4 sm:p-6 md:p-8">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-md border border-slate-100 dark:border-slate-700/50 p-4 sm:p-6 md:p-8">
           {/* Breadcrumb */}
           <nav className="mb-4 md:mb-6" aria-label="Breadcrumb">
             <ol className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">

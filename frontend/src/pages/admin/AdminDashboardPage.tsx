@@ -57,7 +57,7 @@ export function AdminDashboardPage() {
           return (
             <div
               key={card.label}
-              className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 hover:shadow-lg transition-shadow"
+              className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 hover:shadow-elevation-md transition-shadow"
             >
               <div className="flex items-center justify-between">
                 <div className="flex-1">

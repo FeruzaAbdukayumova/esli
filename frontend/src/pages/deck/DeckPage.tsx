@@ -80,7 +80,7 @@ interface FlashcardItemProps {
 function FlashcardItem({ card, isSelected, onToggleSelect, onEdit, onDelete, isDeleting }: FlashcardItemProps) {
   const { t } = useTranslation()
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-md hover:border-primary-300 dark:hover:border-primary-600 hover:scale-[1.02] transition-[transform,box-shadow,border-color] p-6 flex justify-between items-start">
+    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-elevation-sm border border-slate-200 dark:border-slate-700 hover:shadow-elevation-md hover:border-primary-300 dark:hover:border-primary-600 hover:scale-[1.02] transition-[transform,box-shadow,border-color] p-6 flex justify-between items-start">
       <div className="flex-1 min-w-0 flex flex-col">
         <div className="flex items-start gap-3">
           <input
@@ -501,7 +501,7 @@ export const DeckPage = () => {
 
   return deckPageShell(
     <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-6 md:py-8 pb-24 md:pb-8 animate-fade-in">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 border border-slate-100 dark:border-slate-700/50 p-4 sm:p-6 md:p-8">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-md border border-slate-100 dark:border-slate-700/50 p-4 sm:p-6 md:p-8">
         {/* Breadcrumb */}
         <nav className="mb-4 md:mb-6" aria-label="Breadcrumb">
           <ol className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
@@ -541,7 +541,7 @@ export const DeckPage = () => {
         )}
 
         {/* Deck header card */}
-        <div className="bg-white dark:bg-slate-700/50 rounded-xl shadow-sm border border-slate-200 dark:border-slate-600 p-6 mb-8">
+        <div className="bg-white dark:bg-slate-700/50 rounded-xl shadow-elevation-sm border border-slate-200 dark:border-slate-600 p-6 mb-8">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="min-w-0 flex-1">
               <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-100 mb-3 truncate tracking-tight">
@@ -672,7 +672,7 @@ export const DeckPage = () => {
 
         {/* Enhanced Add Card Form */}
         {showAddCard && (
-          <div className="bg-white dark:bg-slate-700/50 rounded-xl shadow-sm border border-slate-200 dark:border-slate-600 p-6 mb-6 animate-slide-down">
+          <div className="bg-white dark:bg-slate-700/50 rounded-xl shadow-elevation-sm border border-slate-200 dark:border-slate-600 p-6 mb-6 animate-slide-down">
             {/* Header with success indicator */}
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
@@ -942,7 +942,7 @@ export const DeckPage = () => {
                       setShowAddCard(true)
                       setAddedCount(0)
                     }}
-                    className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 ${m.border} ${m.bg} transition-[color,background-color,border-color,box-shadow] duration-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                    className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 ${m.border} ${m.bg} transition-[color,background-color,border-color,box-shadow] duration-200 hover:shadow-elevation-md focus:outline-none focus:ring-2 focus:ring-primary-500`}
                   >
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${m.color}`}>
                       <Icon className="w-6 h-6" />
@@ -1074,7 +1074,7 @@ export const DeckPage = () => {
             aria-labelledby="edit-deck-title"
           >
             <div
-              className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 border border-slate-100 dark:border-slate-700/50 max-w-md w-full p-6 animate-slide-up"
+              className="bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-md border border-slate-100 dark:border-slate-700/50 max-w-md w-full p-6 animate-slide-up"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-start justify-between gap-4 mb-6">
@@ -1161,7 +1161,7 @@ export const DeckPage = () => {
             aria-labelledby="edit-card-title"
           >
             <div
-              className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 border border-slate-100 dark:border-slate-700/50 max-w-2xl w-full p-6 animate-slide-up max-h-[90vh] overflow-y-auto"
+              className="bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-md border border-slate-100 dark:border-slate-700/50 max-w-2xl w-full p-6 animate-slide-up max-h-[90vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-start justify-between gap-4 mb-6">

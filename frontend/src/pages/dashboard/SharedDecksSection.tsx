@@ -44,7 +44,7 @@ function FeaturedCard({ deck, index, onCopy, isCopying }: FeaturedCardProps) {
   const tags = parseTags(deck.categoryTags)
 
   return (
-    <div className="flex flex-col rounded-xl overflow-hidden bg-white dark:bg-slate-800/50 shadow-sm hover:shadow-md border border-slate-200 dark:border-slate-700 transition-[box-shadow] duration-200 group">
+    <div className="flex flex-col rounded-xl overflow-hidden bg-white dark:bg-slate-800/50 shadow-elevation-sm hover:shadow-elevation-md border border-slate-200 dark:border-slate-700 transition-[box-shadow] duration-200 group">
       {/* Gradient header */}
       <Link to={`/browse/${deck.id}`} className={`block bg-gradient-to-r ${gradient} px-4 py-3`}>
         <h3 className="text-sm font-bold text-white truncate group-hover:underline decoration-white/40 underline-offset-2">{deck.title}</h3>

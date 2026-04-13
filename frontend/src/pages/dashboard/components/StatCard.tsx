@@ -14,7 +14,7 @@ export function StatCard({ icon: Icon, value, label, color = 'text-primary-600 d
 
   if (resolvedVariant === 'bento') {
     return (
-      <div className="flex items-center gap-3 rounded-2xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 px-4 py-3 min-w-0 transition-shadow duration-200 hover:shadow-md">
+      <div className="flex items-center gap-3 rounded-2xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 px-4 py-3 min-w-0 transition-shadow duration-200 hover:shadow-elevation-md">
         <div className={`p-2 rounded-xl bg-slate-100 dark:bg-slate-700 ${color} shrink-0`}>
           <Icon className="w-5 h-5" />
         </div>
@@ -37,7 +37,7 @@ export function StatCard({ icon: Icon, value, label, color = 'text-primary-600 d
   }
 
   return (
-    <div className="bg-white dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-600 p-4 flex items-center gap-3 transition-shadow duration-200 hover:shadow-md">
+    <div className="bg-white dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-600 p-4 flex items-center gap-3 transition-shadow duration-200 hover:shadow-elevation-md">
       <div className={`p-2.5 rounded-lg bg-slate-100 dark:bg-slate-700 ${color}`}>
         <Icon className="w-5 h-5" />
       </div>

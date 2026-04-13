@@ -140,7 +140,7 @@ export function CreateDeckModal({ isOpen, isPending, initialMethod, onClose, onS
       aria-labelledby="create-deck-title"
     >
       <div
-        className={`bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 border border-slate-100 dark:border-slate-700/50 max-w-lg w-full p-6 transition-[transform,opacity] duration-300 ${closing ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0 animate-slide-up'}`}
+        className={`bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-md border border-slate-100 dark:border-slate-700/50 max-w-lg w-full p-6 transition-[transform,opacity] duration-300 ${closing ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0 animate-slide-up'}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4 mb-6">
@@ -174,7 +174,7 @@ export function CreateDeckModal({ isOpen, isPending, initialMethod, onClose, onS
                   key={m.id}
                   type="button"
                   onClick={() => handleSelectMethod(m.id)}
-                  className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 ${m.border} ${m.bg} transition-[color,background-color,border-color,box-shadow] duration-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                  className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 ${m.border} ${m.bg} transition-[color,background-color,border-color,box-shadow] duration-200 hover:shadow-elevation-md focus:outline-none focus:ring-2 focus:ring-primary-500`}
                 >
                   <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${m.color}`}>
                     <Icon className="w-6 h-6" />

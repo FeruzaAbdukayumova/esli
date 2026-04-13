@@ -76,7 +76,7 @@ export const DecksPage = () => {
           </ol>
         </nav>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 border border-slate-100 dark:border-slate-700/50 p-4 sm:p-6 md:p-8">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-md border border-slate-100 dark:border-slate-700/50 p-4 sm:p-6 md:p-8">
           <YourDecks isGuest={!user} />
         </div>
       </main>

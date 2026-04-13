@@ -240,7 +240,7 @@ export function DashboardNavbar({ user, isApiMode, hasGuestDecksToSave, isSyncin
                     <ChevronDown className={`w-4 h-4 shrink-0 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} aria-hidden />
                   </button>
                   {userMenuOpen && (
-                    <div className="absolute right-0 top-full mt-1 w-72 max-h-[calc(100vh-5rem)] overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 py-2 z-50 animate-fade-in" role="menu">
+                    <div className="absolute right-0 top-full mt-1 w-72 max-h-[calc(100vh-5rem)] overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 shadow-elevation-md py-2 z-50 animate-fade-in" role="menu">
                       <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700">
                         <div className="flex items-center justify-between gap-2 mb-1">
                           {user.username && (
@@ -332,7 +332,7 @@ export function DashboardNavbar({ user, isApiMode, hasGuestDecksToSave, isSyncin
       {mobileMenuOpen && (
         <>
           <div className="fixed inset-0 z-[60] bg-black/30 transition-opacity duration-200 md:hidden" onClick={() => setMobileMenuOpen(false)} aria-hidden />
-          <div className="fixed top-0 right-0 bottom-0 z-[61] w-72 max-w-[85vw] bg-white dark:bg-slate-800 shadow-2xl border-l border-slate-200 dark:border-slate-700 animate-slide-in-right md:hidden overflow-y-auto" role="dialog" aria-label={t('nav.userMenu')}>
+          <div className="fixed top-0 right-0 bottom-0 z-[61] w-72 max-w-[85vw] bg-white dark:bg-slate-800 shadow-elevation-lg border-l border-slate-200 dark:border-slate-700 animate-slide-in-right md:hidden overflow-y-auto" role="dialog" aria-label={t('nav.userMenu')}>
             <div className="flex flex-col h-full pt-14 px-4 pb-6">
               {user && (
                 <div className="py-3 border-b border-slate-200 dark:border-slate-600">

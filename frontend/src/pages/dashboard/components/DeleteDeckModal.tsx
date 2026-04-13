@@ -44,7 +44,7 @@ export function DeleteDeckModal({ isOpen, isPending, onClose, onConfirm }: Delet
       aria-describedby="delete-deck-desc"
     >
       <div
-        className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 border border-slate-100 dark:border-slate-700/50 max-w-md w-full p-6 transition-colors duration-200 animate-slide-up"
+        className="bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-md border border-slate-100 dark:border-slate-700/50 max-w-md w-full p-6 transition-colors duration-200 animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 id="delete-deck-title" className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">{t('deck.deleteDeckConfirm')}</h2>

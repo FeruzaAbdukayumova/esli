@@ -91,7 +91,7 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
       aria-labelledby="welcome-title"
     >
       <div
-        className={`bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 border border-slate-100 dark:border-slate-700/50 max-w-lg w-full p-6 transition-[transform,opacity] duration-300 max-h-[90vh] overflow-y-auto ${closing ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0 animate-slide-up'}`}
+        className={`bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-md border border-slate-100 dark:border-slate-700/50 max-w-lg w-full p-6 transition-[transform,opacity] duration-300 max-h-[90vh] overflow-y-auto ${closing ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0 animate-slide-up'}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

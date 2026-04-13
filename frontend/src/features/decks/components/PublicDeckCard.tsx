@@ -30,7 +30,7 @@ export function PublicDeckCard({ deck, index, onCopy, isCopying }: PublicDeckCar
   const tags = parseTags(deck.categoryTags)
 
   return (
-    <div className={`group relative flex flex-col bg-white dark:bg-slate-800/50 rounded-xl shadow-sm border border-slate-200 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-lg transition-[box-shadow,border-color] duration-200 p-4 md:p-6 border-t-4 ${accentClass} animate-fade-in`}>
+    <div className={`group relative flex flex-col bg-white dark:bg-slate-800/50 rounded-xl shadow-elevation-sm border border-slate-200 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-elevation-md transition-[box-shadow,border-color] duration-200 p-4 md:p-6 border-t-4 ${accentClass} animate-fade-in`}>
       <Link to={`/browse/${deck.id}`} className="flex-1 min-h-0 flex flex-col">
         <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-2 pr-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{deck.title}</h3>
 
