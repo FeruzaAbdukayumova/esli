@@ -19,7 +19,7 @@ export function AuthPageLayout({
 }: AuthPageLayoutProps) {
   const { t } = useTranslation()
   return (
-    <div className="min-h-screen flex flex-col sm:flex-row items-center justify-center p-4 sm:p-6 md:p-8 bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col sm:flex-row items-center justify-center p-4 sm:p-6 md:p-8 bg-slate-50 dark:bg-[#0F0F11] grain relative overflow-hidden">
       {/* Decorative background pattern */}
       <div
         className="absolute inset-0 opacity-[0.03] dark:opacity-[0.06] pointer-events-none"

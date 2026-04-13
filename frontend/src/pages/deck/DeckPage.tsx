@@ -266,7 +266,7 @@ export const DeckPage = () => {
   }
 
   const deckPageShell = (children: ReactNode) => (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 relative overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-[#0F0F11] grain relative overflow-x-hidden">
       <div
         className="fixed inset-0 opacity-[0.03] dark:opacity-[0.06] pointer-events-none z-0"
         style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)', backgroundSize: '24px 24px' }}

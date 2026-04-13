@@ -6,7 +6,7 @@ export function SubscriptionCanceledPage() {
   const { t } = useTranslation()
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0F0F11] grain px-4">
       <div className="max-w-md w-full text-center bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700/50 p-8">
         <XCircle className="w-16 h-16 text-slate-400 mx-auto mb-4" />
         <h1 className="text-2xl font-display font-bold text-slate-800 dark:text-slate-100 mb-2">
