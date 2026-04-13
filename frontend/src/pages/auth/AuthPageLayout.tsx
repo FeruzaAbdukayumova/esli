@@ -50,7 +50,7 @@ export function AuthPageLayout({
             </h1>
           </div>
 
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-100 text-center mb-1">
+          <h2 className="text-2xl sm:text-3xl font-display font-bold tracking-tight text-slate-800 dark:text-slate-100 text-center mb-1">
             {title}
           </h2>
           <p className="text-slate-600 dark:text-slate-400 text-center text-sm mb-4 sm:mb-6">

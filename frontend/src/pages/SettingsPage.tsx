@@ -447,7 +447,7 @@ export function SettingsPage() {
         </nav>
 
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700/50 p-6 md:p-8">
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-6">{t('settings.title')}</h1>
+          <h1 className="text-2xl font-display font-bold text-slate-800 dark:text-slate-100 mb-6">{t('settings.title')}</h1>
           {settingsContent}
         </div>
       </main>

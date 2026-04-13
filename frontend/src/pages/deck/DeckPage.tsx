@@ -80,7 +80,7 @@ interface FlashcardItemProps {
 function FlashcardItem({ card, isSelected, onToggleSelect, onEdit, onDelete, isDeleting }: FlashcardItemProps) {
   const { t } = useTranslation()
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-elevation-sm border border-slate-200 dark:border-slate-700 hover:shadow-elevation-md hover:border-primary-300 dark:hover:border-primary-600 hover:scale-[1.02] transition-[transform,box-shadow,border-color] p-6 flex justify-between items-start">
+    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-elevation-sm border border-slate-200 dark:border-slate-700 hover:shadow-glow-sm hover:border-primary-300 dark:hover:border-primary-600 transition-[box-shadow,border-color] duration-200 p-6 flex justify-between items-start">
       <div className="flex-1 min-w-0 flex flex-col">
         <div className="flex items-start gap-3">
           <input
@@ -544,7 +544,7 @@ export const DeckPage = () => {
         <div className="bg-white dark:bg-slate-700/50 rounded-xl shadow-elevation-sm border border-slate-200 dark:border-slate-600 p-6 mb-8">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="min-w-0 flex-1">
-              <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-100 mb-3 truncate tracking-tight">
+              <h1 className="text-2xl md:text-3xl font-display font-bold text-slate-800 dark:text-slate-100 mb-3 truncate tracking-tight">
                 {deck.title}
               </h1>
               {deck.categoryTags.length > 0 && (

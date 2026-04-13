@@ -185,7 +185,7 @@ export function PublicDeckDetailPage() {
             <>
               {/* Deck header */}
               <div className="mb-8">
-                <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-100 tracking-tight mb-3">
+                <h1 className="text-2xl md:text-3xl font-display font-bold text-slate-800 dark:text-slate-100 tracking-tight mb-3">
                   {deck.title}
                 </h1>
 

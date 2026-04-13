@@ -157,7 +157,7 @@ export const BrowsePage = () => {
           {/* Header */}
           <div className="flex flex-col gap-4 mb-6 md:mb-8">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-3">
+              <h1 className="text-2xl md:text-3xl font-display font-bold text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-3">
                 <Globe className="w-8 h-8 text-primary-600 dark:text-primary-400" />
                 {t('browse.title')}
               </h1>

@@ -446,7 +446,7 @@ export const StudyPage = () => {
           <div className="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mx-auto mb-4">
             <Trophy className="w-8 h-8 text-primary-600 dark:text-primary-400" aria-hidden />
           </div>
-          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">{t('study.roundComplete')}</h1>
+          <h1 className="text-3xl font-display font-bold tracking-tight text-slate-800 dark:text-slate-100 mb-2">{t('study.roundComplete')}</h1>
           <p className="text-lg text-slate-600 dark:text-slate-400 mb-6">
             {t('study.roundCompleteMessage', { count: studyCount })}
           </p>
@@ -498,7 +498,7 @@ export const StudyPage = () => {
           <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mx-auto mb-4">
             <Trophy className="w-8 h-8 text-emerald-600 dark:text-emerald-400" aria-hidden />
           </div>
-          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">{t('study.sessionComplete')}</h1>
+          <h1 className="text-3xl font-display font-bold tracking-tight text-slate-800 dark:text-slate-100 mb-2">{t('study.sessionComplete')}</h1>
           <p className="text-lg text-slate-600 dark:text-slate-400 mb-2">
             {t('study.sessionCompleteMessage', { count: sessionQueue.length })}
           </p>
@@ -556,7 +556,7 @@ export const StudyPage = () => {
               : <Trophy className="w-8 h-8 text-emerald-600 dark:text-emerald-400" aria-hidden />
             }
           </div>
-          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">
+          <h1 className="text-3xl font-display font-bold tracking-tight text-slate-800 dark:text-slate-100 mb-2">
             {isEmpty ? t('study.noCards') : t('study.allDone')}
           </h1>
           <p className="text-lg text-slate-600 dark:text-slate-400 mb-2">
