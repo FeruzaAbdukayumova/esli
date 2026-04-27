@@ -54,6 +54,12 @@ const routes = [
     description: 'The terms governing your use of Esli — accounts, subscriptions, acceptable use, and limitations of liability.',
     canonical: 'https://esli.app/terms',
   },
+  {
+    path: '/refund',
+    title: 'Refund Policy | Esli',
+    description: 'Esli refund policy — 14-day money-back guarantee on new subscriptions, how renewals work, and how to request a refund.',
+    canonical: 'https://esli.app/refund',
+  },
 ]
 
 function injectMeta(template, route, html) {

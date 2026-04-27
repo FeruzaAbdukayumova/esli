@@ -13,6 +13,7 @@ import EsliVsAnkiPage from './pages/EsliVsAnki'
 import AIFlashcardsMedicalStudentsPage from './pages/AIFlashcardsMedicalStudents'
 import PrivacyPage from './pages/Privacy'
 import TermsPage from './pages/Terms'
+import RefundPage from './pages/Refund'
 
 function HomePage() {
   return (
@@ -39,6 +40,7 @@ export default function App() {
       <Route path="/use-case/medical-students" element={<AIFlashcardsMedicalStudentsPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/terms" element={<TermsPage />} />
+      <Route path="/refund" element={<RefundPage />} />
     </Routes>
   )
 }
