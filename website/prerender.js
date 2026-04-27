@@ -42,6 +42,18 @@ const routes = [
     description: 'Esli generates medical flashcards instantly from any topic or PDF. USMLE, MCAT, anatomy, pharmacology — study smarter with AI + spaced repetition.',
     canonical: 'https://esli.app/use-case/medical-students',
   },
+  {
+    path: '/privacy',
+    title: 'Privacy Policy | Esli',
+    description: 'How Esli collects, uses, and protects your information when you use the Esli web app, landing site, and browser extension.',
+    canonical: 'https://esli.app/privacy',
+  },
+  {
+    path: '/terms',
+    title: 'Terms of Service | Esli',
+    description: 'The terms governing your use of Esli — accounts, subscriptions, acceptable use, and limitations of liability.',
+    canonical: 'https://esli.app/terms',
+  },
 ]
 
 function injectMeta(template, route, html) {

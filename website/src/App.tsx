@@ -11,6 +11,8 @@ import JapaneseVocabularyFlashcardsPage from './pages/JapaneseVocabularyFlashcar
 import AWSCertificationFlashcardsPage from './pages/AWSCertificationFlashcards'
 import EsliVsAnkiPage from './pages/EsliVsAnki'
 import AIFlashcardsMedicalStudentsPage from './pages/AIFlashcardsMedicalStudents'
+import PrivacyPage from './pages/Privacy'
+import TermsPage from './pages/Terms'
 
 function HomePage() {
   return (
@@ -35,6 +37,8 @@ export default function App() {
       <Route path="/flashcards/aws-certification" element={<AWSCertificationFlashcardsPage />} />
       <Route path="/compare/anki" element={<EsliVsAnkiPage />} />
       <Route path="/use-case/medical-students" element={<AIFlashcardsMedicalStudentsPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/terms" element={<TermsPage />} />
     </Routes>
   )
 }

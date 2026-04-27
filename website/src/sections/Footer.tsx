@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
 
 const APP_URL = 'https://app.esli.app'
 
@@ -8,6 +9,11 @@ const footerLinks = [
   { key: 'footer.faq', href: '#faq' },
   { key: 'footer.login', href: `${APP_URL}/login` },
   { key: 'footer.signup', href: `${APP_URL}/register` },
+]
+
+const legalLinks = [
+  { label: 'Privacy', to: '/privacy' },
+  { label: 'Terms', to: '/terms' },
 ]
 
 export default function Footer() {
@@ -40,6 +46,15 @@ export default function Footer() {
               >
                 {t(link.key)}
               </a>
+            ))}
+            {legalLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="text-sm text-slate-400 hover:text-white transition-colors no-underline"
+              >
+                {link.label}
+              </Link>
             ))}
           </div>
         </div>
