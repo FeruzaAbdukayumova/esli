@@ -1,0 +1,32 @@
+name: Weekly Growth Report
+
+on:
+  schedule:
+    - cron: '0 4 * * 1'  # 09:00 Tashkent time (UTC+5), every Monday
+  workflow_dispatch:
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run weekly growth report
+        env:
+          API_URL: https://api.esli.app
+          AGENT_EMAIL: ${{ secrets.AGENT_EMAIL }}
+          AGENT_PASSWORD: ${{ secrets.AGENT_PASSWORD }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python3 agents/scripts/weekly-growth.py
+
+      - name: Commit report
+        run: |
+          git config user.email "agent@esli.app"
+          git config user.name "Esli Agent"
+          git add agents/reports/weekly-growth/
+          git diff --staged --quiet || git commit -m "chore: weekly growth report $(date +%Y-W%V)"
+          git push
