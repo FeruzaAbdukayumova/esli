@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Check, ChevronRight, Loader2, Sparkles, Crown, Zap } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import toast from 'react-hot-toast'
 import { useAuthContext } from '@/app/providers/AuthProvider'
 import { useDeckRepo } from '@/features/decks/repo'
 import { useAuth } from '@/features/auth/hooks/useAuth'
-import { usePlans } from '@/features/subscription/hooks'
+import { usePlans, usePortalSession } from '@/features/subscription/hooks'
 import { PromoCodeInput } from '@/features/subscription/components/PromoCodeInput'
 import { useTier } from '@/features/subscription/useTier'
 import { useSyncImport } from '@/features/sync/hooks'
@@ -13,8 +14,9 @@ import { guestStorage } from '@/shared/lib/guestStorage'
 import { trackEvent } from '@/shared/lib/analytics'
 import { DashboardNavbar } from '@/pages/dashboard/components/DashboardNavbar'
 import { usePageMeta } from '@/shared/lib/usePageMeta'
+import { openPaddleCheckout } from '@/features/billing/paddle'
 import { PromoGiftModal } from './PromoGiftModal'
-import type { PlanTier } from '@/features/subscription/types'
+import type { PlanTier, PlanInfo } from '@/features/subscription/types'
 
 const PLAN_ICONS: Record<PlanTier, React.ReactNode> = {
   free: <Zap className="w-6 h-6" />,
@@ -61,6 +63,7 @@ export function PricingPage() {
   const { logout } = useAuth()
   const { tier: currentTier, isGuest } = useTier()
   const { data: plansData, isLoading } = usePlans()
+  const portalMutation = usePortalSession()
   const syncImportMutation = useSyncImport()
   const [billingInterval, setBillingInterval] = useState<'month' | 'year'>('month')
   const [giftTier, setGiftTier] = useState<'pro' | 'premium' | null>(null)
@@ -72,14 +75,34 @@ export function PricingPage() {
     typeof guestData.cardsByDeckId === 'object' &&
     guestData.decks.length >= 1
 
-  const handleUpgrade = (tier: PlanTier) => {
+  const handleUpgrade = async (tier: PlanTier, plan: PlanInfo) => {
     trackEvent('pricing.upgrade_click', { tier, interval: billingInterval })
     if (isGuest) {
       window.location.href = '/register'
       return
     }
-    if (tier === 'pro' || tier === 'premium') {
+    if (tier !== 'pro' && tier !== 'premium') return
+
+    const priceId = billingInterval === 'month' ? plan.monthly_price_id : plan.yearly_price_id
+    const token = plansData?.paddle_client_token
+    const env = plansData?.paddle_env
+
+    // Fall back to the free-promo gift modal until Paddle is configured.
+    if (!priceId || !token || !env || !user) {
       setGiftTier(tier)
+      return
+    }
+
+    try {
+      await openPaddleCheckout(token, env, {
+        priceId,
+        email: user.email,
+        userId: user.id,
+        successUrl: `${window.location.origin}/dashboard?upgraded=${tier}`,
+      })
+    } catch (err) {
+      console.error('Paddle checkout failed', err)
+      toast.error(t('pricing.checkoutError', 'Could not open checkout. Please try again.'))
     }
   }
 
@@ -274,13 +297,22 @@ export function PricingPage() {
                       <div className="text-center text-sm text-slate-500 dark:text-slate-400 py-2.5">
                         {t('pricing.currentPlan')}
                       </div>
-                    ) : (
+                    ) : isGuest ? (
                       <Link
-                        to={isGuest ? '/register' : '/settings'}
+                        to="/register"
                         className="block text-center px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                       >
-                        {isGuest ? t('pricing.getStarted') : t('pricing.currentPlan')}
+                        {t('pricing.getStarted')}
                       </Link>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => portalMutation.mutate()}
+                        disabled={portalMutation.isPending}
+                        className="block w-full text-center px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-60"
+                      >
+                        {t('pricing.manageSubscription', 'Manage subscription')}
+                      </button>
                     )
                   ) : isCurrent ? (
                     <div className="text-center text-sm text-slate-500 dark:text-slate-400 py-2.5">
@@ -288,7 +320,7 @@ export function PricingPage() {
                     </div>
                   ) : (
                     <button
-                      onClick={() => handleUpgrade(plan.tier)}
+                      onClick={() => handleUpgrade(plan.tier, plan)}
                       className={`w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                         plan.tier === 'pro'
                           ? 'bg-primary-600 hover:bg-primary-700 text-white'

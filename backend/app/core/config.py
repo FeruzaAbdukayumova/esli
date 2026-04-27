@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     ANTHROPIC_API_KEY: str | None = None
 
-    # Stripe
+    # Stripe (legacy, being replaced by Paddle)
     STRIPE_SECRET_KEY: str | None = None
     STRIPE_PUBLISHABLE_KEY: str | None = None
     STRIPE_WEBHOOK_SECRET: str | None = None
@@ -21,7 +21,26 @@ class Settings(BaseSettings):
     STRIPE_PRO_YEARLY_PRICE_ID: str | None = None
     STRIPE_PREMIUM_MONTHLY_PRICE_ID: str | None = None
     STRIPE_PREMIUM_YEARLY_PRICE_ID: str | None = None
+
+    # Paddle
+    PADDLE_ENV: str = "sandbox"  # "sandbox" or "production"
+    PADDLE_API_KEY: str | None = None
+    PADDLE_CLIENT_TOKEN: str | None = None
+    PADDLE_WEBHOOK_SECRET: str | None = None
+    PADDLE_PRO_MONTHLY_PRICE_ID: str | None = None
+    PADDLE_PRO_YEARLY_PRICE_ID: str | None = None
+    PADDLE_PREMIUM_MONTHLY_PRICE_ID: str | None = None
+    PADDLE_PREMIUM_YEARLY_PRICE_ID: str | None = None
+
     FRONTEND_URL: str = "http://localhost:5173"
+
+    @property
+    def paddle_api_base(self) -> str:
+        return (
+            "https://sandbox-api.paddle.com"
+            if self.PADDLE_ENV == "sandbox"
+            else "https://api.paddle.com"
+        )
 
     # OAuth
     GOOGLE_CLIENT_ID: str | None = None

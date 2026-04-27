@@ -55,4 +55,6 @@ class PlanInfo(BaseModel):
 
 class PlansResponse(BaseModel):
     plans: list[PlanInfo]
-    publishable_key: str | None = None
+    publishable_key: str | None = None  # Stripe (legacy)
+    paddle_client_token: str | None = None
+    paddle_env: str | None = None

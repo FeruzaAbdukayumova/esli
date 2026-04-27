@@ -32,6 +32,7 @@ class User(Base):
     )
 
     stripe_customer_id: Mapped[str | None] = mapped_column(String(255), nullable=True, unique=True)
+    paddle_customer_id: Mapped[str | None] = mapped_column(String(255), nullable=True, unique=True)
     is_admin: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     created_at: Mapped[datetime] = mapped_column(

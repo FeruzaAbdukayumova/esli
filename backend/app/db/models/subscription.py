@@ -21,6 +21,8 @@ class Subscription(Base):
     )
     stripe_customer_id: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
     stripe_subscription_id: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
+    paddle_customer_id: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
+    paddle_subscription_id: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
 
     plan_tier: Mapped[str] = mapped_column(String(20), nullable=False, default="free")
     billing_interval: Mapped[str | None] = mapped_column(String(10), nullable=True)

@@ -12,9 +12,10 @@ from app.db.models.promo_code import PromoCode  # noqa: F401
 from app.db.models.chat_conversation import ChatConversation  # noqa: F401
 from app.db.models.chat_message import ChatMessage  # noqa: F401
 from app.db.models.analytics_event import AnalyticsEvent  # noqa: F401
+from app.db.models.paddle_event import PaddleEvent  # noqa: F401
 
 __all__ = [
     "Base", "User", "Deck", "Card", "RefreshToken", "ReviewLog",
     "Subscription", "UsageTracking", "PromoCode", "ChatConversation", "ChatMessage",
-    "AnalyticsEvent",
+    "AnalyticsEvent", "PaddleEvent",
 ]

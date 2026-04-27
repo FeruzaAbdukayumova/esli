@@ -44,4 +44,6 @@ export interface PlanInfo {
 export interface PlansResponse {
   plans: PlanInfo[]
   publishable_key: string | null
+  paddle_client_token: string | null
+  paddle_env: 'sandbox' | 'production' | null
 }

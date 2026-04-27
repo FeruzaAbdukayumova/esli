@@ -28,15 +28,6 @@ export function usePlans() {
   })
 }
 
-export function useCheckoutSession() {
-  return useMutation({
-    mutationFn: (priceId: string) => subscriptionApi.createCheckoutSession(priceId),
-    onSuccess: (data) => {
-      window.location.href = data.url
-    },
-  })
-}
-
 export function usePortalSession() {
   return useMutation({
     mutationFn: () => subscriptionApi.createPortalSession(),

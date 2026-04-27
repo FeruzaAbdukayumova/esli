@@ -3,20 +3,18 @@ import type { SubscriptionInfo, PlansResponse } from './types'
 
 export const subscriptionApi = {
   getSubscription(): Promise<SubscriptionInfo> {
-    return apiClient.get<SubscriptionInfo>('/stripe/subscription')
+    return apiClient.get<SubscriptionInfo>('/billing/subscription')
   },
 
   getPlans(): Promise<PlansResponse> {
-    return apiClient.get<PlansResponse>('/stripe/plans')
-  },
-
-  createCheckoutSession(priceId: string): Promise<{ url: string }> {
-    return apiClient.post<{ url: string }>('/stripe/create-checkout-session', {
-      price_id: priceId,
-    })
+    return apiClient.get<PlansResponse>('/billing/plans')
   },
 
   createPortalSession(): Promise<{ url: string }> {
-    return apiClient.post<{ url: string }>('/stripe/create-portal-session')
+    return apiClient.post<{ url: string }>('/billing/portal-session')
+  },
+
+  cancelSubscription(): Promise<{ status: string }> {
+    return apiClient.post<{ status: string }>('/billing/cancel')
   },
 }

@@ -13,6 +13,7 @@
     "@fontsource-variable/inter": "^5.2.8",
     "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
     "@fontsource/source-serif-4": "^5.2.9",
+    "@paddle/paddle-js": "^1.6.4",
     "@tanstack/react-query": "^5.12.0",
     "@tiptap/extension-character-count": "^3.19.0",
     "@tiptap/extension-code-block": "^3.19.0",
