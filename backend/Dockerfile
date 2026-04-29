@@ -14,3 +14,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN uv pip install -r /app/requirements.txt
 
 COPY . /app
+
+# Default production command: run migrations then start the API.
+# docker-compose.yml overrides this for local dev (uvicorn --reload).
+CMD ["sh", "scripts/start.sh"]
