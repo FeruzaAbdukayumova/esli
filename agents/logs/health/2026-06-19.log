@@ -1,2 +1,3 @@
 [06:04 UTC] api=403(0.072s) app=403(0.053s) landing=403(0.069s) db=403(0.052s) | FAILURES: api/docs=403 app=403 landing=403 db=403
 [12:04 UTC] api=403(0.423s) app=403(0.251s) landing=403(0.263s) db=403(0.060s) | ALL FAILED - 403 on all endpoints
+[18:04 UTC] MONITOR ERROR: Network egress policy blocks outbound requests to esli.app domains. Health check could not run. ACTION: Add esli.app domains to egress allowlist or run monitor from a different environment.
