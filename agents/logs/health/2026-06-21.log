@@ -3,3 +3,4 @@
 [06:04 UTC] NOTE: Telegram alert BLOCKED - api.telegram.org not in network egress allowlist. Alert could not be delivered.
 [12:05 UTC] api=403(0.336s) app=403(0.221s) landing=403(0.360s) db=403(0.045s) | ALL FAILED - 403 on all endpoints
 [12:05 UTC] NOTE: Telegram alert BLOCKED - api.telegram.org not in network egress allowlist. Alert could not be delivered.
+[18:03 UTC] api=403(0.100s) app=403(0.155s) landing=403(0.107s) db=403(0.050s) | ALL FAILED - non-200 responses
