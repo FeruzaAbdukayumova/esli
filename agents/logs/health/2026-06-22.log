@@ -1,2 +1,3 @@
 [00:04 UTC] HEALTH CHECK FAILED TO RUN - network egress policy blocks esli.app, app.esli.app, api.esli.app. Add these hosts to Claude Code on the web network allowlist. Service status: UNKNOWN.
 [06:04 UTC] api=403(0.041s) app=403(0.049s) landing=403(0.057s) db=403 | FAIL - all services returning 403
+[12:04 UTC] api=403(0.247s) app=403(0.166s) landing=403(0.358s) db=403(0.059s) | FAILED - all 403 | ALERT: Telegram blocked by network policy - notification not delivered
