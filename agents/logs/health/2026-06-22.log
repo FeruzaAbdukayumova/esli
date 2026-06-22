@@ -1,0 +1,1 @@
+[00:04 UTC] HEALTH CHECK FAILED TO RUN - network egress policy blocks esli.app, app.esli.app, api.esli.app. Add these hosts to Claude Code on the web network allowlist. Service status: UNKNOWN.
