@@ -3,6 +3,5 @@
 [12:05 UTC] api=403(0.29s) app=403(0.16s) landing=403(0.41s) db=403(0.04s) | PROXY BLOCKED
 [18:03 UTC] api=000(0.316s) app=000(0.854s) landing=000(0.327s) db=000(0.281s) | PROXY BLOCKED
 
-All checks blocked by remote env egress policy - actual service status UNKNOWN.
+All checks blocked by egress policy. Service status UNKNOWN.
 esli.app and api.telegram.org not in allowed egress list.
-Fix: add these hosts to the Claude Code environment network policy.
