@@ -1,3 +1,8 @@
-[00:04 UTC] api=403(0.070s) app=403(0.201s) landing=403(0.223s) db=403(0.053s) | FAIL - all 403
-[06:04 UTC] api=403(0.264s) app=403(0.275s) landing=403(0.260s) db=403(0.046s) | FAILED: all 403
-[12:05 UTC] api=403(0.29s) app=403(0.16s) landing=403(0.41s) db=403(0.04s) | FAILURES: all 403
+[00:04 UTC] api=403(0.070s) app=403(0.201s) landing=403(0.223s) db=403(0.053s) | PROXY BLOCKED
+[06:04 UTC] api=403(0.264s) app=403(0.275s) landing=403(0.260s) db=403(0.046s) | PROXY BLOCKED
+[12:05 UTC] api=403(0.29s) app=403(0.16s) landing=403(0.41s) db=403(0.04s) | PROXY BLOCKED
+[18:03 UTC] api=000(0.316s) app=000(0.854s) landing=000(0.327s) db=000(0.281s) | PROXY BLOCKED
+
+All checks blocked by remote env egress policy - actual service status UNKNOWN.
+esli.app and api.telegram.org not in allowed egress list.
+Fix: add these hosts to the Claude Code environment network policy.
