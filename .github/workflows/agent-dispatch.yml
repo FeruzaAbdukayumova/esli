@@ -1,0 +1,46 @@
+name: Agent Dispatch
+
+# Fired by the Cloudflare Worker when Feruza taps a button or sends a request.
+# Routes the event to the right agent.
+
+on:
+  repository_dispatch:
+    types: [approve, reject, request, status]
+
+jobs:
+  route:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      EVENT: ${{ github.event.action }}
+      JOB_ID: ${{ github.event.client_payload.job_id }}
+      REQUEST_TEXT: ${{ github.event.client_payload.text }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      API_URL: https://api.esli.app
+      AGENT_EMAIL: ${{ secrets.AGENT_EMAIL }}
+      AGENT_PASSWORD: ${{ secrets.AGENT_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Route event to the right agent
+        working-directory: agents/scripts
+        run: python3 runner.py
+
+      - name: Commit any agent output
+        run: |
+          git config user.email "agent@esli.app"
+          git config user.name "Esli Agent"
+          git add agents/
+          git diff --staged --quiet || git commit -m "chore: agent run ($EVENT)"
+          git push || true
