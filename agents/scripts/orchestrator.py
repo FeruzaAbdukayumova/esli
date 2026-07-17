@@ -42,6 +42,9 @@ def build_context():
 solo founder (Feruza) who has a full-time job and wants to be only the final
 yes/no approver. Plan today's work for the agent team.
 
+=== TEAM CONSTITUTION (how you think — this overrides everything else) ===
+{read('agents/config/constitution.md', 7000)}
+
 === CURRENT PRIORITIES ===
 {read('context/current-priorities.md')}
 
@@ -57,24 +60,42 @@ yes/no approver. Plan today's work for the agent team.
 === LATEST QA REPORT ===
 {latest_report('qa')}
 
-Plan 2-4 concrete tasks for today across build + promote. Each task must name
-the responsible agent (dev, qa, deploy, growth, content, social) and be
-specific and shippable in a day. Prefer the top priority (UX) and the
-2026 deadline (real users). Do NOT propose production deploys or
-payment changes without flagging them as approval-gated.
+Think like a founder, not a task dispatcher. First ask: what is the single
+highest-impact improvement we can make today for awareness, visitors,
+sign-ups, activation, retention, or revenue? Plan 1-4 concrete tasks around
+that answer — one big task beats four small ones if its expected impact is
+higher. Skip busy work. Challenge yesterday's plan if the data says it was
+wrong. Each task must name the responsible agent (dev, qa, deploy, growth,
+content, social), be specific and shippable in a day, and say which North
+Star metric it moves. Do NOT propose production deploys, public publishing,
+or payment changes without flagging them as approval-gated.
 
 Respond ONLY as JSON:
 {{"summary": "one-line plain-language summary for a tired founder",
-  "tasks": [{{"agent": "qa", "task": "short description"}}]}}"""
+  "opportunity": "biggest opportunity right now, one line",
+  "risk": "biggest risk right now, one line",
+  "confidence": "high|medium|low",
+  "tasks": [{{"agent": "qa", "task": "short description",
+             "metric": "which North Star metric this moves",
+             "impact": "expected impact, one short phrase"}}]}}"""
 
 
 def format_message(plan):
     lines = [f"<b>☀️ Today's plan — {TODAY}</b>", "", plan["summary"], ""]
+    if plan.get("opportunity"):
+        lines.append(f"🎯 <b>Opportunity:</b> {plan['opportunity']}")
+    if plan.get("risk"):
+        lines.append(f"⚠️ <b>Risk:</b> {plan['risk']}")
+    if plan.get("opportunity") or plan.get("risk"):
+        lines.append("")
     icons = {"dev": "💻", "qa": "🔍", "deploy": "🚀", "growth": "📈",
              "content": "✍️", "social": "📱", "analytics": "📊"}
     for t in plan["tasks"]:
         icon = icons.get(t["agent"], "•")
-        lines.append(f"{icon} <b>{t['agent']}</b>: {t['task']}")
+        extra = f" ({t['metric']})" if t.get("metric") else ""
+        lines.append(f"{icon} <b>{t['agent']}</b>: {t['task']}{extra}")
+    if plan.get("confidence"):
+        lines += ["", f"Confidence: {plan['confidence']}"]
     lines += ["", "Tap Approve to run it, or Reject to skip and reply with changes."]
     return "\n".join(lines)
 
@@ -84,8 +105,13 @@ def main():
     plan = lib_claude.ask_json(build_context())
 
     PLANS_DIR.mkdir(parents=True, exist_ok=True)
+    header = f"# Plan {TODAY}\n\n{plan['summary']}\n"
+    if plan.get("opportunity"):
+        header += f"\nOpportunity: {plan['opportunity']}\n"
+    if plan.get("risk"):
+        header += f"\nRisk: {plan['risk']}\n"
     (PLANS_DIR / f"{TODAY}.md").write_text(
-        f"# Plan {TODAY}\n\n{plan['summary']}\n\n" +
+        header + "\n" +
         "\n".join(f"- **{t['agent']}**: {t['task']}" for t in plan["tasks"]) + "\n"
     )
 

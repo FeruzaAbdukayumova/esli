@@ -46,7 +46,12 @@ def load_plan(job_id):
 
 
 def produce_deliverable(agent, task, plan_text):
-    prompt = f"""You are the Esli {agent} agent. Product context:
+    prompt = f"""You are the Esli {agent} agent.
+
+Team constitution (how you think — outcomes over activity):
+{read('agents/config/constitution.md', 6000)}
+
+Product context:
 {read('agents/config/agent-context.md', 2500)}
 
 Your role:
@@ -58,8 +63,12 @@ Today's approved plan:
 Your task: {task}
 
 Produce the actual deliverable (the draft / report / posts). Be concrete and
-ready to use. Use Feruza's external tone for public copy (professional, modern,
-clean), internal tone for reports (bullets, direct). No em dashes."""
+ready to use. State which North Star metric it moves and why, in one line at
+the top. If the task fails the constitution's decision framework (moves no
+metric, adds friction, busy work), say so plainly and propose the
+higher-impact alternative instead of executing blindly. Use Feruza's external
+tone for public copy (professional, modern, clean), internal tone for reports
+(bullets, direct). No em dashes."""
     body = lib_claude.ask(prompt)
     out_dir = ROOT / "agents" / ("content" if agent in {"content", "social"} else "reports") / agent
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -114,11 +123,16 @@ def handle_request():
     prompt = f"""You are Esli's Chief of Staff. The founder texted this request:
 "{REQUEST_TEXT}"
 
+Team constitution (how you think):
+{read('agents/config/constitution.md', 4000)}
+
 Context:
 {read('context/current-priorities.md', 1500)}
 
 Break it into 1-3 concrete tasks. Name the responsible agent for each
-(dev, deploy, qa, growth, content, social). Respond ONLY as JSON:
+(dev, deploy, qa, growth, content, social). If the request is low-impact,
+still honour it, but note the higher-impact alternative in the summary.
+Respond ONLY as JSON:
 {{"summary": "one line", "tasks": [{{"agent": "content", "task": "..."}}]}}"""
     plan = lib_claude.ask_json(prompt)
 
