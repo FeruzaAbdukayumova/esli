@@ -1,1 +1,2 @@
 [06:10 UTC] api=000(0.276s) app=000(0.238s) landing=000(0.242s) db=000(0.236s) | ALL FAILED - egress proxy blocked connections (policy denial)
+[12:12 UTC] api=000(0.29s) app=000(blocked) landing=000(blocked) db=000(blocked) | FAIL - egress proxy blocked all external connections (env network policy)
