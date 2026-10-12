@@ -95,6 +95,15 @@ def _client_ip(request: Request) -> str:
 
 def _check_ip_rate_limit(request: Request) -> None:
     client_ip = _client_ip(request)
+    # TEMP diagnostic (remove after verifying proxy headers on Railway)
+    logger.warning(
+        "ratelimit-debug key=%s client=%s xff=%r xreal=%r cf=%r",
+        client_ip,
+        request.client.host if request.client else None,
+        request.headers.get("x-forwarded-for"),
+        request.headers.get("x-real-ip"),
+        request.headers.get("cf-connecting-ip"),
+    )
     now = time.time()
     # Clean old entries
     _ip_usage[client_ip] = [t for t in _ip_usage[client_ip] if now - t < _IP_RATE_WINDOW]
