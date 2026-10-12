@@ -124,10 +124,11 @@ class TestGuestRateLimitIp:
 
         from app.api.v1.routes.ai import _client_ip
 
-        def make(headers: dict[str, str]) -> Request:
+        def make(headers: dict[str, str], extra: list[tuple[str, str]] = ()) -> Request:
+            pairs = list(extra) + list(headers.items())
             return Request({
                 "type": "http",
-                "headers": [(k.encode(), v.encode()) for k, v in headers.items()],
+                "headers": [(k.encode(), v.encode()) for k, v in pairs],
                 "client": ("10.0.0.1", 1234),
             })
 
@@ -140,4 +141,9 @@ class TestGuestRateLimitIp:
         assert _client_ip(make({"cf-connecting-ip": "1.2.3.4", "x-forwarded-for": f"5.6.7.8, {edge}"})) == "5.6.7.8"
         # Forged left-most X-Forwarded-For entries are ignored
         assert _client_ip(make({"x-forwarded-for": f"1.1.1.1, 2.2.2.2, 5.6.7.8, {edge}"})) == "5.6.7.8"
+        # A client-sent duplicate X-Forwarded-For header can't hide the proxy-appended hops
+        assert _client_ip(make(
+            {"cf-connecting-ip": "1.2.3.4", "x-forwarded-for": f"5.6.7.8, {edge}"},
+            extra=[("x-forwarded-for", "172.64.0.1, 9.9.9.9")],
+        )) == "5.6.7.8"
         assert _client_ip(make({})) == "10.0.0.1"
