@@ -115,16 +115,27 @@ def main():
 
     highest = offset
     for u in updates:
+        # Advance past this update FIRST, and persist immediately, so a handler
+        # that throws can't make Telegram replay the same message on every poll
+        # (that turned one failure into an error every 15 min, forever).
         highest = max(highest, u["update_id"] + 1)
-        msg = u.get("message")
-        cb = u.get("callback_query")
-        if msg and str(msg.get("chat", {}).get("id")) == CHAT_ID and msg.get("text"):
-            print(f"message: {msg['text'][:60]}")
-            handle_message(msg["text"])
-        elif cb and str(cb.get("message", {}).get("chat", {}).get("id")) == CHAT_ID:
-            print(f"callback: {cb.get('data')}")
-            handle_callback(cb)
-    save_offset(highest)
+        save_offset(highest)
+        try:
+            msg = u.get("message")
+            cb = u.get("callback_query")
+            if msg and str(msg.get("chat", {}).get("id")) == CHAT_ID and msg.get("text"):
+                print(f"message: {msg['text'][:60]}")
+                handle_message(msg["text"])
+            elif cb and str(cb.get("message", {}).get("chat", {}).get("id")) == CHAT_ID:
+                print(f"callback: {cb.get('data')}")
+                handle_callback(cb)
+        except Exception as e:
+            # Report once, then move on — the offset is already saved above.
+            print(f"handler failed on update {u['update_id']}: {e}", file=sys.stderr)
+            try:
+                tg.send(f"⚠️ Couldn't process that one: {e}")
+            except Exception:
+                pass
     print(f"Processed up to offset {highest}.")
 
 
