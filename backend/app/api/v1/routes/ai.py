@@ -77,13 +77,15 @@ def _is_cloudflare(ip: str) -> bool:
 def _client_ip(request: Request) -> str:
     """Real visitor IP behind Cloudflare + Railway, without trusting spoofable headers.
 
-    request.client.host is Railway's proxy in production. The right-most
-    X-Forwarded-For entry is appended by that proxy, so it is the true peer.
-    Only when that peer is Cloudflare do we trust CF-Connecting-IP; a request
-    hitting the *.up.railway.app domain directly can't forge its way out.
+    Railway's edge appends the IP that connected to it, then its internal hop
+    appends the edge's own IP, so X-Forwarded-For ends "<peer>, <railway edge>"
+    and the second-to-last entry is the true peer (anything left of it is
+    client-supplied). Only when that peer is Cloudflare do we trust
+    CF-Connecting-IP; a request hitting the *.up.railway.app domain directly
+    can't forge its way out.
     """
-    forwarded = request.headers.get("x-forwarded-for")
-    peer = forwarded.split(",")[-1].strip() if forwarded else None
+    hops = [h.strip() for h in request.headers.get("x-forwarded-for", "").split(",") if h.strip()]
+    peer = hops[-2] if len(hops) >= 2 else None
     if not peer:
         peer = request.client.host if request.client else "unknown"
     if _is_cloudflare(peer):
@@ -95,15 +97,6 @@ def _client_ip(request: Request) -> str:
 
 def _check_ip_rate_limit(request: Request) -> None:
     client_ip = _client_ip(request)
-    # TEMP diagnostic (remove after verifying proxy headers on Railway)
-    logger.warning(
-        "ratelimit-debug key=%s client=%s xff=%r xreal=%r cf=%r",
-        client_ip,
-        request.client.host if request.client else None,
-        request.headers.get("x-forwarded-for"),
-        request.headers.get("x-real-ip"),
-        request.headers.get("cf-connecting-ip"),
-    )
     now = time.time()
     # Clean old entries
     _ip_usage[client_ip] = [t for t in _ip_usage[client_ip] if now - t < _IP_RATE_WINDOW]
