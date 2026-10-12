@@ -4,6 +4,7 @@ import { Search, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useAdminUsers, useUpdateUser } from '@/features/admin/adminHooks'
 import type { AdminUser } from '@/features/admin/adminApi'
 import { usePageMeta } from '@/shared/lib/usePageMeta'
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog'
 
 export function AdminUsersPage() {
   const { t } = useTranslation()
@@ -14,6 +15,7 @@ export function AdminUsersPage() {
   const [tierFilter, setTierFilter] = useState<string | undefined>(undefined)
   const [adminFilter, setAdminFilter] = useState<boolean | undefined>(undefined)
   const [searchTimeout, setSearchTimeout] = useState<ReturnType<typeof setTimeout> | null>(null)
+  const [userToToggle, setUserToToggle] = useState<AdminUser | null>(null)
 
   const { data, isLoading } = useAdminUsers({
     page,
@@ -35,10 +37,12 @@ export function AdminUsersPage() {
     )
   }
 
-  const handleToggleAdmin = (user: AdminUser) => {
-    if (window.confirm(t('admin.users.confirmToggleAdmin', { email: user.email }))) {
-      updateUserMutation.mutate({ userId: user.id, data: { is_admin: !user.is_admin } })
-    }
+  const handleConfirmToggleAdmin = () => {
+    if (!userToToggle) return
+    updateUserMutation.mutate(
+      { userId: userToToggle.id, data: { is_admin: !userToToggle.is_admin } },
+      { onSettled: () => setUserToToggle(null) },
+    )
   }
 
   return (
@@ -160,9 +164,9 @@ export function AdminUsersPage() {
                       </td>
                       <td className="px-4 py-3 text-sm">
                         <button
-                          onClick={() => handleToggleAdmin(user)}
+                          onClick={() => setUserToToggle(user)}
                           disabled={updateUserMutation.isPending}
-                          className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium disabled:opacity-50"
+                          className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium disabled:opacity-50 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800"
                         >
                           {user.is_admin ? t('admin.users.revokeAdmin') : t('admin.users.grantAdmin')}
                         </button>
@@ -186,7 +190,7 @@ export function AdminUsersPage() {
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="p-2 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-2 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -196,7 +200,7 @@ export function AdminUsersPage() {
                 <button
                   onClick={() => setPage((p) => Math.min(data.total_pages, p + 1))}
                   disabled={page >= data.total_pages}
-                  className="p-2 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-2 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -209,6 +213,23 @@ export function AdminUsersPage() {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={userToToggle !== null}
+        title={
+          userToToggle?.is_admin
+            ? t('admin.users.revokeAdminTitle', 'Revoke admin access?')
+            : t('admin.users.grantAdminTitle', 'Grant admin access?')
+        }
+        description={t('admin.users.confirmToggleAdmin', { email: userToToggle?.email })}
+        confirmLabel={
+          userToToggle?.is_admin ? t('admin.users.revokeAdmin') : t('admin.users.grantAdmin')
+        }
+        danger
+        isPending={updateUserMutation.isPending}
+        onClose={() => setUserToToggle(null)}
+        onConfirm={handleConfirmToggleAdmin}
+      />
     </div>
   )
 }

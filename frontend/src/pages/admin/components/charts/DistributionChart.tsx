@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts'
 
 interface DistributionChartProps {
@@ -6,12 +7,13 @@ interface DistributionChartProps {
 }
 
 export function DistributionChart({ data, height = 300 }: DistributionChartProps) {
+  const { t } = useTranslation()
   const total = data.reduce((sum, d) => sum + d.value, 0)
 
   if (total === 0) {
     return (
       <div className="flex items-center justify-center h-[300px] text-slate-400 dark:text-slate-500 text-sm">
-        No data available
+        {t('admin.analytics.noData', 'No data available')}
       </div>
     )
   }

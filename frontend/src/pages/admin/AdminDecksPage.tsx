@@ -4,6 +4,7 @@ import { Search, ChevronLeft, ChevronRight, Eye, EyeOff, Trash2 } from 'lucide-r
 import { useAdminDecks, useUpdateDeck, useDeleteDeck } from '@/features/admin/adminHooks'
 import type { AdminDeck } from '@/features/admin/adminApi'
 import { usePageMeta } from '@/shared/lib/usePageMeta'
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog'
 
 export function AdminDecksPage() {
   const { t } = useTranslation()
@@ -13,6 +14,7 @@ export function AdminDecksPage() {
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [sharedFilter, setSharedFilter] = useState<boolean | undefined>(undefined)
   const [searchTimeout, setSearchTimeout] = useState<ReturnType<typeof setTimeout> | null>(null)
+  const [deckToDelete, setDeckToDelete] = useState<AdminDeck | null>(null)
 
   const { data, isLoading } = useAdminDecks({
     page,
@@ -38,10 +40,9 @@ export function AdminDecksPage() {
     updateDeckMutation.mutate({ deckId: deck.id, data: { is_shared: !deck.is_shared } })
   }
 
-  const handleDelete = (deck: AdminDeck) => {
-    if (window.confirm(t('admin.decks.confirmDelete', { title: deck.title }))) {
-      deleteDeckMutation.mutate(deck.id)
-    }
+  const handleConfirmDelete = () => {
+    if (!deckToDelete) return
+    deleteDeckMutation.mutate(deckToDelete.id, { onSettled: () => setDeckToDelete(null) })
   }
 
   return (
@@ -158,14 +159,14 @@ export function AdminDecksPage() {
                           <button
                             onClick={() => handleToggleShared(deck)}
                             disabled={updateDeckMutation.isPending}
-                            className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium disabled:opacity-50"
+                            className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium disabled:opacity-50 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800"
                           >
                             {deck.is_shared ? t('admin.decks.makePrivate') : t('admin.decks.makePublic')}
                           </button>
                           <button
-                            onClick={() => handleDelete(deck)}
+                            onClick={() => setDeckToDelete(deck)}
                             disabled={deleteDeckMutation.isPending}
-                            className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50"
+                            className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800"
                             title={t('admin.decks.delete')}
                           >
                             <Trash2 className="w-4 h-4" />
@@ -191,7 +192,7 @@ export function AdminDecksPage() {
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="p-2 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-2 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -201,7 +202,7 @@ export function AdminDecksPage() {
                 <button
                   onClick={() => setPage((p) => Math.min(data.total_pages, p + 1))}
                   disabled={page >= data.total_pages}
-                  className="p-2 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-2 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -214,6 +215,17 @@ export function AdminDecksPage() {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={deckToDelete !== null}
+        title={t('admin.decks.confirmDeleteTitle', 'Delete this deck?')}
+        description={t('admin.decks.confirmDelete', { title: deckToDelete?.title })}
+        confirmLabel={t('admin.decks.delete')}
+        danger
+        isPending={deleteDeckMutation.isPending}
+        onClose={() => setDeckToDelete(null)}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   )
 }

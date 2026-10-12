@@ -48,7 +48,7 @@ export function AdminSupportPage() {
               <button
                 key={f.label}
                 onClick={() => setStatusFilter(f.value)}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800 ${
                   statusFilter === f.value
                     ? 'bg-primary-600 text-white'
                     : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'

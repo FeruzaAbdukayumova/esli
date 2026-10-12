@@ -1,16 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Layers, Copy, User, Loader2 } from 'lucide-react'
+import { Layers, Copy, User, Loader2, Check } from 'lucide-react'
 import type { PublicDeck } from '@/features/decks/types'
-
-const CARD_COLORS = [
-  'border-t-primary-500',
-  'border-t-emerald-500',
-  'border-t-amber-500',
-  'border-t-rose-500',
-  'border-t-violet-500',
-  'border-t-cyan-500',
-] as const
 
 function parseTags(tagsString: string): string[] {
   if (!tagsString) return []
@@ -19,19 +10,23 @@ function parseTags(tagsString: string): string[] {
 
 interface PublicDeckCardProps {
   deck: PublicDeck
-  index: number
   onCopy: (deckId: string) => void
   isCopying: boolean
+  /** Id of the user's copied deck once the copy succeeded */
+  copiedDeckId?: string | null
 }
 
-export function PublicDeckCard({ deck, index, onCopy, isCopying }: PublicDeckCardProps) {
+export function PublicDeckCard({ deck, onCopy, isCopying, copiedDeckId }: PublicDeckCardProps) {
   const { t } = useTranslation()
-  const accentClass = CARD_COLORS[index % CARD_COLORS.length]
   const tags = parseTags(deck.categoryTags)
+  const ownerLabel = deck.owner.username || t('browse.communityAuthor', 'Community member')
 
   return (
-    <div className={`group relative flex flex-col bg-white dark:bg-slate-800/50 rounded-xl shadow-elevation-sm border border-slate-200 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-elevation-md transition-[box-shadow,border-color] duration-200 p-4 md:p-6 border-t-4 ${accentClass} animate-fade-in`}>
-      <Link to={`/browse/${deck.id}`} className="flex-1 min-h-0 flex flex-col">
+    <div className="group relative flex flex-col bg-white dark:bg-slate-800/50 rounded-xl shadow-elevation-sm border border-slate-200 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-elevation-md transition-[box-shadow,border-color] duration-200 p-4 md:p-6 border-t-4 border-t-primary-500/60 dark:border-t-primary-500/50 animate-fade-in">
+      <Link
+        to={`/browse/${deck.id}`}
+        className="flex-1 min-h-0 flex flex-col rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800"
+      >
         <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-2 pr-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{deck.title}</h3>
 
         {tags.length > 0 && (
@@ -58,30 +53,40 @@ export function PublicDeckCard({ deck, index, onCopy, isCopying }: PublicDeckCar
 
         <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500 mb-4">
           <User className="w-3.5 h-3.5 shrink-0" aria-hidden />
-          <span className="truncate">{deck.owner.email}</span>
+          <span className="truncate">{ownerLabel}</span>
         </div>
       </Link>
 
       <div className="flex items-center gap-2 mt-auto pt-2">
-        <button
-          type="button"
-          onClick={() => onCopy(deck.id)}
-          disabled={isCopying}
-          className="flex-1 inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 rounded-lg text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
-          title={t('dashboard.copyToLibrary')}
-        >
-          {isCopying ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              {t('browse.copying')}
-            </>
-          ) : (
-            <>
-              <Copy className="w-4 h-4" />
-              {t('browse.copyToLibrary')}
-            </>
-          )}
-        </button>
+        {copiedDeckId ? (
+          <Link
+            to={`/deck/${copiedDeckId}`}
+            className="flex-1 inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 rounded-lg text-sm font-medium text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700/50 hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800"
+          >
+            <Check className="w-4 h-4" aria-hidden />
+            {t('browse.copied', 'Copied')}
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={() => onCopy(deck.id)}
+            disabled={isCopying}
+            className="flex-1 inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 rounded-lg text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800"
+            title={t('dashboard.copyToLibrary')}
+          >
+            {isCopying ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                {t('browse.copying')}
+              </>
+            ) : (
+              <>
+                <Copy className="w-4 h-4" />
+                {t('browse.copyToLibrary')}
+              </>
+            )}
+          </button>
+        )}
       </div>
     </div>
   )

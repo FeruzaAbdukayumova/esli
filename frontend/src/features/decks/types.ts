@@ -3,6 +3,10 @@ export interface Deck {
   title: string
   categoryTags: string[]
   isShared: boolean
+  /** populated by both repos; may be missing on freshly stored guest data */
+  cardCount?: number
+  /** times a shared deck has been copied; only meaningful in api mode */
+  copyCount?: number
   createdAt: string
   updatedAt: string
   lastStudiedAt?: string
@@ -79,8 +83,7 @@ export interface UpdateCardInput {
 
 export interface PublicDeckOwner {
   id: string
-  email: string
-  username?: string
+  username?: string | null
 }
 
 export interface PublicDeck {

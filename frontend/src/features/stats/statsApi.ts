@@ -32,6 +32,7 @@ interface RawDashboardStats {
   retention_percent: number
   deck_progress: RawDeckProgress[]
   review_forecast: RawDayForecast[]
+  activity_heatmap?: RawDayForecast[]
 }
 
 function transformDeckProgress(raw: RawDeckProgress): DeckProgress {
@@ -68,5 +69,6 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
     retentionPercent: raw.retention_percent,
     deckProgress: raw.deck_progress.map(transformDeckProgress),
     reviewForecast: raw.review_forecast.map(transformForecast),
+    activityHeatmap: raw.activity_heatmap?.map((d) => ({ date: d.date, count: d.count })),
   }
 }

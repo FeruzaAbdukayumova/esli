@@ -1,4 +1,3 @@
-import * as XLSX from 'xlsx'
 
 export interface ParsedRow {
   [columnName: string]: string
@@ -14,10 +13,12 @@ export interface ParseResult {
 /**
  * Parse an Excel (.xlsx/.xls) or CSV file into rows with column headers.
  */
-export function parseSpreadsheetFile(
+export async function parseSpreadsheetFile(
   file: File,
   sheetIndex = 0,
 ): Promise<ParseResult> {
+  // Loaded on demand: xlsx is ~400 kB and only needed for spreadsheet import.
+  const XLSX = await import('xlsx')
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
 

@@ -1,3 +1,5 @@
+/* eslint-disable react-refresh/only-export-components */
+import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Outlet } from 'react-router-dom'
 import { BottomNav } from '@/shared/ui/BottomNav'
 import { LoginPage } from '@/pages/auth/LoginPage'
@@ -13,13 +15,14 @@ import { ProfilePage } from '@/pages/profile/ProfilePage'
 import { PricingPage } from '@/pages/pricing/PricingPage'
 import { SubscriptionSuccessPage } from '@/pages/subscription/SubscriptionSuccessPage'
 import { SubscriptionCanceledPage } from '@/pages/subscription/SubscriptionCanceledPage'
-import { AdminLayout } from '@/layouts/AdminLayout'
-import { AdminDashboardPage } from '@/pages/admin/AdminDashboardPage'
-import { AdminUsersPage } from '@/pages/admin/AdminUsersPage'
-import { AdminDecksPage } from '@/pages/admin/AdminDecksPage'
-import { AdminPromoPage } from '@/pages/admin/AdminPromoPage'
-import { AdminSupportPage } from '@/pages/admin/AdminSupportPage'
-import { AdminAnalyticsPage } from '@/pages/admin/AdminAnalyticsPage'
+// Admin section is lazy-loaded: it pulls in recharts and is invisible to normal users.
+const AdminLayout = lazy(() => import('@/layouts/AdminLayout').then((m) => ({ default: m.AdminLayout })))
+const AdminDashboardPage = lazy(() => import('@/pages/admin/AdminDashboardPage').then((m) => ({ default: m.AdminDashboardPage })))
+const AdminUsersPage = lazy(() => import('@/pages/admin/AdminUsersPage').then((m) => ({ default: m.AdminUsersPage })))
+const AdminDecksPage = lazy(() => import('@/pages/admin/AdminDecksPage').then((m) => ({ default: m.AdminDecksPage })))
+const AdminPromoPage = lazy(() => import('@/pages/admin/AdminPromoPage').then((m) => ({ default: m.AdminPromoPage })))
+const AdminSupportPage = lazy(() => import('@/pages/admin/AdminSupportPage').then((m) => ({ default: m.AdminSupportPage })))
+const AdminAnalyticsPage = lazy(() => import('@/pages/admin/AdminAnalyticsPage').then((m) => ({ default: m.AdminAnalyticsPage })))
 import { OAuthCallbackPage } from '@/pages/auth/OAuthCallbackPage'
 import { ExtensionAuthDonePage } from '@/pages/auth/ExtensionAuthDonePage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
@@ -105,7 +108,17 @@ export const router = createBrowserRouter([
   },
   {
     path: '/admin',
-    element: <AdminLayout />,
+    element: (
+      <Suspense
+        fallback={
+          <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-surface-base">
+            <span className="inline-block w-8 h-8 border-[3px] border-primary-500 border-t-transparent rounded-full animate-spin" aria-hidden />
+          </div>
+        }
+      >
+        <AdminLayout />
+      </Suspense>
+    ),
     children: [
       {
         index: true,

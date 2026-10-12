@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts'
 
 interface SimpleBarChartProps {
@@ -6,11 +7,12 @@ interface SimpleBarChartProps {
   height?: number
 }
 
-export function SimpleBarChart({ data, color = '#6366f1', height = 300 }: SimpleBarChartProps) {
+export function SimpleBarChart({ data, color = '#7c3aed', height = 300 }: SimpleBarChartProps) {
+  const { t } = useTranslation()
   if (data.length === 0) {
     return (
       <div className="flex items-center justify-center h-[300px] text-slate-400 dark:text-slate-500 text-sm">
-        No data available
+        {t('admin.analytics.noData', 'No data available')}
       </div>
     )
   }

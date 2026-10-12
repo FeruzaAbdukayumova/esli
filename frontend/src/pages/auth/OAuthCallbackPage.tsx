@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
+import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { authApi } from '@/features/auth/api'
@@ -52,26 +52,28 @@ export const OAuthCallbackPage = () => {
       .catch(() => {
         setError(t('auth.oauthFailed'))
       })
+    // Intentionally run once: re-running would replay the one-shot OAuth code exchange.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-surface-base">
         <div className="text-center p-8">
           <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
-          <a
-            href="/login"
-            className="text-primary-600 dark:text-primary-400 hover:underline"
+          <Link
+            to="/login"
+            className="inline-flex items-center justify-center min-h-[44px] px-4 rounded-lg text-primary-600 dark:text-primary-400 hover:underline transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50 dark:focus-visible:ring-offset-surface-base"
           >
             {t('auth.backToLogin')}
-          </a>
+          </Link>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-surface-base">
       <div className="text-center">
         <svg
           className="animate-spin h-8 w-8 text-primary-600 mx-auto mb-4"

@@ -1,4 +1,4 @@
-import { useState, FormEvent, useCallback, useRef, useEffect, type ReactNode, type KeyboardEvent } from 'react'
+import { useState, FormEvent, useCallback, useRef, useEffect, lazy, Suspense, type ReactNode, type KeyboardEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -40,11 +40,21 @@ import { useSyncImport } from '@/features/sync/hooks'
 import { guestStorage } from '@/shared/lib/guestStorage'
 import type { Card } from '@/features/decks/types'
 import { Button } from '@/shared/ui/Button'
+import { Modal } from '@/shared/ui/Modal'
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog'
+import { Skeleton } from '@/shared/ui/Skeleton'
 import { DashboardNavbar } from '@/pages/dashboard/components/DashboardNavbar'
 import { FileImportTab } from './components/FileImportTab'
 import { AIGenerateTab } from './components/AIGenerateTab'
 import { BulkAIEditModal } from './components/BulkAIEditModal'
-import { RichTextEditor } from '@/shared/ui/RichTextEditor'
+// TipTap + KaTeX are heavy; load the editor only when the deck editor renders.
+const RichTextEditor = lazy(() =>
+  import('@/shared/ui/RichTextEditor').then((m) => ({ default: m.RichTextEditor })),
+)
+
+function EditorFallback() {
+  return <Skeleton className="h-[120px] w-full rounded-lg" />
+}
 import { RichTextDisplay } from '@/shared/ui/RichTextDisplay'
 import { stripHtml, plainTextToHtml } from '@/shared/lib/htmlUtils'
 import { usePageMeta } from '@/shared/lib/usePageMeta'
@@ -52,7 +62,7 @@ import { trackEvent } from '@/shared/lib/analytics'
 
 const MAX_RICH_TEXT_CHARS = 5000
 
-function formatRelative(dateStr: string, t: (key: string, opts?: Record<string, unknown>) => string): string {
+function formatRelative(dateStr: string, t: (key: string, opts?: Record<string, unknown>) => string, locale: string): string {
   const date = new Date(dateStr)
   const now = new Date()
   const diffMs = now.getTime() - date.getTime()
@@ -61,7 +71,7 @@ function formatRelative(dateStr: string, t: (key: string, opts?: Record<string, 
   if (diffDays === 1) return t('deck.yesterday')
   if (diffDays < 7) return t('deck.daysAgo', { count: diffDays })
   if (diffDays < 30) return t('deck.weeksAgo', { count: Math.floor(diffDays / 7) })
-  return new Date(dateStr).toLocaleDateString(undefined, {
+  return new Date(dateStr).toLocaleDateString(locale, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -78,7 +88,7 @@ interface FlashcardItemProps {
 }
 
 function FlashcardItem({ card, isSelected, onToggleSelect, onEdit, onDelete, isDeleting }: FlashcardItemProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl shadow-elevation-sm border border-slate-200 dark:border-slate-700 hover:shadow-glow-sm hover:border-primary-300 dark:hover:border-primary-600 transition-[box-shadow,border-color] duration-200 p-6 flex justify-between items-start">
       <div className="flex-1 min-w-0 flex flex-col">
@@ -118,10 +128,10 @@ function FlashcardItem({ card, isSelected, onToggleSelect, onEdit, onDelete, isD
             <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400 mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
               <span className="flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5" aria-hidden />
-                {t('deck.created')} {new Date(card.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                {t('deck.created')} {new Date(card.createdAt).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric', year: 'numeric' })}
               </span>
               {card.lastReviewedAt && (
-                <span>{t('deck.lastReviewed')} {formatRelative(card.lastReviewedAt, t)}</span>
+                <span>{t('deck.lastReviewed')} {formatRelative(card.lastReviewedAt, t, i18n.language)}</span>
               )}
             </div>
           </div>
@@ -134,7 +144,7 @@ function FlashcardItem({ card, isSelected, onToggleSelect, onEdit, onDelete, isD
             e.stopPropagation()
             onEdit()
           }}
-          className="p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           title={t('deck.editCard')}
           aria-label={t('deck.editCard')}
         >
@@ -147,7 +157,7 @@ function FlashcardItem({ card, isSelected, onToggleSelect, onEdit, onDelete, isD
             onDelete()
           }}
           disabled={isDeleting}
-          className="p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-60"
+          className="p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-60"
           title={t('deck.deleteCard')}
           aria-label={t('deck.deleteCard')}
         >
@@ -163,7 +173,7 @@ function FlashcardItem({ card, isSelected, onToggleSelect, onEdit, onDelete, isD
 }
 
 export const DeckPage = () => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { deckId } = useParams<{ deckId: string }>()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -171,7 +181,7 @@ export const DeckPage = () => {
   const { logout } = useAuth()
   const { mode } = useDeckRepo()
   const syncImportMutation = useSyncImport()
-  const { data: deck, isLoading: deckLoading } = useDeck(deckId || '')
+  const { data: deck, isLoading: deckLoading, error: deckError, refetch: refetchDeck } = useDeck(deckId || '')
   const { data: cards = [], isLoading: cardsLoading } = useCards(deckId || '')
   usePageMeta({ title: deck?.title || t('seo.decks.title', 'My Decks'), noIndex: true })
   const addCardMutation = useAddCard()
@@ -203,6 +213,12 @@ export const DeckPage = () => {
   const [errorDismissing, setErrorDismissing] = useState(false)
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+
+  // Confirm dialog state (replaces native confirm())
+  const [cardToDelete, setCardToDelete] = useState<string | null>(null)
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false)
+  const [bulkDeleteProgress, setBulkDeleteProgress] = useState<{ done: number; total: number } | null>(null)
+  const [showDeleteDeckConfirm, setShowDeleteDeckConfirm] = useState(false)
 
   // Bulk AI edit modal state
   const [showBulkAIEdit, setShowBulkAIEdit] = useState(false)
@@ -266,7 +282,7 @@ export const DeckPage = () => {
   }
 
   const deckPageShell = (children: ReactNode) => (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-[#0F0F11] grain relative overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-surface-base grain relative overflow-x-hidden">
       <div
         className="fixed inset-0 opacity-[0.03] dark:opacity-[0.06] pointer-events-none z-0"
         style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)', backgroundSize: '24px 24px' }}
@@ -296,8 +312,45 @@ export const DeckPage = () => {
 
   if (deckLoading) {
     return deckPageShell(
-      <main className="relative z-10 flex-1 flex items-center justify-center px-4 py-8">
-        <p className="text-slate-600 dark:text-slate-400">{t('deck.loadingDeck')}</p>
+      <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-6 md:py-8" aria-busy="true">
+        <span className="sr-only">{t('deck.loadingDeck')}</span>
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-md border border-slate-100 dark:border-slate-700/50 p-4 sm:p-6 md:p-8">
+          {/* Breadcrumb skeleton */}
+          <Skeleton className="h-4 w-48 mb-6" />
+          {/* Deck header skeleton */}
+          <div className="pb-6 mb-8 border-b border-slate-200 dark:border-slate-700">
+            <Skeleton className="h-8 md:h-9 w-2/3 max-w-sm mb-4" />
+            <div className="flex gap-2 mb-4">
+              <Skeleton className="h-7 w-16 rounded-full" />
+              <Skeleton className="h-7 w-20 rounded-full" />
+            </div>
+            <div className="flex flex-wrap gap-6">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-4 w-36" />
+            </div>
+          </div>
+          {/* Cards list skeleton */}
+          <div className="flex flex-col gap-4">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-40 rounded-xl" />
+            ))}
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  if (deckError) {
+    return deckPageShell(
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 gap-4 py-8">
+        <XCircle className="w-10 h-10 text-red-500 dark:text-red-400" aria-hidden />
+        <p className="text-slate-600 dark:text-slate-400 text-center max-w-sm">
+          {t('deck.loadError', 'Something went wrong while loading this deck.')}
+        </p>
+        <div className="flex gap-3">
+          <Button variant="secondary" onClick={() => refetchDeck()}>{t('deck.tryAgain', 'Try again')}</Button>
+          <Button onClick={() => navigate('/dashboard')}>{t('deck.backToDashboard')}</Button>
+        </div>
       </main>
     )
   }
@@ -385,9 +438,9 @@ export const DeckPage = () => {
     setAddedCount(0)
   }
 
-  const handleDeleteCard = async (cardId: string) => {
-    if (!confirm(t('deck.confirmDeleteCard'))) return
-
+  const confirmDeleteCard = async () => {
+    if (!cardToDelete) return
+    const cardId = cardToDelete
     try {
       await deleteCardMutation.mutateAsync({ deckId, cardId })
       setSelectedIds((prev) => {
@@ -398,47 +451,84 @@ export const DeckPage = () => {
       toast.success(t('toast.cardDeleted'))
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t('toast.failedToDeleteCard'))
+    } finally {
+      setCardToDelete(null)
     }
   }
 
-  const handleBulkDelete = async () => {
-    if (selectedIds.size === 0) return
-    if (!confirm(t('deck.confirmDeleteCards', { count: selectedIds.size }))) return
+  const confirmBulkDelete = async () => {
+    const ids = Array.from(selectedIds)
+    const total = ids.length
+    if (total === 0) return
 
-    const count = selectedIds.size
+    let done = 0
+    setBulkDeleteProgress({ done: 0, total })
     try {
-      for (const cardId of selectedIds) {
+      // No batch delete in DeckRepository — delete sequentially with progress,
+      // aborting on the first failure so the user knows exactly what succeeded.
+      for (const cardId of ids) {
         await deleteCardMutation.mutateAsync({ deckId, cardId })
+        done++
+        setBulkDeleteProgress({ done, total })
+        setSelectedIds((prev) => {
+          const next = new Set(prev)
+          next.delete(cardId)
+          return next
+        })
       }
-      setSelectedIds(new Set())
-      toast.success(t('toast.cardsDeleted', { count }))
+      toast.success(t('toast.cardsDeleted', { count: total }))
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('toast.failedToDeleteCards'))
+      toast.error(
+        done > 0
+          ? t('deck.bulkDeletePartial', 'Deleted {{done}} of {{total}} cards before an error occurred.', { done, total })
+          : error instanceof Error ? error.message : t('toast.failedToDeleteCards'),
+      )
+    } finally {
+      setBulkDeleteProgress(null)
+      setShowBulkDeleteConfirm(false)
     }
   }
 
   const handleApplyBulkEdits = async (
     edits: { cardId: string; patch: { frontText: string; backText: string } }[],
   ) => {
-    for (const edit of edits) {
-      await updateCardMutation.mutateAsync({
-        deckId,
-        cardId: edit.cardId,
-        patch: edit.patch,
-      })
+    const total = edits.length
+    const toastId = 'bulk-edit-progress'
+    let done = 0
+    try {
+      for (const edit of edits) {
+        toast.loading(
+          t('deck.applyingEditsProgress', 'Applying edits {{done}}/{{total}}…', { done: done + 1, total }),
+          { id: toastId },
+        )
+        await updateCardMutation.mutateAsync({
+          deckId,
+          cardId: edit.cardId,
+          patch: edit.patch,
+        })
+        done++
+      }
+      toast.dismiss(toastId)
+      setSelectedIds(new Set())
+      toast.success(t('ai.bulkEditDone', { count: total }))
+    } catch (error) {
+      toast.dismiss(toastId)
+      if (done > 0) {
+        toast.error(t('deck.bulkEditPartial', 'Updated {{done}} of {{total}} cards before an error occurred.', { done, total }))
+      }
+      // Re-throw so BulkAIEditModal can surface its error state
+      throw error
     }
-    setSelectedIds(new Set())
-    toast.success(t('ai.bulkEditDone', { count: edits.length }))
   }
 
-  const handleDeleteDeck = async () => {
-    if (!window.confirm(t('deck.deleteDeckConfirm') + ' ' + t('deck.deleteDeckWarning'))) return
+  const confirmDeleteDeck = async () => {
     setDeleteError(null)
     try {
       await deleteDeckMutation.mutateAsync(deckId)
       navigate('/dashboard')
     } catch (error) {
       console.error('Failed to delete deck:', error)
+      setShowDeleteDeckConfirm(false)
       setDeleteError(error instanceof Error ? error.message : 'Failed to delete deck')
     }
   }
@@ -506,11 +596,11 @@ export const DeckPage = () => {
         <nav className="mb-4 md:mb-6" aria-label="Breadcrumb">
           <ol className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
             <li>
-              <Link to="/" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{t('common.home')}</Link>
+              <Link to="/" className="rounded hover:text-primary-600 dark:hover:text-primary-400 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">{t('common.home')}</Link>
             </li>
             <li><ChevronRight className="w-4 h-4 shrink-0 text-slate-400 dark:text-slate-500" aria-hidden /></li>
             <li>
-              <Link to="/dashboard" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{t('deck.yourDecks')}</Link>
+              <Link to="/dashboard" className="rounded hover:text-primary-600 dark:hover:text-primary-400 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">{t('deck.yourDecks')}</Link>
             </li>
             <li><ChevronRight className="w-4 h-4 shrink-0 text-slate-400 dark:text-slate-500" aria-hidden /></li>
             <li className="font-medium text-slate-800 dark:text-slate-100" aria-current="page">
@@ -532,7 +622,7 @@ export const DeckPage = () => {
             <button
               type="button"
               onClick={dismissError}
-              className="shrink-0 p-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="shrink-0 p-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
               aria-label={t('auth.dismissError')}
             >
               <X className="w-5 h-5" aria-hidden />
@@ -540,8 +630,8 @@ export const DeckPage = () => {
           </div>
         )}
 
-        {/* Deck header card */}
-        <div className="bg-white dark:bg-slate-700/50 rounded-xl shadow-elevation-sm border border-slate-200 dark:border-slate-600 p-6 mb-8">
+        {/* Deck header — sits directly on the page card, separated by a subtle border */}
+        <div className="pb-6 mb-8 border-b border-slate-200 dark:border-slate-700">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="min-w-0 flex-1">
               <h1 className="text-2xl md:text-3xl font-display font-bold text-slate-800 dark:text-slate-100 mb-3 truncate tracking-tight">
@@ -566,18 +656,18 @@ export const DeckPage = () => {
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Calendar className="w-4 h-4 text-slate-400 dark:text-slate-500" aria-hidden />
-                  {t('deck.created')} {new Date(deck.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                  {t('deck.created')} {new Date(deck.createdAt).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric', year: 'numeric' })}
                 </span>
                 {deck.lastStudiedAt && (
                   <span className="flex items-center gap-1.5">
                     <Clock className="w-4 h-4 text-slate-400 dark:text-slate-500" aria-hidden />
-                    {t('deck.lastStudied')} {new Date(deck.lastStudiedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                    {t('deck.lastStudied')} {new Date(deck.lastStudiedAt).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric', year: 'numeric' })}
                   </span>
                 )}
               </div>
 
               {/* Share toggle */}
-              <div className="flex items-center gap-3 mt-4 pt-4 border-t border-slate-200 dark:border-slate-600">
+              <div className="flex items-center gap-3 mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
                 <button
                   type="button"
                   onClick={() => {
@@ -587,10 +677,10 @@ export const DeckPage = () => {
                     })
                   }}
                   disabled={updateDeckMutation.isPending}
-                  className={`relative inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-slate-800 ${
+                  className={`relative inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800 ${
                     deck.isShared
-                      ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 focus:ring-emerald-500'
-                      : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 focus:ring-slate-500'
+                      ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 focus-visible:ring-emerald-500'
+                      : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 focus-visible:ring-slate-500'
                   } disabled:opacity-60`}
                 >
                   {updateDeckMutation.isPending ? (
@@ -608,10 +698,10 @@ export const DeckPage = () => {
                     : t('deck.privateDescription')
                   }
                 </span>
-                {deck.isShared && (deck as any).copyCount > 0 && (
+                {deck.isShared && (deck.copyCount ?? 0) > 0 && (
                   <span className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 ml-auto">
                     <Copy className="w-3.5 h-3.5" />
-                    {(deck as any).copyCount} {(deck as any).copyCount === 1 ? t('deck.copy') : t('deck.copies')}
+                    {deck.copyCount} {deck.copyCount === 1 ? t('deck.copy') : t('deck.copies')}
                   </span>
                 )}
               </div>
@@ -621,7 +711,6 @@ export const DeckPage = () => {
                 onClick={() => navigate(`/study/${deckId}`)}
                 disabled={cards.length === 0}
                 title={cards.length === 0 ? t('deck.addAtLeastOneCard') : t('deck.startStudy')}
-                className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <Play className="w-4 h-4" aria-hidden />
                 {t('deck.startStudy')}
@@ -629,7 +718,7 @@ export const DeckPage = () => {
               <button
                 type="button"
                 onClick={openEditDeckModal}
-                className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                 title={t('deck.editDeck')}
                 aria-label={t('deck.editDeck')}
               >
@@ -637,9 +726,9 @@ export const DeckPage = () => {
               </button>
               <button
                 type="button"
-                onClick={handleDeleteDeck}
+                onClick={() => setShowDeleteDeckConfirm(true)}
                 disabled={deleteDeckMutation.isPending}
-                className="p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-60"
+                className="p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-60"
                 title={t('deck.deleteDeck')}
                 aria-label={t('deck.deleteDeck')}
               >
@@ -656,17 +745,15 @@ export const DeckPage = () => {
         {/* Add New Card button */}
         {!showAddCard && (
           <div className="mb-6">
-            <button
-              type="button"
+            <Button
               onClick={() => {
                 setShowAddCard(true)
                 setAddedCount(0)
               }}
-              className="inline-flex items-center justify-center min-h-[44px] px-4 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 gap-2"
             >
               <Plus className="w-5 h-5" aria-hidden />
               {t('deck.addCards')}
-            </button>
+            </Button>
           </div>
         )}
 
@@ -694,63 +781,38 @@ export const DeckPage = () => {
             </div>
 
             {/* Mode Tabs */}
-            <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg mb-4 w-fit">
-              <button
-                type="button"
-                onClick={() => setAddMode('single')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                  addMode === 'single'
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                }`}
-              >
-                <span className="flex items-center gap-2">
-                  <Plus className="w-4 h-4" />
-                  {t('deck.tabs.singleCard')}
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setAddMode('bulk')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                  addMode === 'bulk'
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                }`}
-              >
-                <span className="flex items-center gap-2">
-                  <Upload className="w-4 h-4" />
-                  {t('deck.tabs.bulkImport')}
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setAddMode('file')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                  addMode === 'file'
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                }`}
-              >
-                <span className="flex items-center gap-2">
-                  <FileSpreadsheet className="w-4 h-4" />
-                  {t('deck.tabs.fileImport')}
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setAddMode('ai')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                  addMode === 'ai'
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                }`}
-              >
-                <span className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" />
-                  {t('deck.tabs.aiGenerate')}
-                </span>
-              </button>
+            <div
+              role="tablist"
+              aria-label={t('deck.addCards')}
+              className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg mb-4 max-w-full w-fit overflow-x-auto scrollbar-hide"
+            >
+              {[
+                { mode: 'single' as const, icon: Plus, label: t('deck.tabs.singleCard') },
+                { mode: 'bulk' as const, icon: Upload, label: t('deck.tabs.bulkImport') },
+                { mode: 'file' as const, icon: FileSpreadsheet, label: t('deck.tabs.fileImport') },
+                { mode: 'ai' as const, icon: Sparkles, label: t('deck.tabs.aiGenerate') },
+              ].map((tab) => {
+                const TabIcon = tab.icon
+                return (
+                  <button
+                    key={tab.mode}
+                    type="button"
+                    role="tab"
+                    aria-selected={addMode === tab.mode}
+                    onClick={() => setAddMode(tab.mode)}
+                    className={`shrink-0 min-h-[44px] px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
+                      addMode === tab.mode
+                        ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <TabIcon className="w-4 h-4" aria-hidden />
+                      {tab.label}
+                    </span>
+                  </button>
+                )
+              })}
             </div>
 
             {addMode === 'ai' ? (
@@ -790,12 +852,12 @@ export const DeckPage = () => {
                       <Lightbulb className="w-4 h-4 text-amber-500" aria-hidden />
                       {t('deck.front')}
                     </label>
-                    <RichTextEditor
+                    <Suspense fallback={<EditorFallback />}><RichTextEditor
                       content={frontText}
                       onChange={setFrontText}
                       placeholder={t('deck.frontPlaceholder')}
                       maxLength={MAX_RICH_TEXT_CHARS}
-                    />
+                    /></Suspense>
                   </div>
                   {/* Back */}
                   <div>
@@ -803,12 +865,12 @@ export const DeckPage = () => {
                       <Check className="w-4 h-4 text-green-600 dark:text-green-400" aria-hidden />
                       {t('deck.back')}
                     </label>
-                    <RichTextEditor
+                    <Suspense fallback={<EditorFallback />}><RichTextEditor
                       content={backText}
                       onChange={setBackText}
                       placeholder={t('deck.backPlaceholder')}
                       maxLength={MAX_RICH_TEXT_CHARS}
-                    />
+                    /></Suspense>
                   </div>
                 </div>
                 <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-600">
@@ -816,31 +878,23 @@ export const DeckPage = () => {
                     {t('deck.pressCtrlEnterToAdd')}
                   </p>
                   <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={closeAddCardForm}
-                      disabled={addCardMutation.isPending}
-                      className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 disabled:opacity-60"
-                    >
+                    <Button variant="secondary" onClick={closeAddCardForm} disabled={addCardMutation.isPending}>
                       {t('common.done')}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="submit"
-                      disabled={addCardMutation.isPending || (!stripHtml(frontText).trim() && !stripHtml(backText).trim())}
-                      className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 disabled:opacity-60 disabled:cursor-not-allowed"
+                      loading={addCardMutation.isPending}
+                      disabled={!stripHtml(frontText).trim() && !stripHtml(backText).trim()}
                     >
                       {addCardMutation.isPending ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
-                          {t('deck.adding')}
-                        </>
+                        t('deck.adding')
                       ) : (
                         <>
                           <Plus className="w-4 h-4" aria-hidden />
                           {t('deck.addAndContinue')}
                         </>
                       )}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </form>
@@ -859,7 +913,7 @@ export const DeckPage = () => {
                     onChange={(e) => setBulkText(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder={t('deck.bulkImportPlaceholder')}
-                    disabled={addCardMutation.isPending}
+                    disabled={addCardsBatchMutation.isPending}
                     rows={8}
                     className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-60 disabled:cursor-not-allowed transition-shadow resize-none font-mono text-sm"
                   />
@@ -872,32 +926,23 @@ export const DeckPage = () => {
                     {bulkText.trim().split('\n').filter((l) => l.trim()).length} {t('deck.cardsReadyToImport')}
                   </p>
                   <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={closeAddCardForm}
-                      disabled={addCardMutation.isPending}
-                      className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 disabled:opacity-60"
-                    >
+                    <Button variant="secondary" onClick={closeAddCardForm} disabled={addCardsBatchMutation.isPending}>
                       {t('common.cancel')}
-                    </button>
-                    <button
-                      type="button"
+                    </Button>
+                    <Button
                       onClick={handleBulkImport}
-                      disabled={addCardMutation.isPending || !bulkText.trim()}
-                      className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 disabled:opacity-60 disabled:cursor-not-allowed"
+                      loading={addCardsBatchMutation.isPending}
+                      disabled={!bulkText.trim()}
                     >
-                      {addCardMutation.isPending ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
-                          {t('deck.importing')}
-                        </>
+                      {addCardsBatchMutation.isPending ? (
+                        t('deck.importing')
                       ) : (
                         <>
                           <Upload className="w-4 h-4" aria-hidden />
                           {t('deck.importAll')}
                         </>
                       )}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -928,7 +973,7 @@ export const DeckPage = () => {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto">
               {[
                 { mode: 'single' as const, icon: Plus, label: t('deck.tabs.singleCard'), desc: t('dashboard.createEmptyDesc'), color: 'text-primary-600 dark:text-primary-400', bg: 'bg-primary-50 dark:bg-primary-900/20', border: 'border-primary-200 dark:border-primary-800 hover:border-primary-400 dark:hover:border-primary-600' },
-                { mode: 'ai' as const, icon: Sparkles, label: t('deck.tabs.aiGenerate'), desc: t('dashboard.generateWithAIDesc'), color: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-50 dark:bg-violet-900/20', border: 'border-violet-200 dark:border-violet-800 hover:border-violet-400 dark:hover:border-violet-600' },
+                { mode: 'ai' as const, icon: Sparkles, label: t('deck.tabs.aiGenerate'), desc: t('dashboard.generateWithAIDesc'), color: 'text-primary-600 dark:text-primary-400', bg: 'bg-primary-50 dark:bg-primary-900/20', border: 'border-primary-200 dark:border-primary-800 hover:border-primary-400 dark:hover:border-primary-600' },
                 { mode: 'file' as const, icon: FileSpreadsheet, label: t('deck.tabs.fileImport'), desc: t('dashboard.importFileDesc'), color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-900/20', border: 'border-emerald-200 dark:border-emerald-800 hover:border-emerald-400 dark:hover:border-emerald-600' },
                 { mode: 'bulk' as const, icon: Upload, label: t('deck.tabs.bulkImport'), desc: t('dashboard.bulkImportDesc'), color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/20', border: 'border-amber-200 dark:border-amber-800 hover:border-amber-400 dark:hover:border-amber-600' },
               ].map((m) => {
@@ -942,7 +987,7 @@ export const DeckPage = () => {
                       setShowAddCard(true)
                       setAddedCount(0)
                     }}
-                    className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 ${m.border} ${m.bg} transition-[color,background-color,border-color,box-shadow] duration-200 hover:shadow-elevation-md focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                    className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 ${m.border} ${m.bg} transition-[color,background-color,border-color,box-shadow] duration-200 hover:shadow-elevation-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500`}
                   >
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${m.color}`}>
                       <Icon className="w-6 h-6" />
@@ -968,7 +1013,7 @@ export const DeckPage = () => {
                   <button
                     type="button"
                     onClick={() => setViewMode('list')}
-                    className={`min-w-[44px] min-h-[44px] flex items-center justify-center p-2 transition-colors duration-200 ${viewMode === 'list' ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-600'}`}
+                    className={`min-w-[44px] min-h-[44px] flex items-center justify-center p-2 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500 ${viewMode === 'list' ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-600'}`}
                     title={t('dashboard.listView')}
                     aria-pressed={viewMode === 'list'}
                   >
@@ -977,7 +1022,7 @@ export const DeckPage = () => {
                   <button
                     type="button"
                     onClick={() => setViewMode('grid')}
-                    className={`min-w-[44px] min-h-[44px] flex items-center justify-center p-2 border-l border-slate-300 dark:border-slate-600 transition-colors duration-200 ${viewMode === 'grid' ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-600'}`}
+                    className={`min-w-[44px] min-h-[44px] flex items-center justify-center p-2 border-l border-slate-300 dark:border-slate-600 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500 ${viewMode === 'grid' ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-600'}`}
                     title={t('dashboard.gridView')}
                     aria-pressed={viewMode === 'grid'}
                   >
@@ -988,7 +1033,7 @@ export const DeckPage = () => {
               <button
                 type="button"
                 onClick={selectAll}
-                className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
+                className="text-sm font-medium rounded text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
               >
                 {selectedIds.size === cards.length ? t('deck.deselectAll') : t('deck.selectAll')}
               </button>
@@ -1008,7 +1053,7 @@ export const DeckPage = () => {
                   isSelected={selectedIds.has(card.id)}
                   onToggleSelect={() => toggleSelect(card.id)}
                   onEdit={() => openEditCardModal(card)}
-                  onDelete={() => handleDeleteCard(card.id)}
+                  onDelete={() => setCardToDelete(card.id)}
                   isDeleting={deleteCardMutation.isPending && deleteCardMutation.variables?.cardId === card.id}
                 />
               ))}
@@ -1033,30 +1078,21 @@ export const DeckPage = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={clearSelection}
-                    className="px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                  >
+                  <Button variant="ghost" onClick={clearSelection}>
                     {t('common.cancel')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowBulkAIEdit(true)}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 transition-colors"
-                  >
+                  </Button>
+                  <Button onClick={() => setShowBulkAIEdit(true)}>
                     <Sparkles className="w-4 h-4" aria-hidden />
                     {t('ai.bulkEdit')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleBulkDelete}
+                  </Button>
+                  <Button
+                    variant="danger"
+                    onClick={() => setShowBulkDeleteConfirm(true)}
                     disabled={deleteCardMutation.isPending}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-500 transition-colors disabled:opacity-60"
                   >
                     <Trash2 className="w-4 h-4" aria-hidden />
                     {t('common.delete')}
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -1065,177 +1101,106 @@ export const DeckPage = () => {
         )}
 
         {/* Edit Deck Modal */}
-        {showEditDeckModal && createPortal(
-          <div
-            className="fixed inset-0 z-[1000] flex items-center justify-center min-h-screen p-4 bg-black/50 dark:bg-black/60 backdrop-blur-sm"
-            onClick={() => setShowEditDeckModal(false)}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="edit-deck-title"
-          >
-            <div
-              className="bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-md border border-slate-100 dark:border-slate-700/50 max-w-md w-full p-6 animate-slide-up"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-start justify-between gap-4 mb-6">
-                <h2 id="edit-deck-title" className="text-xl font-bold text-slate-800 dark:text-slate-100">
-                  {t('deck.editDeckModal')}
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => setShowEditDeckModal(false)}
-                  className="p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                  aria-label={t('common.close')}
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="edit-deck-title-input" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                    {t('deck.title')}
-                  </label>
-                  <input
-                    id="edit-deck-title-input"
-                    type="text"
-                    value={editDeckTitle}
-                    onChange={(e) => setEditDeckTitle(e.target.value)}
-                    maxLength={255}
-                    className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                    placeholder={t('deck.deckTitlePlaceholder')}
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="edit-deck-tags-input" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                    {t('deck.tagsLabel')}
-                  </label>
-                  <input
-                    id="edit-deck-tags-input"
-                    type="text"
-                    value={editDeckTags}
-                    onChange={(e) => setEditDeckTags(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                    placeholder={t('deck.tagsPlaceholder')}
-                  />
-                </div>
-
-                <div className="flex justify-end gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowEditDeckModal(false)}
-                    className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                  >
-                    {t('common.cancel')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSaveDeck}
-                    disabled={updateDeckMutation.isPending || !editDeckTitle.trim()}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:opacity-60 transition-colors"
-                  >
-                    {updateDeckMutation.isPending ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        {t('deck.saving')}
-                      </>
-                    ) : (
-                      t('deck.saveChanges')
-                    )}
-                  </button>
-                </div>
-              </div>
+        <Modal
+          isOpen={showEditDeckModal}
+          onClose={() => setShowEditDeckModal(false)}
+          title={t('deck.editDeckModal')}
+          size="sm"
+          locked={updateDeckMutation.isPending}
+        >
+          <div className="space-y-4 mt-4">
+            <div>
+              <label htmlFor="edit-deck-title-input" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                {t('deck.title')}
+              </label>
+              <input
+                id="edit-deck-title-input"
+                type="text"
+                value={editDeckTitle}
+                onChange={(e) => setEditDeckTitle(e.target.value)}
+                maxLength={255}
+                data-autofocus
+                className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                placeholder={t('deck.deckTitlePlaceholder')}
+              />
             </div>
-          </div>,
-          document.body,
-        )}
+
+            <div>
+              <label htmlFor="edit-deck-tags-input" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                {t('deck.tagsLabel')}
+              </label>
+              <input
+                id="edit-deck-tags-input"
+                type="text"
+                value={editDeckTags}
+                onChange={(e) => setEditDeckTags(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                placeholder={t('deck.tagsPlaceholder')}
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="secondary" onClick={() => setShowEditDeckModal(false)} disabled={updateDeckMutation.isPending}>
+                {t('common.cancel')}
+              </Button>
+              <Button
+                onClick={handleSaveDeck}
+                loading={updateDeckMutation.isPending}
+                disabled={!editDeckTitle.trim()}
+              >
+                {updateDeckMutation.isPending ? t('deck.saving') : t('deck.saveChanges')}
+              </Button>
+            </div>
+          </div>
+        </Modal>
 
         {/* Edit Card Modal */}
-        {editingCard && createPortal(
-          <div
-            className="fixed inset-0 z-[1000] flex items-center justify-center min-h-screen p-4 bg-black/50 dark:bg-black/60 backdrop-blur-sm"
-            onClick={() => setEditingCard(null)}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="edit-card-title"
-          >
-            <div
-              className="bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-md border border-slate-100 dark:border-slate-700/50 max-w-2xl w-full p-6 animate-slide-up max-h-[90vh] overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-start justify-between gap-4 mb-6">
-                <h2 id="edit-card-title" className="text-xl font-bold text-slate-800 dark:text-slate-100">
-                  {t('deck.editCardModal')}
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => setEditingCard(null)}
-                  className="p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                  aria-label={t('common.close')}
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                    <Lightbulb className="w-4 h-4 text-amber-500" />
-                    {t('deck.front')}
-                  </label>
-                  <RichTextEditor
-                    content={editCardFront}
-                    onChange={setEditCardFront}
-                    placeholder={t('deck.enterFront')}
-                    maxLength={MAX_RICH_TEXT_CHARS}
-                    compact
-                  />
-                </div>
-
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                    <Check className="w-4 h-4 text-green-600" />
-                    {t('deck.back')}
-                  </label>
-                  <RichTextEditor
-                    content={editCardBack}
-                    onChange={setEditCardBack}
-                    placeholder={t('deck.enterBack')}
-                    maxLength={MAX_RICH_TEXT_CHARS}
-                    compact
-                  />
-                </div>
-
-                <div className="flex justify-end gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setEditingCard(null)}
-                    className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                  >
-                    {t('common.cancel')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSaveCard}
-                    disabled={updateCardMutation.isPending}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:opacity-60 transition-colors"
-                  >
-                    {updateCardMutation.isPending ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        {t('deck.saving')}
-                      </>
-                    ) : (
-                      t('deck.saveChanges')
-                    )}
-                  </button>
-                </div>
-              </div>
+        <Modal
+          isOpen={!!editingCard}
+          onClose={() => setEditingCard(null)}
+          title={t('deck.editCardModal')}
+          size="lg"
+          locked={updateCardMutation.isPending}
+        >
+          <div className="space-y-4 mt-4">
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                <Lightbulb className="w-4 h-4 text-amber-500" />
+                {t('deck.front')}
+              </label>
+              <Suspense fallback={<EditorFallback />}><RichTextEditor
+                content={editCardFront}
+                onChange={setEditCardFront}
+                placeholder={t('deck.enterFront')}
+                maxLength={MAX_RICH_TEXT_CHARS}
+                compact
+              /></Suspense>
             </div>
-          </div>,
-          document.body,
-        )}
+
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                <Check className="w-4 h-4 text-green-600" />
+                {t('deck.back')}
+              </label>
+              <Suspense fallback={<EditorFallback />}><RichTextEditor
+                content={editCardBack}
+                onChange={setEditCardBack}
+                placeholder={t('deck.enterBack')}
+                maxLength={MAX_RICH_TEXT_CHARS}
+                compact
+              /></Suspense>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="secondary" onClick={() => setEditingCard(null)} disabled={updateCardMutation.isPending}>
+                {t('common.cancel')}
+              </Button>
+              <Button onClick={handleSaveCard} loading={updateCardMutation.isPending}>
+                {updateCardMutation.isPending ? t('deck.saving') : t('deck.saveChanges')}
+              </Button>
+            </div>
+          </div>
+        </Modal>
       </div>
 
       {/* Bulk AI Edit Modal */}
@@ -1244,6 +1209,49 @@ export const DeckPage = () => {
         onClose={() => setShowBulkAIEdit(false)}
         selectedCards={cards.filter((c) => selectedIds.has(c.id))}
         onApplyEdits={handleApplyBulkEdits}
+      />
+
+      {/* Delete card confirmation */}
+      <ConfirmDialog
+        isOpen={cardToDelete !== null}
+        title={t('deck.deleteCard')}
+        description={t('deck.confirmDeleteCard')}
+        confirmLabel={t('common.delete')}
+        danger
+        isPending={deleteCardMutation.isPending}
+        onClose={() => setCardToDelete(null)}
+        onConfirm={confirmDeleteCard}
+      />
+
+      {/* Bulk delete confirmation with progress */}
+      <ConfirmDialog
+        isOpen={showBulkDeleteConfirm}
+        title={t('deck.confirmDeleteCards', { count: bulkDeleteProgress?.total ?? selectedIds.size })}
+        description={
+          bulkDeleteProgress
+            ? t('deck.deletingProgress', 'Deleting {{done}}/{{total}}…', {
+                done: Math.min(bulkDeleteProgress.done + 1, bulkDeleteProgress.total),
+                total: bulkDeleteProgress.total,
+              })
+            : undefined
+        }
+        confirmLabel={t('common.delete')}
+        danger
+        isPending={bulkDeleteProgress !== null}
+        onClose={() => setShowBulkDeleteConfirm(false)}
+        onConfirm={confirmBulkDelete}
+      />
+
+      {/* Delete deck confirmation */}
+      <ConfirmDialog
+        isOpen={showDeleteDeckConfirm}
+        title={t('deck.deleteDeckConfirm')}
+        description={t('deck.deleteDeckWarning')}
+        confirmLabel={t('common.delete')}
+        danger
+        isPending={deleteDeckMutation.isPending}
+        onClose={() => setShowDeleteDeckConfirm(false)}
+        onConfirm={confirmDeleteDeck}
       />
     </main>
   )

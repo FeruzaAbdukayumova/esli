@@ -15,6 +15,8 @@ interface ApiDeck {
   title: string
   category_tags: string
   is_shared: boolean
+  card_count?: number
+  copy_count?: number
   created_at: string
   updated_at: string
 }
@@ -52,6 +54,8 @@ function apiDeckToDeck(api: ApiDeck): Deck {
     title: api.title,
     categoryTags,
     isShared: api.is_shared,
+    cardCount: api.card_count ?? 0,
+    copyCount: api.copy_count ?? 0,
     createdAt: api.created_at,
     updatedAt: api.updated_at,
   }

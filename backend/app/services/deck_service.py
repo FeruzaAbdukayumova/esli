@@ -41,6 +41,18 @@ async def list_decks_by_owner(db: AsyncSession, owner_id: uuid.UUID) -> list[Dec
     return list(result.scalars().all())
 
 
+async def list_decks_with_card_counts(db: AsyncSession, owner_id: uuid.UUID) -> list[tuple[Deck, int]]:
+    """Decks for an owner with their card counts in a single grouped query."""
+    result = await db.execute(
+        select(Deck, func.count(Card.id))
+        .outerjoin(Card, Card.deck_id == Deck.id)
+        .where(Deck.owner_id == owner_id)
+        .group_by(Deck.id)
+        .order_by(Deck.updated_at.desc())
+    )
+    return [(row[0], row[1]) for row in result.all()]
+
+
 async def get_deck_by_id_for_user(db: AsyncSession, deck_id: uuid.UUID, owner_id: uuid.UUID) -> Deck | None:
     result = await db.execute(
         select(Deck).where(Deck.id == deck_id, Deck.owner_id == owner_id)

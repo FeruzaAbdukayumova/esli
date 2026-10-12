@@ -1,62 +1,56 @@
-import { ButtonHTMLAttributes, ReactNode, CSSProperties } from 'react'
+import { ButtonHTMLAttributes, ReactNode, forwardRef } from 'react'
+import { cn } from '@/shared/lib/cn'
+import { Spinner } from './Spinner'
+
+type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
+type Size = 'sm' | 'md' | 'lg'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode
-  variant?: 'primary' | 'secondary'
+  variant?: Variant
+  size?: Size
+  loading?: boolean
+  fullWidth?: boolean
 }
 
-export const Button = ({ 
-  children, 
-  variant = 'primary', 
-  style,
-  ...props 
-}: ButtonProps) => {
-  const baseStyles: CSSProperties = {
-    padding: '8px 16px',
-    borderRadius: '4px',
-    fontWeight: 500,
-    border: 'none',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s',
-  }
+const base =
+  'inline-flex items-center justify-center gap-2 font-semibold rounded-lg select-none ' +
+  'transition-[background-color,color,border-color,opacity,transform] duration-200 ease-smooth ' +
+  'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 ' +
+  'dark:focus-visible:ring-primary-400 dark:focus-visible:ring-offset-slate-900 ' +
+  'active:scale-[0.98] disabled:opacity-60 disabled:pointer-events-none'
 
-  const variantStyles: Record<string, CSSProperties> = {
-    primary: {
-      backgroundColor: '#2563eb',
-      color: 'white',
-    },
-    secondary: {
-      backgroundColor: '#e5e7eb',
-      color: '#1f2937',
-    },
-  }
+const variants: Record<Variant, string> = {
+  primary:
+    'bg-primary-600 text-white hover:bg-primary-700 shadow-glow-sm',
+  secondary:
+    'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600',
+  ghost:
+    'bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100',
+  danger:
+    'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500',
+}
 
-  const combinedStyle: CSSProperties = {
-    ...baseStyles,
-    ...variantStyles[variant],
-    ...(props.disabled && {
-      opacity: 0.5,
-      cursor: 'not-allowed',
-    }),
-    ...style,
-  }
+const sizes: Record<Size, string> = {
+  sm: 'min-h-[36px] px-3 py-1.5 text-sm',
+  md: 'min-h-[44px] px-4 py-2 text-sm',
+  lg: 'min-h-[48px] px-6 py-2.5 text-base',
+}
 
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  { children, variant = 'primary', size = 'md', loading = false, fullWidth = false, className, disabled, ...props },
+  ref,
+) {
   return (
     <button
-      style={combinedStyle}
-      onMouseEnter={(e) => {
-        if (!props.disabled) {
-          e.currentTarget.style.backgroundColor = variant === 'primary' ? '#1d4ed8' : '#d1d5db'
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (!props.disabled) {
-          e.currentTarget.style.backgroundColor = variant === 'primary' ? '#2563eb' : '#e5e7eb'
-        }
-      }}
+      ref={ref}
+      type={props.type ?? 'button'}
+      disabled={disabled || loading}
+      className={cn(base, variants[variant], sizes[size], fullWidth && 'w-full', className)}
       {...props}
     >
+      {loading && <Spinner size="sm" className="text-current" />}
       {children}
     </button>
   )
-}
+})

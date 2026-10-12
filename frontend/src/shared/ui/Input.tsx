@@ -1,69 +1,55 @@
-import { InputHTMLAttributes, CSSProperties } from 'react'
+import { InputHTMLAttributes, ReactNode, forwardRef, useId } from 'react'
+import { cn } from '@/shared/lib/cn'
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  label?: string
-  error?: string
+  label?: ReactNode
+  error?: string | null
+  /** show the valid (green) border state */
+  valid?: boolean
+  hint?: ReactNode
 }
 
-export const Input = ({ 
-  label, 
-  error, 
-  style,
-  id,
-  ...props 
-}: InputProps) => {
-  const inputId = id || `input-${Math.random().toString(36).substring(2, 11)}`
+export const inputBase =
+  'w-full px-4 py-2.5 min-h-[44px] rounded-lg border bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:shadow-focus-primary dark:focus:shadow-focus-primary-dark disabled:opacity-60 disabled:cursor-not-allowed hover:border-slate-400 dark:hover:border-slate-500'
 
-  const containerStyle: CSSProperties = {
-    marginBottom: '16px',
-  }
+export const inputError = 'border-red-500 dark:border-red-400'
+export const inputValid = 'border-green-500 dark:border-green-400'
+export const inputDefault = 'border-slate-300 dark:border-slate-600'
 
-  const labelStyle: CSSProperties = {
-    display: 'block',
-    fontSize: '14px',
-    fontWeight: 500,
-    marginBottom: '4px',
-  }
-
-  const inputStyle: CSSProperties = {
-    width: '100%',
-    padding: '8px 12px',
-    border: `1px solid ${error ? '#ef4444' : '#d1d5db'}`,
-    borderRadius: '4px',
-    fontSize: '16px',
-    outline: 'none',
-    ...style,
-  }
-
-  const errorStyle: CSSProperties = {
-    marginTop: '4px',
-    fontSize: '14px',
-    color: '#ef4444',
-  }
+export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
+  { label, error, valid, hint, className, id, ...props },
+  ref,
+) {
+  const autoId = useId()
+  const inputId = id ?? autoId
+  const errorId = `${inputId}-error`
+  const hintId = `${inputId}-hint`
 
   return (
-    <div style={containerStyle}>
-      {label && (
-        <label htmlFor={inputId} style={labelStyle}>
+    <div>
+      {label != null && (
+        <label htmlFor={inputId} className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
           {label}
         </label>
       )}
       <input
+        ref={ref}
         id={inputId}
-        style={inputStyle}
-        onFocus={(e) => {
-          e.currentTarget.style.borderColor = '#3b82f6'
-          e.currentTarget.style.boxShadow = '0 0 0 2px rgba(59, 130, 246, 0.2)'
-        }}
-        onBlur={(e) => {
-          e.currentTarget.style.borderColor = error ? '#ef4444' : '#d1d5db'
-          e.currentTarget.style.boxShadow = 'none'
-        }}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={cn(error && errorId, hint != null && hintId) || undefined}
+        className={cn(inputBase, error ? inputError : valid ? inputValid : inputDefault, className)}
         {...props}
       />
       {error && (
-        <p style={errorStyle}>{error}</p>
+        <p id={errorId} role="alert" className="mt-1.5 text-sm text-red-600 dark:text-red-400">
+          {error}
+        </p>
+      )}
+      {!error && hint != null && (
+        <p id={hintId} className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
+          {hint}
+        </p>
       )}
     </div>
   )
-}
+})

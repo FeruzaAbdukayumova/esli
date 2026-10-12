@@ -22,6 +22,7 @@ class DeckResponse(BaseModel):
     category_tags: str
     is_shared: bool
     copy_count: int = 0
+    card_count: int = 0
     created_at: datetime
     updated_at: datetime
 
@@ -31,9 +32,9 @@ class DeckResponse(BaseModel):
 # --- Public Deck Schemas ---
 
 class PublicDeckOwner(BaseModel):
-    """Minimal owner info for public deck display."""
+    """Minimal owner info for public deck display. Never expose the email."""
     id: uuid.UUID
-    email: str
+    username: str | None = None
 
     model_config = {"from_attributes": True}
 

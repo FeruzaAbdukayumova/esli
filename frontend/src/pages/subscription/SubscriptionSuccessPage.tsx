@@ -15,8 +15,8 @@ export function SubscriptionSuccessPage() {
   }, [queryClient])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0F0F11] grain px-4">
-      <div className="max-w-md w-full text-center bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700/50 p-8">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-surface-base grain px-4">
+      <div className="max-w-md w-full text-center bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-md border border-slate-100 dark:border-slate-700/50 p-8">
         <CheckCircle className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
         <h1 className="text-2xl font-display font-bold text-slate-800 dark:text-slate-100 mb-2">
           {t('subscription.successTitle')}
@@ -26,7 +26,7 @@ export function SubscriptionSuccessPage() {
         </p>
         <Link
           to="/dashboard"
-          className="inline-block px-6 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors"
+          className="inline-block px-6 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800"
         >
           {t('subscription.goToDashboard')}
         </Link>

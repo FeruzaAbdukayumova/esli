@@ -1,4 +1,4 @@
-import { useState, FormEvent, useId } from 'react'
+import { useState, useEffect, FormEvent, useId } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
@@ -32,6 +32,26 @@ export const LoginPage = () => {
   const [oauthLoading, setOauthLoading] = useState<'google' | null>(null)
   const { login, isLoggingIn, loginError } = useAuth()
 
+  useEffect(() => {
+    if (loginError) console.error('Login error:', loginError)
+  }, [loginError])
+
+  const getLoginErrorMessage = (error: unknown): string => {
+    if (error instanceof Error) {
+      const status = (error as Error & { status?: number }).status
+      if (status === 401 || error.message === 'Invalid credentials') {
+        return t('auth.invalidCredentials', 'Incorrect email or password. Please check and try again.')
+      }
+    }
+    return t('auth.genericError', 'Something went wrong. Please try again.')
+  }
+
+  const emailId = useId()
+  const passwordId = useId()
+  const emailErrorId = useId()
+  const passwordErrorId = useId()
+  const formErrorId = useId()
+
   if (user) return <Navigate to="/dashboard" replace />
 
   const handleOAuth = async (provider: 'google') => {
@@ -64,11 +84,6 @@ export const LoginPage = () => {
     login({ email: email.trim(), password })
   }
 
-  const emailId = useId()
-  const passwordId = useId()
-  const emailErrorId = useId()
-  const passwordErrorId = useId()
-  const formErrorId = useId()
 
   return (
     <AuthPageLayout
@@ -103,21 +118,17 @@ export const LoginPage = () => {
       </div>
 
       <div id={formErrorId} role="alert" aria-live="assertive" aria-atomic="true" className="sr-only">
-        {loginError && (loginError instanceof Error ? loginError.message : t('auth.loginFailed'))}
+        {loginError && getLoginErrorMessage(loginError)}
       </div>
 
       <form
         onSubmit={handleSubmit}
-        autoComplete="off"
         noValidate
         className={`space-y-4 relative transition-opacity duration-200 ${isLoggingIn ? 'opacity-90' : ''}`}
         aria-busy={isLoggingIn}
         aria-describedby={loginError ? formErrorId : undefined}
         style={{ pointerEvents: isLoggingIn ? 'none' : undefined }}
       >
-        <input type="text" className="absolute -left-[9999px]" tabIndex={-1} autoComplete="off" aria-hidden />
-        <input type="password" className="absolute -left-[9999px]" tabIndex={-1} autoComplete="new-password" aria-hidden />
-
         <div>
           <label htmlFor={emailId} className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
             {t('auth.email')}
@@ -132,7 +143,7 @@ export const LoginPage = () => {
               onBlur={() => setEmailTouched(true)}
               required
               disabled={isLoggingIn}
-              autoComplete="off"
+              autoComplete="email"
               aria-invalid={emailError ? true : undefined}
               aria-describedby={emailError ? emailErrorId : undefined}
               aria-label={t('auth.emailAddressLabel')}
@@ -168,7 +179,7 @@ export const LoginPage = () => {
               onBlur={() => setPasswordTouched(true)}
               required
               disabled={isLoggingIn}
-              autoComplete="new-password"
+              autoComplete="current-password"
               aria-invalid={passwordError ? true : undefined}
               aria-describedby={passwordError ? passwordErrorId : undefined}
               aria-label={t('auth.passwordLabel')}
@@ -201,17 +212,6 @@ export const LoginPage = () => {
           )}
         </div>
 
-        <div className="flex flex-col sm:flex-row items-start justify-between gap-2 text-sm">
-          <div />
-          <button
-            type="button"
-            onClick={() => toast(t('auth.forgotPasswordComingSoon'), { icon: '🔒' })}
-            className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium hover:underline transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded"
-          >
-            {t('auth.forgotPassword')}
-          </button>
-        </div>
-
         {loginError && (
           <div
             className="flex items-start gap-3 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 text-red-600 dark:text-red-400 text-sm transition-colors duration-200 animate-fade-in"
@@ -221,7 +221,7 @@ export const LoginPage = () => {
             <svg className="w-5 h-5 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
             </svg>
-            <span>{loginError instanceof Error ? loginError.message : t('auth.loginFailed')}</span>
+            <span>{getLoginErrorMessage(loginError)}</span>
           </div>
         )}
 

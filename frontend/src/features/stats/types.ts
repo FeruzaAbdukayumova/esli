@@ -17,6 +17,11 @@ export interface DayForecast {
   count: number
 }
 
+export interface ActivityDay {
+  date: string
+  count: number
+}
+
 export interface DashboardStats {
   lastStudiedDeck: LastStudiedDeck | null
   cardsDueToday: number
@@ -29,4 +34,6 @@ export interface DashboardStats {
   retentionPercent: number
   deckProgress: DeckProgress[]
   reviewForecast: DayForecast[]
+  /** Daily review counts over the trailing ~12 weeks (optional; may be empty for API mode until the backend provides it). */
+  activityHeatmap?: ActivityDay[]
 }

@@ -1,4 +1,4 @@
-import { useState, FormEvent, useId } from 'react'
+import { useState, useEffect, FormEvent, useId } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
@@ -59,6 +59,33 @@ export const RegisterPage = () => {
   const [confirmTouched, setConfirmTouched] = useState(false)
   const { register, isRegistering, registerError } = useAuth()
 
+  useEffect(() => {
+    if (registerError) console.error('Registration error:', registerError)
+  }, [registerError])
+
+  const getRegisterErrorMessage = (error: unknown): string => {
+    if (error instanceof Error) {
+      if (error.message === 'Email already registered') {
+        return t('auth.emailAlreadyRegistered', 'This email is already registered. Try logging in instead.')
+      }
+      if (error.message === 'Username already taken') {
+        return t('auth.usernameAlreadyTaken', 'This username is already taken. Try another one.')
+      }
+    }
+    return t('auth.genericError', 'Something went wrong. Please try again.')
+  }
+
+  const usernameId = useId()
+  const emailId = useId()
+  const passwordId = useId()
+  const confirmId = useId()
+  const usernameErrorId = useId()
+  const emailErrorId = useId()
+  const passwordErrorId = useId()
+  const confirmErrorId = useId()
+  const formErrorId = useId()
+  const requirementsId = useId()
+
   if (user) return <Navigate to="/dashboard" replace />
 
   const handleOAuth = async (provider: 'google') => {
@@ -78,7 +105,7 @@ export const RegisterPage = () => {
     : usernameTouched && username.trim().length > 50
       ? t('auth.usernameTooLong')
       : null
-  const usernameValid = username.trim().length >= 1 && username.trim().length <= 50
+  const usernameValid = username.trim().length >= 3 && username.trim().length <= 50
   const emailError = emailTouched ? getEmailValidationMessage(email, t) : null
   const emailValid = email.length > 0 && isValidEmail(email)
   const strength = getPasswordStrength(password)
@@ -106,16 +133,6 @@ export const RegisterPage = () => {
     register({ email: email.trim(), password, username: username.trim() })
   }
 
-  const usernameId = useId()
-  const emailId = useId()
-  const passwordId = useId()
-  const confirmId = useId()
-  const usernameErrorId = useId()
-  const emailErrorId = useId()
-  const passwordErrorId = useId()
-  const confirmErrorId = useId()
-  const formErrorId = useId()
-  const requirementsId = useId()
 
   const toggleBtnClass =
     'absolute right-2.5 top-1/2 -translate-y-1/2 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center -my-1 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-0'
@@ -153,12 +170,11 @@ export const RegisterPage = () => {
       </div>
 
       <div id={formErrorId} role="alert" aria-live="assertive" aria-atomic="true" className="sr-only">
-        {registerError && (registerError instanceof Error ? registerError.message : t('auth.registrationFailed'))}
+        {registerError && getRegisterErrorMessage(registerError)}
       </div>
 
       <form
         onSubmit={handleSubmit}
-        autoComplete="off"
         noValidate
         className={`space-y-4 relative transition-opacity duration-200 ${isRegistering ? 'opacity-90' : ''}`}
         aria-busy={isRegistering}
@@ -376,7 +392,7 @@ export const RegisterPage = () => {
             <svg className="w-5 h-5 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
             </svg>
-            <span>{registerError instanceof Error ? registerError.message : t('auth.registrationFailed')}</span>
+            <span>{getRegisterErrorMessage(registerError)}</span>
           </div>
         )}
 

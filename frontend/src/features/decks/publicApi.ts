@@ -12,7 +12,7 @@ interface PublicDecksParams {
 // Raw API response types (snake_case)
 interface RawPublicDeckOwner {
   id: string
-  email: string
+  username?: string | null
 }
 
 interface RawPublicDeck {

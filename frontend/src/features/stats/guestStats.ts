@@ -1,5 +1,5 @@
 import type { GuestData } from '@/shared/lib/guestStorage'
-import type { DashboardStats, DeckProgress, DayForecast, LastStudiedDeck } from './types'
+import type { DashboardStats, DeckProgress, DayForecast, ActivityDay, LastStudiedDeck } from './types'
 
 function startOfDay(d: Date): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate())
@@ -120,6 +120,20 @@ export function computeGuestStats(data: GuestData): DashboardStats {
     reviewForecast.push({ date: ds, count: forecastMap[ds] || 0 })
   }
 
+  // --- Activity heatmap (trailing 84 days of review counts) ---
+  const heatmapMap: Record<string, number> = {}
+  for (const log of reviewLogs) {
+    const d = dateStr(new Date(log.reviewedAt))
+    heatmapMap[d] = (heatmapMap[d] || 0) + 1
+  }
+  const activityHeatmap: ActivityDay[] = []
+  for (let i = 83; i >= 0; i--) {
+    const d = new Date(todayStart)
+    d.setDate(d.getDate() - i)
+    const ds = dateStr(d)
+    activityHeatmap.push({ date: ds, count: heatmapMap[ds] || 0 })
+  }
+
   return {
     lastStudiedDeck,
     cardsDueToday,
@@ -132,5 +146,6 @@ export function computeGuestStats(data: GuestData): DashboardStats {
     retentionPercent,
     deckProgress,
     reviewForecast,
+    activityHeatmap,
   }
 }

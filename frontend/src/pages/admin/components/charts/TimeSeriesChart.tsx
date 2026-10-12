@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
 
 interface Series {
@@ -13,10 +14,11 @@ interface TimeSeriesChartProps {
 }
 
 export function TimeSeriesChart({ data, series, height = 300 }: TimeSeriesChartProps) {
+  const { t } = useTranslation()
   if (data.length === 0) {
     return (
       <div className="flex items-center justify-center h-[300px] text-slate-400 dark:text-slate-500 text-sm">
-        No data available
+        {t('admin.analytics.noData', 'No data available')}
       </div>
     )
   }
