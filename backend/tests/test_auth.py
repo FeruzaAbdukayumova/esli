@@ -12,7 +12,8 @@ class TestAuthRegister:
             "/api/v1/auth/register",
             json={
                 "email": "test@example.com",
-                "password": "testpassword123"
+                "password": "testpassword123",
+                "username": "user1"
             }
         )
         
@@ -30,7 +31,8 @@ class TestAuthRegister:
             "/api/v1/auth/register",
             json={
                 "email": "duplicate@example.com",
-                "password": "testpassword123"
+                "password": "testpassword123",
+                "username": "user2"
             }
         )
         
@@ -39,7 +41,8 @@ class TestAuthRegister:
             "/api/v1/auth/register",
             json={
                 "email": "duplicate@example.com",
-                "password": "anotherpassword123"
+                "password": "anotherpassword123",
+                "username": "user3"
             }
         )
         
@@ -60,7 +63,8 @@ class TestAuthLogin:
             "/api/v1/auth/register",
             json={
                 "email": "login@example.com",
-                "password": "correctpassword123"
+                "password": "correctpassword123",
+                "username": "user4"
             }
         )
         
@@ -87,7 +91,8 @@ class TestAuthLogin:
             "/api/v1/auth/register",
             json={
                 "email": "wrongpass@example.com",
-                "password": "correctpassword123"
+                "password": "correctpassword123",
+                "username": "user5"
             }
         )
         
@@ -132,7 +137,8 @@ class TestAuthMe:
             "/api/v1/auth/register",
             json={
                 "email": "me@example.com",
-                "password": "testpassword123"
+                "password": "testpassword123",
+                "username": "user6"
             }
         )
         token = register_response.json()["access_token"]

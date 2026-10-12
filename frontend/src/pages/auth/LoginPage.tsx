@@ -1,5 +1,5 @@
 import { useState, useEffect, FormEvent, useId } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 import { useAuth } from '@/features/auth/hooks/useAuth'
@@ -166,9 +166,17 @@ export const LoginPage = () => {
         </div>
 
         <div>
-          <label htmlFor={passwordId} className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-            {t('auth.password')}
-          </label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label htmlFor={passwordId} className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+              {t('auth.password')}
+            </label>
+            <Link
+              to="/forgot-password"
+              className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 hover:underline transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded"
+            >
+              {t('auth.forgot.link', 'Forgot password?')}
+            </Link>
+          </div>
           <div className="relative">
             <input
               id={passwordId}

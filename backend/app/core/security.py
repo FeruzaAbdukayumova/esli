@@ -45,3 +45,38 @@ def generate_refresh_token() -> str:
 
 def hash_token(token: str) -> str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+PASSWORD_RESET_EXPIRE_MINUTES = 60
+
+
+def _password_fingerprint(password_hash: str | None) -> str:
+    # Bound into the reset token so it stops working once the password changes
+    # (single-use without storing anything).
+    return hashlib.sha256((password_hash or "").encode("utf-8")).hexdigest()[:16]
+
+
+def create_password_reset_token(user_id: str, password_hash: str | None) -> str:
+    expire = datetime.now(timezone.utc) + timedelta(minutes=PASSWORD_RESET_EXPIRE_MINUTES)
+    payload: dict[str, Any] = {
+        "sub": user_id,
+        "exp": expire,
+        "purpose": "password_reset",
+        "pwf": _password_fingerprint(password_hash),
+    }
+    return jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.JWT_ALG)
+
+
+def read_password_reset_token(token: str) -> tuple[str, str] | None:
+    """Return (user_id, password fingerprint) or None if invalid/expired."""
+    try:
+        payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALG])
+    except Exception:
+        return None
+    if payload.get("purpose") != "password_reset" or not payload.get("sub"):
+        return None
+    return payload["sub"], payload.get("pwf", "")
+
+
+def password_fingerprint_matches(password_hash: str | None, fingerprint: str) -> bool:
+    return secrets.compare_digest(_password_fingerprint(password_hash), fingerprint)

@@ -4,6 +4,8 @@ import { createBrowserRouter, Outlet } from 'react-router-dom'
 import { BottomNav } from '@/shared/ui/BottomNav'
 import { LoginPage } from '@/pages/auth/LoginPage'
 import { RegisterPage } from '@/pages/auth/RegisterPage'
+import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage'
+import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage'
 import { DashboardPage } from '@/pages/dashboard/DashboardPage'
 import { DeckPage } from '@/pages/deck/DeckPage'
 import { StudyPage } from '@/pages/study/StudyPage'
@@ -44,6 +46,14 @@ export const router = createBrowserRouter([
   {
     path: '/register',
     element: <RegisterPage />,
+  },
+  {
+    path: '/forgot-password',
+    element: <ForgotPasswordPage />,
+  },
+  {
+    path: '/reset-password',
+    element: <ResetPasswordPage />,
   },
   {
     path: '/auth/callback/:provider',

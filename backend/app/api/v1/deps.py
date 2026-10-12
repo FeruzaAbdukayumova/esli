@@ -27,7 +27,8 @@ async def get_current_user(
     try:
         payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALG])
         user_id_str: str = payload.get("sub")
-        if not user_id_str:
+        # Purpose-scoped tokens (e.g. password reset) are not access tokens
+        if not user_id_str or payload.get("purpose"):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid token: missing subject",
@@ -67,7 +68,7 @@ async def get_optional_current_user(
     try:
         payload = jwt.decode(credentials.credentials, settings.JWT_SECRET, algorithms=[settings.JWT_ALG])
         user_id_str: str = payload.get("sub")
-        if not user_id_str:
+        if not user_id_str or payload.get("purpose"):
             return None
         user_id = uuid.UUID(user_id_str)
     except (JWTError, ValueError):

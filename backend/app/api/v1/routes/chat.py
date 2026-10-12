@@ -193,7 +193,7 @@ async def websocket_endpoint(
             try:
                 payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALG])
                 user_id_str = payload.get("sub")
-                if user_id_str:
+                if user_id_str and not payload.get("purpose"):
                     user = await get_user_by_id(db, uuid.UUID(user_id_str))
             except (JWTError, ValueError):
                 await websocket.close(code=4001)

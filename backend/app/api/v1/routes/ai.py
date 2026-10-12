@@ -51,8 +51,23 @@ def _count_pdf_pages(pdf_data: bytes) -> int:
         return 0
 
 
+def _client_ip(request: Request) -> str:
+    """Real visitor IP behind Cloudflare + Railway.
+
+    request.client.host is the proxy's address in production, which would make
+    every guest share one rate-limit bucket.
+    """
+    cf_ip = request.headers.get("cf-connecting-ip")
+    if cf_ip:
+        return cf_ip.strip()
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+
 def _check_ip_rate_limit(request: Request) -> None:
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = _client_ip(request)
     now = time.time()
     # Clean old entries
     _ip_usage[client_ip] = [t for t in _ip_usage[client_ip] if now - t < _IP_RATE_WINDOW]
