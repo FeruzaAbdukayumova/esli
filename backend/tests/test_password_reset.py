@@ -113,6 +113,10 @@ class TestGuestRateLimitIp:
                 "client": ("10.0.0.1", 1234),
             })
 
-        assert _client_ip(make({"cf-connecting-ip": "1.2.3.4", "x-forwarded-for": "9.9.9.9"})) == "1.2.3.4"
-        assert _client_ip(make({"x-forwarded-for": "5.6.7.8, 10.0.0.2"})) == "5.6.7.8"
+        # Via Cloudflare: Railway's proxy appended a Cloudflare IP, so trust CF-Connecting-IP
+        assert _client_ip(make({"cf-connecting-ip": "1.2.3.4", "x-forwarded-for": "162.158.1.1"})) == "1.2.3.4"
+        # Direct hit on the Railway domain with a forged CF header: use the real peer
+        assert _client_ip(make({"cf-connecting-ip": "1.2.3.4", "x-forwarded-for": "5.6.7.8"})) == "5.6.7.8"
+        # Forged left-most X-Forwarded-For entries are ignored
+        assert _client_ip(make({"x-forwarded-for": "1.1.1.1, 2.2.2.2, 5.6.7.8"})) == "5.6.7.8"
         assert _client_ip(make({})) == "10.0.0.1"
