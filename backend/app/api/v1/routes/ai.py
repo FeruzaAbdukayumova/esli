@@ -84,7 +84,10 @@ def _client_ip(request: Request) -> str:
     CF-Connecting-IP; a request hitting the *.up.railway.app domain directly
     can't forge its way out.
     """
-    hops = [h.strip() for h in request.headers.get("x-forwarded-for", "").split(",") if h.strip()]
+    # Join every X-Forwarded-For header: .get() returns only the first, which a
+    # client can add itself while the proxies append to the last one.
+    forwarded = ",".join(request.headers.getlist("x-forwarded-for"))
+    hops = [h.strip() for h in forwarded.split(",") if h.strip()]
     peer = hops[-2] if len(hops) >= 2 else None
     if not peer:
         peer = request.client.host if request.client else "unknown"
