@@ -15,7 +15,6 @@ import { trackEvent } from '@/shared/lib/analytics'
 import { DashboardNavbar } from '@/pages/dashboard/components/DashboardNavbar'
 import { usePageMeta } from '@/shared/lib/usePageMeta'
 import { openPaddleCheckout } from '@/features/billing/paddle'
-import { PromoGiftModal } from './PromoGiftModal'
 import type { PlanTier, PlanInfo } from '@/features/subscription/types'
 
 const PLAN_ICONS: Record<PlanTier, React.ReactNode> = {
@@ -65,7 +64,6 @@ export function PricingPage() {
   const { tier: currentTier, isGuest } = useTier()
   const { data: plansData, isLoading, isError, refetch, isRefetching } = usePlans()
   const [billingInterval, setBillingInterval] = useState<'month' | 'year'>('month')
-  const [giftTier, setGiftTier] = useState<'pro' | 'premium' | null>(null)
   const [checkoutTier, setCheckoutTier] = useState<PlanTier | null>(null)
 
   const { hasGuestDecksToSave, isSyncing, saveGuestDecks } = useGuestSync()
@@ -83,9 +81,9 @@ export function PricingPage() {
     const token = plansData?.paddle_client_token
     const env = plansData?.paddle_env
 
-    // Fall back to the free-promo gift modal until Paddle is configured.
+    // Checkout config missing (shouldn't happen in production): never hand out free plans
     if (!priceId || !token || !env || !user) {
-      setGiftTier(tier)
+      toast.error(t('pricing.checkoutError', 'Could not open checkout. Please try again.'))
       return
     }
 
@@ -365,12 +363,6 @@ export function PricingPage() {
           </div>
         )}
       </main>
-
-      <PromoGiftModal
-        isOpen={!!giftTier}
-        tier={giftTier}
-        onClose={() => setGiftTier(null)}
-      />
     </div>
   )
 }
