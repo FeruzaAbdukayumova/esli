@@ -72,6 +72,24 @@ class TestPasswordReset:
         )
         assert second.status_code == 400
 
+    async def test_reset_kills_existing_access_tokens(self, async_client: AsyncClient, sent_emails):
+        await _register(async_client, "kill@example.com", "killuser")
+        login = await async_client.post(
+            "/api/v1/auth/login", json={"email": "kill@example.com", "password": "oldpassword123"}
+        )
+        old_access = login.json()["access_token"]
+        headers = {"Authorization": f"Bearer {old_access}"}
+        assert (await async_client.get("/api/v1/auth/me", headers=headers)).status_code == 200
+
+        token = await _request_token(async_client, "kill@example.com", sent_emails)
+        reset = await async_client.post(
+            "/api/v1/auth/reset-password", json={"token": token, "new_password": "newpassword456"}
+        )
+        assert reset.status_code == 200
+        assert (await async_client.get("/api/v1/auth/me", headers=headers)).status_code == 401
+        new_headers = {"Authorization": f"Bearer {reset.json()['access_token']}"}
+        assert (await async_client.get("/api/v1/auth/me", headers=new_headers)).status_code == 200
+
     async def test_unknown_email_still_returns_204_and_sends_nothing(self, async_client: AsyncClient, sent_emails):
         resp = await async_client.post("/api/v1/auth/forgot-password", json={"email": "nobody@example.com"})
         assert resp.status_code == 204

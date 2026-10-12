@@ -18,7 +18,11 @@ RESEND_API = "https://api.resend.com/emails"
 async def send_email(to: str, subject: str, html_body: str, text_body: str) -> bool:
     """Send one email. Returns False on failure; never raises."""
     if not settings.RESEND_API_KEY:
-        logger.warning("RESEND_API_KEY not set; email to %s not sent:\n%s", to, text_body)
+        # Bodies can hold live credentials (reset links): only print them for local dev
+        if settings.FRONTEND_URL.startswith(("http://localhost", "http://127.0.0.1")):
+            logger.warning("RESEND_API_KEY not set; email to %s not sent:\n%s", to, text_body)
+        else:
+            logger.error("RESEND_API_KEY not set; email %r not sent", subject)
         return False
 
     try:

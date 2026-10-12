@@ -3,6 +3,7 @@ import time
 import uuid
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -87,7 +88,7 @@ async def register(
         user = await create_user(db, payload.email, hash_password(payload.password), username=payload.username)
         await subscription_service.create_free_subscription(db, user.id)
         asyncio.create_task(notify_registration(payload.email, payload.username))
-        access_token = create_access_token(str(user.id))
+        access_token = create_access_token(str(user.id), user.password_hash)
         raw_refresh = await create_refresh_token(db, user.id)
         _set_refresh_cookie(response, raw_refresh)
         return TokenResponse(access_token=access_token)
@@ -107,7 +108,7 @@ async def login(
     if not user or not user.password_hash or not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
-    access_token = create_access_token(str(user.id))
+    access_token = create_access_token(str(user.id), user.password_hash)
     raw_refresh = await create_refresh_token(db, user.id)
     _set_refresh_cookie(response, raw_refresh)
     return TokenResponse(access_token=access_token)
@@ -161,11 +162,25 @@ async def reset_password(
     if not user or not password_fingerprint_matches(user.password_hash, fingerprint):
         raise invalid
 
-    user.password_hash = hash_password(payload.new_password)
+    # Compare-and-swap so two concurrent requests with the same link can't both succeed
+    old_hash = user.password_hash
+    new_hash = hash_password(payload.new_password)
+    result = await db.execute(
+        update(User)
+        .where(
+            User.id == user.id,
+            User.password_hash.is_(None) if old_hash is None else User.password_hash == old_hash,
+        )
+        .values(password_hash=new_hash)
+    )
+    if result.rowcount != 1:
+        await db.rollback()
+        raise invalid
     await db.commit()
+    user.password_hash = new_hash
     # Sign out every other session, then sign this one in
     await revoke_all_user_tokens(db, user.id)
-    access_token = create_access_token(str(user.id))
+    access_token = create_access_token(str(user.id), user.password_hash)
     raw_refresh = await create_refresh_token(db, user.id)
     _set_refresh_cookie(response, raw_refresh)
     return TokenResponse(access_token=access_token)
@@ -187,7 +202,7 @@ async def refresh(
 
     # Rotate: revoke old, issue new
     await revoke_refresh_token(db, refresh_token)
-    new_access = create_access_token(str(user.id))
+    new_access = create_access_token(str(user.id), user.password_hash)
     new_refresh = await create_refresh_token(db, user.id)
     _set_refresh_cookie(response, new_refresh)
     return TokenResponse(access_token=new_access)
