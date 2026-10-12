@@ -50,9 +50,35 @@ interface RichTextEditorProps {
 }
 
 const TEXT_COLORS = [
-  '#000000', '#ef4444', '#f97316', '#eab308', '#22c55e',
-  '#3b82f6', '#8b5cf6', '#ec4899', '#6b7280',
+  '#ef4444', '#f97316', '#eab308', '#22c55e',
+  '#3b82f6', '#8b5cf6', '#ec4899', '#64748b',
 ]
+
+interface ToolbarButtonProps {
+  onClick: () => void
+  isActive?: boolean
+  title: string
+  children: React.ReactNode
+}
+
+function ToolbarButton({ onClick, isActive, title, children }: ToolbarButtonProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      aria-label={title}
+      aria-pressed={isActive}
+      className={`p-1 rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
+        isActive
+          ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300'
+          : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700 active:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200 dark:active:bg-slate-600'
+      }`}
+    >
+      {children}
+    </button>
+  )
+}
 
 export function RichTextEditor({
   content,
@@ -69,8 +95,14 @@ export function RichTextEditor({
   const [imageUrl, setImageUrl] = useState('')
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [showTableMenu, setShowTableMenu] = useState(false)
+  const [showMathHint, setShowMathHint] = useState(false)
   const linkInputRef = useRef<HTMLInputElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
+  const colorPopoverRef = useRef<HTMLDivElement>(null)
+  const linkPopoverRef = useRef<HTMLDivElement>(null)
+  const imagePopoverRef = useRef<HTMLDivElement>(null)
+  const tablePopoverRef = useRef<HTMLDivElement>(null)
+  const mathPopoverRef = useRef<HTMLDivElement>(null)
   const initialContentRef = useRef(content)
 
   const editor = useEditor({
@@ -166,34 +198,38 @@ export function RichTextEditor({
     if (showImageInput && imageInputRef.current) imageInputRef.current.focus()
   }, [showImageInput])
 
+  // Dismiss any open popover on outside pointerdown or Escape
+  const anyPopoverOpen = showColorPicker || showLinkInput || showImageInput || showTableMenu || showMathHint
+  useEffect(() => {
+    if (!anyPopoverOpen) return
+    const closeAll = () => {
+      setShowColorPicker(false)
+      setShowLinkInput(false)
+      setShowImageInput(false)
+      setShowTableMenu(false)
+      setShowMathHint(false)
+    }
+    const onPointerDown = (e: PointerEvent) => {
+      const target = e.target as Node
+      const wrappers = [colorPopoverRef, linkPopoverRef, imagePopoverRef, tablePopoverRef, mathPopoverRef]
+      if (wrappers.some((ref) => ref.current?.contains(target))) return
+      closeAll()
+    }
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeAll()
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [anyPopoverOpen])
+
   if (!editor) return null
 
   const charCount = editor.storage.characterCount.characters()
-
-  const ToolbarButton = ({
-    onClick,
-    isActive = false,
-    title,
-    children,
-  }: {
-    onClick: () => void
-    isActive?: boolean
-    title: string
-    children: React.ReactNode
-  }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      title={title}
-      className={`p-1 rounded transition-colors ${
-        isActive
-          ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300'
-          : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200'
-      }`}
-    >
-      {children}
-    </button>
-  )
+  const nearLimit = charCount > maxLength * 0.9
 
   const iconSize = compact ? 14 : 16
 
@@ -295,20 +331,33 @@ export function RichTextEditor({
         <div className="w-px h-5 bg-slate-300 dark:bg-slate-500 mx-0.5" />
 
         {/* Color picker */}
-        <div className="relative">
+        <div className="relative" ref={colorPopoverRef}>
           <ToolbarButton
             onClick={() => {
               setShowColorPicker(!showColorPicker)
               setShowLinkInput(false)
               setShowImageInput(false)
               setShowTableMenu(false)
+              setShowMathHint(false)
             }}
             title={t('editor.textColor')}
           >
             <Palette size={iconSize} />
           </ToolbarButton>
           {showColorPicker && (
-            <div className="absolute top-full left-0 z-10 mt-1 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg shadow-lg flex gap-1 flex-wrap w-[140px]">
+            <div className="absolute top-full left-0 z-10 mt-1 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg shadow-elevation-md flex gap-1 flex-wrap w-[140px]">
+              <button
+                type="button"
+                onClick={() => {
+                  editor.chain().focus().unsetColor().run()
+                  setShowColorPicker(false)
+                }}
+                className="w-5 h-5 rounded border border-slate-300 dark:border-slate-500 hover:scale-110 active:scale-95 transition-transform text-xs flex items-center justify-center text-slate-700 dark:text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                title={t('editor.colorDefault', 'Default color')}
+                aria-label={t('editor.colorDefault', 'Default color')}
+              >
+                ✕
+              </button>
               {TEXT_COLORS.map((color) => (
                 <button
                   key={color}
@@ -317,28 +366,18 @@ export function RichTextEditor({
                     editor.chain().focus().setColor(color).run()
                     setShowColorPicker(false)
                   }}
-                  className="w-5 h-5 rounded border border-slate-300 dark:border-slate-500 hover:scale-110 transition-transform"
+                  className="w-5 h-5 rounded border border-slate-300 dark:border-slate-500 ring-1 ring-inset ring-black/10 dark:ring-white/20 hover:scale-110 active:scale-95 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                   style={{ backgroundColor: color }}
                   title={color}
+                  aria-label={color}
                 />
               ))}
-              <button
-                type="button"
-                onClick={() => {
-                  editor.chain().focus().unsetColor().run()
-                  setShowColorPicker(false)
-                }}
-                className="w-5 h-5 rounded border border-slate-300 dark:border-slate-500 hover:scale-110 transition-transform text-xs flex items-center justify-center"
-                title="Default"
-              >
-                ✕
-              </button>
             </div>
           )}
         </div>
 
         {/* Link */}
-        <div className="relative">
+        <div className="relative" ref={linkPopoverRef}>
           <ToolbarButton
             onClick={() => {
               if (editor.isActive('link')) {
@@ -348,6 +387,7 @@ export function RichTextEditor({
                 setShowColorPicker(false)
                 setShowImageInput(false)
                 setShowTableMenu(false)
+                setShowMathHint(false)
               }
             }}
             isActive={editor.isActive('link')}
@@ -356,7 +396,7 @@ export function RichTextEditor({
             {editor.isActive('link') ? <Unlink size={iconSize} /> : <LinkIcon size={iconSize} />}
           </ToolbarButton>
           {showLinkInput && (
-            <div className="absolute top-full left-0 z-10 mt-1 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg shadow-lg flex gap-1">
+            <div className="absolute top-full left-0 z-10 mt-1 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg shadow-elevation-md flex gap-1">
               <input
                 ref={linkInputRef}
                 type="url"
@@ -372,7 +412,7 @@ export function RichTextEditor({
               <button
                 type="button"
                 onClick={insertLink}
-                className="px-2 py-1 text-xs bg-primary-600 text-white rounded hover:bg-primary-700"
+                className="px-2 py-1 text-xs bg-primary-600 text-white rounded hover:bg-primary-700 active:bg-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-slate-800"
               >
                 {t('editor.linkInsert')}
               </button>
@@ -381,20 +421,21 @@ export function RichTextEditor({
         </div>
 
         {/* Image */}
-        <div className="relative">
+        <div className="relative" ref={imagePopoverRef}>
           <ToolbarButton
             onClick={() => {
               setShowImageInput(!showImageInput)
               setShowColorPicker(false)
               setShowLinkInput(false)
               setShowTableMenu(false)
+              setShowMathHint(false)
             }}
             title={t('editor.image')}
           >
             <ImageIcon size={iconSize} />
           </ToolbarButton>
           {showImageInput && (
-            <div className="absolute top-full right-0 z-10 mt-1 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg shadow-lg flex gap-1">
+            <div className="absolute top-full right-0 z-10 mt-1 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg shadow-elevation-md flex gap-1">
               <input
                 ref={imageInputRef}
                 type="url"
@@ -410,7 +451,7 @@ export function RichTextEditor({
               <button
                 type="button"
                 onClick={insertImage}
-                className="px-2 py-1 text-xs bg-primary-600 text-white rounded hover:bg-primary-700"
+                className="px-2 py-1 text-xs bg-primary-600 text-white rounded hover:bg-primary-700 active:bg-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-slate-800"
               >
                 {t('editor.imageInsert')}
               </button>
@@ -419,13 +460,14 @@ export function RichTextEditor({
         </div>
 
         {/* Table */}
-        <div className="relative">
+        <div className="relative" ref={tablePopoverRef}>
           <ToolbarButton
             onClick={() => {
               setShowTableMenu(!showTableMenu)
               setShowColorPicker(false)
               setShowLinkInput(false)
               setShowImageInput(false)
+              setShowMathHint(false)
             }}
             isActive={editor.isActive('table')}
             title={t('editor.table')}
@@ -433,12 +475,12 @@ export function RichTextEditor({
             <TableIcon size={iconSize} />
           </ToolbarButton>
           {showTableMenu && (
-            <div className="absolute top-full right-0 z-10 mt-1 p-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg shadow-lg min-w-[160px]">
+            <div className="absolute top-full right-0 z-10 mt-1 p-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg shadow-elevation-md min-w-[160px]">
               {!editor.isActive('table') ? (
                 <button
                   type="button"
                   onClick={insertTable}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 text-sm text-left hover:bg-slate-100 dark:hover:bg-slate-700 rounded"
+                  className="flex items-center gap-2 w-full px-2 py-1.5 text-sm text-left hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
                 >
                   <Plus size={14} />
                   {t('editor.tableInsert')}
@@ -448,7 +490,7 @@ export function RichTextEditor({
                   <button
                     type="button"
                     onClick={() => { editor.chain().focus().addRowAfter().run(); setShowTableMenu(false) }}
-                    className="flex items-center gap-2 w-full px-2 py-1.5 text-sm text-left hover:bg-slate-100 dark:hover:bg-slate-700 rounded"
+                    className="flex items-center gap-2 w-full px-2 py-1.5 text-sm text-left hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
                   >
                     <RowsIcon size={14} />
                     {t('editor.tableAddRow')}
@@ -456,7 +498,7 @@ export function RichTextEditor({
                   <button
                     type="button"
                     onClick={() => { editor.chain().focus().addColumnAfter().run(); setShowTableMenu(false) }}
-                    className="flex items-center gap-2 w-full px-2 py-1.5 text-sm text-left hover:bg-slate-100 dark:hover:bg-slate-700 rounded"
+                    className="flex items-center gap-2 w-full px-2 py-1.5 text-sm text-left hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
                   >
                     <ColumnsIcon size={14} />
                     {t('editor.tableAddColumn')}
@@ -464,7 +506,7 @@ export function RichTextEditor({
                   <button
                     type="button"
                     onClick={() => { editor.chain().focus().deleteRow().run(); setShowTableMenu(false) }}
-                    className="flex items-center gap-2 w-full px-2 py-1.5 text-sm text-left hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-red-600 dark:text-red-400"
+                    className="flex items-center gap-2 w-full px-2 py-1.5 text-sm text-left hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset text-red-600 dark:text-red-400"
                   >
                     <RowsIcon size={14} />
                     {t('editor.tableDeleteRow')}
@@ -472,7 +514,7 @@ export function RichTextEditor({
                   <button
                     type="button"
                     onClick={() => { editor.chain().focus().deleteColumn().run(); setShowTableMenu(false) }}
-                    className="flex items-center gap-2 w-full px-2 py-1.5 text-sm text-left hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-red-600 dark:text-red-400"
+                    className="flex items-center gap-2 w-full px-2 py-1.5 text-sm text-left hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset text-red-600 dark:text-red-400"
                   >
                     <ColumnsIcon size={14} />
                     {t('editor.tableDeleteColumn')}
@@ -481,7 +523,7 @@ export function RichTextEditor({
                   <button
                     type="button"
                     onClick={() => { editor.chain().focus().deleteTable().run(); setShowTableMenu(false) }}
-                    className="flex items-center gap-2 w-full px-2 py-1.5 text-sm text-left hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-red-600 dark:text-red-400"
+                    className="flex items-center gap-2 w-full px-2 py-1.5 text-sm text-left hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset text-red-600 dark:text-red-400"
                   >
                     <Trash2 size={14} />
                     {t('editor.tableDelete')}
@@ -493,14 +535,37 @@ export function RichTextEditor({
         </div>
 
         {/* Math */}
-        <ToolbarButton
-          onClick={() => {
-            editor.chain().focus().insertContent('$E = mc^2$').run()
-          }}
-          title={t('editor.math')}
-        >
-          <Sigma size={iconSize} />
-        </ToolbarButton>
+        <div className="relative" ref={mathPopoverRef}>
+          <ToolbarButton
+            onClick={() => {
+              setShowMathHint(!showMathHint)
+              setShowColorPicker(false)
+              setShowLinkInput(false)
+              setShowImageInput(false)
+              setShowTableMenu(false)
+            }}
+            title={t('editor.math')}
+          >
+            <Sigma size={iconSize} />
+          </ToolbarButton>
+          {showMathHint && (
+            <div className="absolute top-full right-0 z-10 mt-1 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg shadow-elevation-md w-56">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1.5 leading-relaxed">
+                {t('editor.mathHint', 'Wrap math in $...$ - e.g. $x^2 + y^2 = z^2$')}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  editor.chain().focus().insertContent('$E = mc^2$').run()
+                  setShowMathHint(false)
+                }}
+                className="px-2 py-1 text-xs bg-primary-600 text-white rounded hover:bg-primary-700 active:bg-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-slate-800"
+              >
+                {t('editor.mathInsertExample', 'Insert example')}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Editor area */}
@@ -508,8 +573,12 @@ export function RichTextEditor({
 
       {/* Character count */}
       <div className="flex justify-end px-2 py-1 border-t border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50">
-        <span className={`text-xs ${charCount > maxLength * 0.9 ? 'text-red-500' : 'text-slate-400 dark:text-slate-500'}`}>
-          {charCount} / {maxLength}
+        <span
+          className={`text-xs ${nearLimit ? 'text-red-500' : 'text-slate-400 dark:text-slate-500'}`}
+          title={nearLimit ? t('editor.charLimitNear', 'Approaching the {{max}} character limit', { max: maxLength }) : undefined}
+          aria-label={nearLimit ? t('editor.charLimitNear', 'Approaching the {{max}} character limit', { max: maxLength }) : undefined}
+        >
+          {t('editor.charCount', '{{count}} / {{max}} characters', { count: charCount, max: maxLength })}
         </span>
       </div>
     </div>

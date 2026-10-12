@@ -65,7 +65,7 @@ export function AdminChatTab() {
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-3 space-y-3">
         {messages.length === 0 && !sendMutation.isPending && (
-          <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-slate-500 text-sm">
+          <div className="flex flex-col items-center justify-center h-full text-slate-400 dark:text-slate-500 text-sm">
             <Headphones className="w-10 h-10 mb-2 opacity-50" />
             <p className="text-center">{t('chat.supportWelcome')}</p>
           </div>

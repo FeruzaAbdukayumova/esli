@@ -1,16 +1,16 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Check, ChevronRight, Loader2, Sparkles, Crown, Zap } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { AlertCircle, Check, ChevronRight, Loader2, Sparkles, Crown, Zap } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 import { useAuthContext } from '@/app/providers/AuthProvider'
 import { useDeckRepo } from '@/features/decks/repo'
 import { useAuth } from '@/features/auth/hooks/useAuth'
-import { usePlans, usePortalSession } from '@/features/subscription/hooks'
+import { usePlans } from '@/features/subscription/hooks'
+import { Button } from '@/shared/ui/Button'
 import { PromoCodeInput } from '@/features/subscription/components/PromoCodeInput'
 import { useTier } from '@/features/subscription/useTier'
-import { useSyncImport } from '@/features/sync/hooks'
-import { guestStorage } from '@/shared/lib/guestStorage'
+import { useGuestSync } from '@/features/sync/useGuestSync'
 import { trackEvent } from '@/shared/lib/analytics'
 import { DashboardNavbar } from '@/pages/dashboard/components/DashboardNavbar'
 import { usePageMeta } from '@/shared/lib/usePageMeta'
@@ -61,24 +61,20 @@ export function PricingPage() {
   const { user } = useAuthContext()
   const { mode } = useDeckRepo()
   const { logout } = useAuth()
+  const navigate = useNavigate()
   const { tier: currentTier, isGuest } = useTier()
-  const { data: plansData, isLoading } = usePlans()
-  const portalMutation = usePortalSession()
-  const syncImportMutation = useSyncImport()
+  const { data: plansData, isLoading, isError, refetch, isRefetching } = usePlans()
   const [billingInterval, setBillingInterval] = useState<'month' | 'year'>('month')
   const [giftTier, setGiftTier] = useState<'pro' | 'premium' | null>(null)
+  const [checkoutTier, setCheckoutTier] = useState<PlanTier | null>(null)
 
-  const guestData = guestStorage.read()
-  const hasGuestDecksToSave =
-    !!user &&
-    Array.isArray(guestData.decks) &&
-    typeof guestData.cardsByDeckId === 'object' &&
-    guestData.decks.length >= 1
+  const { hasGuestDecksToSave, isSyncing, saveGuestDecks } = useGuestSync()
 
   const handleUpgrade = async (tier: PlanTier, plan: PlanInfo) => {
+    if (checkoutTier) return
     trackEvent('pricing.upgrade_click', { tier, interval: billingInterval })
     if (isGuest) {
-      window.location.href = '/register'
+      navigate('/register')
       return
     }
     if (tier !== 'pro' && tier !== 'premium') return
@@ -93,6 +89,7 @@ export function PricingPage() {
       return
     }
 
+    setCheckoutTier(tier)
     try {
       await openPaddleCheckout(token, env, {
         priceId,
@@ -103,13 +100,15 @@ export function PricingPage() {
     } catch (err) {
       console.error('Paddle checkout failed', err)
       toast.error(t('pricing.checkoutError', 'Could not open checkout. Please try again.'))
+    } finally {
+      setCheckoutTier(null)
     }
   }
 
   const plans = plansData?.plans ?? []
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-[#0F0F11] grain">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-surface-base grain">
       <div
         className="fixed inset-0 opacity-[0.03] dark:opacity-[0.06] pointer-events-none z-0"
         style={{
@@ -123,22 +122,17 @@ export function PricingPage() {
         user={user}
         isApiMode={mode === 'api'}
         hasGuestDecksToSave={hasGuestDecksToSave}
-        isSyncing={syncImportMutation.isPending}
-        onSaveGuestDecks={() => {
-          syncImportMutation.mutate(
-            { version: 1 as const, decks: guestData.decks, cardsByDeckId: guestData.cardsByDeckId },
-            { onSuccess: () => guestStorage.clear() },
-          )
-        }}
+        isSyncing={isSyncing}
+        onSaveGuestDecks={saveGuestDecks}
         onLogout={logout}
       />
 
       <main className="relative z-10 flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 md:py-8">
         {/* Breadcrumb */}
-        <nav className="mb-6" aria-label="Breadcrumb">
+        <nav className="mb-6" aria-label={t('nav.breadcrumb', 'Breadcrumb')}>
           <ol className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
             <li>
-              <Link to="/" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+              <Link to="/" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
                 {t('common.home')}
               </Link>
             </li>
@@ -163,11 +157,13 @@ export function PricingPage() {
         <div className="flex justify-center mb-8">
           <div className="inline-flex rounded-lg bg-slate-100 dark:bg-slate-800 p-1">
             <button
+              type="button"
+              aria-pressed={billingInterval === 'month'}
               onClick={() => {
                 setBillingInterval('month')
                 trackEvent('pricing.billing_toggle', { interval: 'month' })
               }}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
                 billingInterval === 'month'
                   ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm'
                   : 'text-slate-600 dark:text-slate-400'
@@ -176,11 +172,13 @@ export function PricingPage() {
               {t('pricing.monthly')}
             </button>
             <button
+              type="button"
+              aria-pressed={billingInterval === 'year'}
               onClick={() => {
                 setBillingInterval('year')
                 trackEvent('pricing.billing_toggle', { interval: 'year' })
               }}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
                 billingInterval === 'year'
                   ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm'
                   : 'text-slate-600 dark:text-slate-400'
@@ -198,6 +196,16 @@ export function PricingPage() {
         {isLoading ? (
           <div className="flex justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+          </div>
+        ) : isError || plans.length === 0 ? (
+          <div className="max-w-md mx-auto text-center bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-md border border-slate-100 dark:border-slate-700/50 p-8">
+            <AlertCircle className="w-8 h-8 text-slate-400 mx-auto mb-3" aria-hidden />
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+              {t('pricing.plansError', 'Could not load plans. Check your connection and try again.')}
+            </p>
+            <Button variant="secondary" size="sm" loading={isRefetching} onClick={() => refetch()}>
+              {t('common.retry', 'Retry')}
+            </Button>
           </div>
         ) : (
           <div className="grid md:grid-cols-3 gap-6">
@@ -300,19 +308,13 @@ export function PricingPage() {
                     ) : isGuest ? (
                       <Link
                         to="/register"
-                        className="block text-center px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                        className="block text-center px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
                       >
                         {t('pricing.getStarted')}
                       </Link>
                     ) : (
-                      <button
-                        type="button"
-                        onClick={() => portalMutation.mutate()}
-                        disabled={portalMutation.isPending}
-                        className="block w-full text-center px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-60"
-                      >
-                        {t('pricing.manageSubscription', 'Manage subscription')}
-                      </button>
+                      // No billing portal pre-Paddle: paid users see no action on the free card.
+                      <div className="py-2.5" aria-hidden />
                     )
                   ) : isCurrent ? (
                     <div className="text-center text-sm text-slate-500 dark:text-slate-400 py-2.5">
@@ -320,13 +322,16 @@ export function PricingPage() {
                     </div>
                   ) : (
                     <button
+                      type="button"
                       onClick={() => handleUpgrade(plan.tier, plan)}
-                      className={`w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                      disabled={checkoutTier !== null}
+                      className={`w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 disabled:opacity-60 disabled:cursor-not-allowed ${
                         plan.tier === 'pro'
-                          ? 'bg-primary-600 hover:bg-primary-700 text-white'
-                          : 'bg-amber-500 hover:bg-amber-600 text-white'
+                          ? 'bg-primary-600 hover:bg-primary-700 text-white focus-visible:ring-primary-500'
+                          : 'bg-amber-500 hover:bg-amber-600 text-white focus-visible:ring-amber-500'
                       }`}
                     >
+                      {checkoutTier === plan.tier && <Loader2 className="w-4 h-4 animate-spin" aria-hidden />}
                       {isGuest ? (
                         t('pricing.getStarted')
                       ) : (
@@ -339,6 +344,19 @@ export function PricingPage() {
             })}
           </div>
         )}
+
+        {/* Trust note */}
+        <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
+          {t('pricing.cancelAnytime', 'Cancel anytime.')}{' '}
+          <a
+            href="https://esli.app/refund"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-primary-600 dark:hover:text-primary-400 transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          >
+            {t('pricing.refundPolicy', 'Refund policy')}
+          </a>
+        </p>
 
         {/* Promo Code Section */}
         {!isGuest && (

@@ -41,7 +41,7 @@ export function AIChatTab() {
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-3 space-y-3">
         {messages.length === 0 && !sendMutation.isPending && (
-          <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-slate-500 text-sm">
+          <div className="flex flex-col items-center justify-center h-full text-slate-400 dark:text-slate-500 text-sm">
             <Bot className="w-10 h-10 mb-2 opacity-50" />
             <p className="text-center">{t('chat.aiWelcome')}</p>
           </div>
@@ -51,7 +51,7 @@ export function AIChatTab() {
         ))}
         {sendMutation.isPending && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 dark:bg-slate-600 rounded-2xl rounded-bl-md px-4 py-3 text-sm text-gray-500 dark:text-slate-400 flex items-center gap-2">
+            <div className="bg-slate-100 dark:bg-slate-600 rounded-2xl rounded-bl-md px-4 py-3 text-sm text-slate-500 dark:text-slate-400 flex items-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin" />
               {t('chat.aiThinking')}
             </div>

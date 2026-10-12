@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Link, useParams, useNavigate } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import {
   ChevronRight,
@@ -8,6 +8,7 @@ import {
   User,
   Loader2,
   ArrowLeft,
+  Check,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAuthContext } from '@/app/providers/AuthProvider'
@@ -18,19 +19,21 @@ import { useSyncImport } from '@/features/sync/hooks'
 import { guestStorage } from '@/shared/lib/guestStorage'
 import { usePageMeta } from '@/shared/lib/usePageMeta'
 import { stripHtml } from '@/shared/lib/htmlUtils'
+import { RichTextDisplay } from '@/shared/ui/RichTextDisplay'
 import { DashboardNavbar } from '@/pages/dashboard/components/DashboardNavbar'
 
 export function PublicDeckDetailPage() {
   const { t } = useTranslation()
   const { deckId } = useParams<{ deckId: string }>()
-  const navigate = useNavigate()
   const { user } = useAuthContext()
   const { logout } = useAuth()
   const { mode } = useDeckRepo()
   const syncImportMutation = useSyncImport()
   const [isCopying, setIsCopying] = useState(false)
+  // Id of the user's copied deck once the copy succeeded
+  const [copiedDeckId, setCopiedDeckId] = useState<string | null>(null)
 
-  const guestData = guestStorage.read()
+  const guestData = useMemo(() => guestStorage.read(), [])
   const hasGuestDecksToSave =
     !!user &&
     Array.isArray(guestData.decks) &&
@@ -95,10 +98,12 @@ export function PublicDeckDetailPage() {
     setIsCopying(true)
     try {
       const result = await copyDeckMutation.mutateAsync(deckId)
-      toast.success(t('toast.deckCopied'))
-      setTimeout(() => {
-        navigate(`/deck/${result.id}`)
-      }, 1500)
+      toast.success(
+        deck
+          ? t('browse.copiedToLibrary', '"{{title}}" copied to your library', { title: deck.title })
+          : t('toast.deckCopied'),
+      )
+      setCopiedDeckId(result.id)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t('toast.failedToCopyDeck'))
     } finally {
@@ -116,7 +121,7 @@ export function PublicDeckDetailPage() {
   const tags = deck ? parseTags(deck.categoryTags) : []
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-[#0F0F11] grain relative overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-surface-base grain relative overflow-x-hidden">
       {/* Decorative background */}
       <div
         className="fixed inset-0 opacity-[0.03] dark:opacity-[0.06] pointer-events-none z-0"
@@ -210,30 +215,40 @@ export function PublicDeckDetailPage() {
                   </span>
                   <span className="flex items-center gap-1.5">
                     <User className="w-4 h-4 shrink-0" aria-hidden />
-                    <span>{deck.owner.email}</span>
+                    <span>{deck.owner.username || t('browse.communityAuthor', 'Community member')}</span>
                   </span>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={handleCopy}
-                    disabled={isCopying}
-                    className="inline-flex items-center justify-center gap-2 min-h-[44px] px-6 py-2.5 rounded-lg text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
-                    title={t('browse.copyToLibraryTitle')}
-                  >
-                    {isCopying ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        {t('browse.copying')}
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-4 h-4" />
-                        {t('browse.copyToLibrary')}
-                      </>
-                    )}
-                  </button>
+                  {copiedDeckId ? (
+                    <Link
+                      to={`/deck/${copiedDeckId}`}
+                      className="inline-flex items-center justify-center gap-2 min-h-[44px] px-6 py-2.5 rounded-lg text-sm font-medium text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700/50 hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800"
+                    >
+                      <Check className="w-4 h-4" aria-hidden />
+                      {t('browse.copied', 'Copied')}
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleCopy}
+                      disabled={isCopying}
+                      className="inline-flex items-center justify-center gap-2 min-h-[44px] px-6 py-2.5 rounded-lg text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800"
+                      title={t('browse.copyToLibraryTitle')}
+                    >
+                      {isCopying ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          {t('browse.copying')}
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-4 h-4" />
+                          {t('browse.copyToLibrary')}
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -243,7 +258,9 @@ export function PublicDeckDetailPage() {
               {/* Cards section */}
               <div>
                 <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">
-                  {t('browse.cardsCount')} ({cards?.length ?? 0})
+                  {cards && cards.length < deck.cardCount
+                    ? t('browse.showingFirst', 'Showing first {{count}} cards', { count: cards.length })
+                    : `${t('browse.cardsCount')} (${deck.cardCount})`}
                 </h2>
 
                 {cardsLoading ? (
@@ -280,9 +297,11 @@ export function PublicDeckDetailPage() {
                           {/* Front */}
                           <div className="flex-1 min-w-0">
                             <span className="sm:hidden text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1 block">{t('deck.frontLabel')}</span>
-                            <p className="text-sm text-slate-800 dark:text-slate-100 whitespace-pre-wrap break-words">
-                              {card.frontText || <span className="italic text-slate-400 dark:text-slate-500">{t('deck.noFrontText')}</span>}
-                            </p>
+                            {card.frontText ? (
+                              <RichTextDisplay content={card.frontText} className="text-sm text-slate-800 dark:text-slate-100 break-words" />
+                            ) : (
+                              <p className="text-sm italic text-slate-400 dark:text-slate-500">{t('deck.noFrontText')}</p>
+                            )}
                             {card.frontImageUrl && (
                               <img src={card.frontImageUrl} alt="" className="mt-2 max-h-24 rounded border border-slate-200 dark:border-slate-600" />
                             )}
@@ -294,9 +313,11 @@ export function PublicDeckDetailPage() {
                           {/* Back */}
                           <div className="flex-1 min-w-0">
                             <span className="sm:hidden text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1 block">{t('deck.backLabel')}</span>
-                            <p className="text-sm text-slate-700 dark:text-slate-200 whitespace-pre-wrap break-words">
-                              {card.backText || <span className="italic text-slate-400 dark:text-slate-500">{t('deck.noBackText')}</span>}
-                            </p>
+                            {card.backText ? (
+                              <RichTextDisplay content={card.backText} className="text-sm text-slate-700 dark:text-slate-200 break-words" />
+                            ) : (
+                              <p className="text-sm italic text-slate-400 dark:text-slate-500">{t('deck.noBackText')}</p>
+                            )}
                             {card.backImageUrl && (
                               <img src={card.backImageUrl} alt="" className="mt-2 max-h-24 rounded border border-slate-200 dark:border-slate-600" />
                             )}

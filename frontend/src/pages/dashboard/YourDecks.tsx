@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
@@ -18,7 +18,10 @@ import {
   User,
 } from 'lucide-react'
 import { useDecks, useCreateDeck, useDeleteDeck } from '@/features/decks/hooks'
+import { useDashboardStats } from '@/features/stats/statsHooks'
+import type { DeckProgress } from '@/features/stats/types'
 import { DeckCard } from './components/DeckCard'
+import { Skeleton } from '@/shared/ui/Skeleton'
 import { CreateDeckModal, type CreateMethod } from './components/CreateDeckModal'
 import { DeleteDeckModal } from './components/DeleteDeckModal'
 import { AIGenerateDeckModal } from './components/AIGenerateDeckModal'
@@ -34,7 +37,7 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' as const } },
 }
 
-const CONFETTI_COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'] as const
+const CONFETTI_COLORS = ['rgb(var(--color-primary-500))', '#10b981', '#f59e0b', '#ec4899', 'rgb(var(--color-primary-300))'] as const
 
 function ConfettiOverlay() {
   const pieces = useMemo(() => {
@@ -76,6 +79,12 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { data: decks = [], isLoading } = useDecks()
+  const { data: stats } = useDashboardStats()
+  const progressByDeck = useMemo(() => {
+    const map = new Map<string, DeckProgress>()
+    for (const p of stats?.deckProgress ?? []) map.set(p.deckId, p)
+    return map
+  }, [stats])
   const createDeckMutation = useCreateDeck()
   const deleteDeckMutation = useDeleteDeck()
 
@@ -87,7 +96,6 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [showConfetti, setShowConfetti] = useState(false)
   const [showAIModal, setShowAIModal] = useState(false)
-  const hasCreatedDeckBeforeRef = useRef(false)
   const [guestWarningDismissed, setGuestWarningDismissed] = useState(
     () => localStorage.getItem('flashcards-guest-warning-dismissed') === '1'
   )
@@ -140,9 +148,8 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
     }
 
     try {
+      const isFirstDeck = decks.length === 0
       const deck = await createDeckMutation.mutateAsync({ title, categoryTags })
-      const isFirstDeck = !hasCreatedDeckBeforeRef.current
-      hasCreatedDeckBeforeRef.current = true
       setShowCreateModal(false)
 
       // Navigate to deck page with the appropriate add mode
@@ -151,8 +158,8 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
 
       if (isFirstDeck) {
         setShowConfetti(true)
-        setTimeout(() => setShowConfetti(false), 2500)
-        setTimeout(() => navigate(url), 1200)
+        setTimeout(() => setShowConfetti(false), 2000)
+        setTimeout(() => navigate(url), 700)
       } else {
         navigate(url)
       }
@@ -192,33 +199,20 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
     <section className={`animate-fade-in${limit ? ' flex-1 flex flex-col' : ''}`}>
       {showConfetti && <ConfettiOverlay />}
 
-      {/* Mobile FAB */}
-      <button
-        type="button"
-        onClick={() => setShowCreateModal(true)}
-        className="md:hidden fixed bottom-20 right-4 z-40 min-w-[56px] min-h-[56px] flex items-center justify-center rounded-full bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white shadow-elevation-md hover:shadow-elevation-lg transition-[box-shadow,background-color] duration-200 focus:outline-none focus:ring-4 focus:ring-primary-500/50"
-        aria-label={t('dashboard.createNewDeck')}
-        title={t('dashboard.createNewDeck')}
-      >
-        <Plus className="w-7 h-7" aria-hidden />
-      </button>
-
       {/* Header */}
       <div className="flex flex-col gap-4 mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">{t('dashboard.yourDecks')}</h2>
-            {!limit && (
-              <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                {isLoading ? t('common.loading') : filteredAndSortedDecks.length === 0 && !searchQuery ? t('dashboard.noDecksYet') : t('dashboard.deckCount', { count: filteredAndSortedDecks.length })}
-              </p>
-            )}
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+              {isLoading ? t('common.loading') : decks.length === 0 ? t('dashboard.noDecksYet') : t('dashboard.deckCount', { count: limit ? decks.length : filteredAndSortedDecks.length })}
+            </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
               onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
+              className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white font-medium transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800"
               aria-label={t('dashboard.createNewDeckKeyboard')}
               title={t('dashboard.createNewDeckPress')}
             >
@@ -296,7 +290,7 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
               <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
                 {t('dashboard.guestInfoMessage')}
               </p>
-              <Link to="/register" className="inline-flex items-center justify-center min-h-[40px] px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800">{t('dashboard.createFreeAccount')}</Link>
+              <Link to="/register" className="inline-flex items-center justify-center min-h-[40px] px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800">{t('dashboard.createFreeAccount')}</Link>
             </div>
             <button
               type="button"
@@ -327,18 +321,18 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
         <div className={`grid grid-cols-1 ${limit ? 'sm:grid-cols-2 gap-4 flex-1' : 'sm:grid-cols-2 lg:grid-cols-3 gap-6'}`}>
           {[1, 2, 3].map((i) => (
             <div key={i} className="bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 border-t-4 border-t-slate-200 dark:border-t-slate-600" aria-hidden>
-              <div className="h-6 rounded w-3/4 mb-3 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 bg-[length:200%_100%] animate-shimmer" />
+              <Skeleton className="h-6 w-3/4 mb-3" />
               <div className="flex gap-2 mb-3">
-                <div className="h-5 rounded-full w-16 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 bg-[length:200%_100%] animate-shimmer" />
-                <div className="h-5 rounded-full w-20 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 bg-[length:200%_100%] animate-shimmer" />
+                <Skeleton className="h-5 rounded-full w-16" />
+                <Skeleton className="h-5 rounded-full w-20" />
               </div>
               <div className="flex gap-3 mb-4">
-                <div className="h-4 rounded w-20 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 bg-[length:200%_100%] animate-shimmer" />
-                <div className="h-4 rounded w-24 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 bg-[length:200%_100%] animate-shimmer" />
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-4 w-24" />
               </div>
               <div className="flex gap-2">
-                <div className="h-9 rounded-lg w-16 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 bg-[length:200%_100%] animate-shimmer" />
-                <div className="h-9 rounded-lg w-14 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 bg-[length:200%_100%] animate-shimmer" />
+                <Skeleton className="h-9 w-16" />
+                <Skeleton className="h-9 w-14" />
               </div>
             </div>
           ))}
@@ -368,7 +362,7 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
             <button
               type="button"
               onClick={() => openCreateModal('empty')}
-              className="flex flex-col items-center gap-3 p-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-elevation-md transition-[box-shadow,border-color] duration-200 text-center group focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
+              className="flex flex-col items-center gap-3 p-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-elevation-md transition-[box-shadow,border-color] duration-200 text-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800"
             >
               <div className="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Plus className="w-6 h-6 text-primary-600 dark:text-primary-400" aria-hidden />
@@ -383,10 +377,10 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
             <button
               type="button"
               onClick={() => setShowAIModal(true)}
-              className="flex flex-col items-center gap-3 p-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-violet-300 dark:hover:border-violet-600 hover:shadow-elevation-md transition-[box-shadow,border-color] duration-200 text-center group focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
+              className="flex flex-col items-center gap-3 p-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-elevation-md transition-[box-shadow,border-color] duration-200 text-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
             >
-              <div className="w-12 h-12 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Sparkles className="w-6 h-6 text-violet-600 dark:text-violet-400" aria-hidden />
+              <div className="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Sparkles className="w-6 h-6 text-primary-600 dark:text-primary-400" aria-hidden />
               </div>
               <div>
                 <p className="font-semibold text-slate-800 dark:text-slate-100 text-sm">{t('dashboard.getStarted.generateAI')}</p>
@@ -398,7 +392,7 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
             <button
               type="button"
               onClick={() => openCreateModal('file')}
-              className="flex flex-col items-center gap-3 p-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-emerald-300 dark:hover:border-emerald-600 hover:shadow-elevation-md transition-[box-shadow,border-color] duration-200 text-center group focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
+              className="flex flex-col items-center gap-3 p-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-emerald-300 dark:hover:border-emerald-600 hover:shadow-elevation-md transition-[box-shadow,border-color] duration-200 text-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800"
             >
               <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <FileSpreadsheet className="w-6 h-6 text-emerald-600 dark:text-emerald-400" aria-hidden />
@@ -413,7 +407,7 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
             <button
               type="button"
               onClick={() => openCreateModal('bulk')}
-              className="flex flex-col items-center gap-3 p-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-amber-300 dark:hover:border-amber-600 hover:shadow-elevation-md transition-[box-shadow,border-color] duration-200 text-center group focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
+              className="flex flex-col items-center gap-3 p-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-amber-300 dark:hover:border-amber-600 hover:shadow-elevation-md transition-[box-shadow,border-color] duration-200 text-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800"
             >
               <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Upload className="w-6 h-6 text-amber-600 dark:text-amber-400" aria-hidden />
@@ -427,7 +421,7 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
             {/* Browse Shared Decks */}
             <Link
               to="/browse"
-              className="flex flex-col items-center gap-3 p-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-sky-300 dark:hover:border-sky-600 hover:shadow-elevation-md transition-[box-shadow,border-color] duration-200 text-center group focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 col-span-2 sm:col-span-1"
+              className="flex flex-col items-center gap-3 p-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-sky-300 dark:hover:border-sky-600 hover:shadow-elevation-md transition-[box-shadow,border-color] duration-200 text-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800 col-span-2 sm:col-span-1"
             >
               <div className="w-12 h-12 rounded-full bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Globe className="w-6 h-6 text-sky-600 dark:text-sky-400" aria-hidden />
@@ -464,6 +458,7 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
                 onDelete={handleDeleteDeckClick}
                 isDeleting={deleteDeckMutation.isPending && deckToDelete === deck.id}
                 viewMode={viewMode}
+                progress={progressByDeck.get(deck.id)}
               />
             </motion.div>
           ))}
@@ -473,7 +468,7 @@ export function YourDecks({ isGuest, limit, categoryFilter }: YourDecksProps) {
       {/* Bottom "View all" link when limited */}
       {limit && decks.length > limit && (
         <div className="mt-auto pt-6 border-t border-slate-100 dark:border-slate-700/50">
-          <Link to="/decks" className="inline-flex items-center gap-2 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium transition-colors">
+          <Link to="/decks" className="inline-flex items-center gap-2 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
             {t('dashboard.viewAllDecks', { count: decks.length })} <ArrowRight className="w-4 h-4" />
           </Link>
         </div>

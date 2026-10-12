@@ -107,13 +107,13 @@ export function AIGenerateTab({
     } catch (err) {
       if (err instanceof DOMException && err.name === 'AbortError') return
       setGenerateError(
-        err instanceof Error ? err.message : 'Failed to generate cards',
+        err instanceof Error ? err.message : t('ai.generateFailed', 'Failed to generate cards'),
       )
       setStep('prompt')
     } finally {
       abortRef.current = null
     }
-  }, [topic, count, inputMode, pdfFile, existingCards])
+  }, [topic, count, inputMode, pdfFile, existingCards, t])
 
   const handleFileSelect = useCallback((file: File) => {
     if (file.type !== 'application/pdf') {
@@ -172,11 +172,11 @@ export function AIGenerateTab({
       setStep('done')
     } catch (err) {
       setSaveError(
-        err instanceof Error ? err.message : 'Failed to save cards',
+        err instanceof Error ? err.message : t('ai.saveFailed', 'Failed to save cards'),
       )
       setStep('preview')
     }
-  }, [generatedCards, deckId, onAddBatch])
+  }, [generatedCards, deckId, onAddBatch, t])
 
   const resetToPrompt = () => {
     setStep('prompt')
@@ -220,7 +220,7 @@ export function AIGenerateTab({
             <button
               type="button"
               onClick={() => setInputMode('topic')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
                 inputMode === 'topic'
                   ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-sm'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
@@ -232,7 +232,7 @@ export function AIGenerateTab({
             <button
               type="button"
               onClick={() => setInputMode('pdf')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
                 inputMode === 'pdf'
                   ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-sm'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
@@ -269,10 +269,19 @@ export function AIGenerateTab({
               {/* PDF upload area */}
               {!pdfFile ? (
                 <div
+                  role="button"
+                  tabIndex={0}
+                  aria-label={t('ai.dropPdfHere')}
                   onDrop={handleDrop}
                   onDragOver={(e) => e.preventDefault()}
                   onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-8 text-center cursor-pointer hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-50/50 dark:hover:bg-primary-900/10 transition-colors"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      fileInputRef.current?.click()
+                    }
+                  }}
+                  className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-8 text-center cursor-pointer hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-50/50 dark:hover:bg-primary-900/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                 >
                   <Upload className="w-8 h-8 mx-auto mb-3 text-slate-400 dark:text-slate-500" />
                   <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
@@ -306,7 +315,7 @@ export function AIGenerateTab({
                   <button
                     type="button"
                     onClick={() => setPdfFile(null)}
-                    className="p-1 rounded text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                    className="p-1 rounded text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                     aria-label={t('common.delete')}
                   >
                     <X className="w-4 h-4" />
@@ -382,7 +391,7 @@ export function AIGenerateTab({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           >
             {t('common.cancel')}
           </button>
@@ -390,7 +399,7 @@ export function AIGenerateTab({
             type="button"
             onClick={handleGenerate}
             disabled={!canGenerate}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           >
             <Sparkles className="w-4 h-4" />
             {t('ai.generate')}
@@ -416,7 +425,7 @@ export function AIGenerateTab({
         <button
           type="button"
           onClick={handleCancelGeneration}
-          className="mt-2 px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"
+          className="mt-2 px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
         >
           {t('common.cancel')}
         </button>
@@ -479,7 +488,7 @@ export function AIGenerateTab({
                       <button
                         type="button"
                         onClick={() => removeCard(i)}
-                        className="p-1 rounded text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                        className="p-1 rounded text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                         aria-label={t('ai.removeCard')}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -512,7 +521,7 @@ export function AIGenerateTab({
           <button
             type="button"
             onClick={handleBackToPrompt}
-            className="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm rounded text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             {t('ai.editAndRegenerate')}
@@ -521,7 +530,7 @@ export function AIGenerateTab({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             >
               {t('common.cancel')}
             </button>
@@ -529,7 +538,7 @@ export function AIGenerateTab({
               type="button"
               onClick={handleSave}
               disabled={isPending || generatedCards.length === 0}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             >
               <Sparkles className="w-4 h-4" />
               {t('ai.addCards', { count: generatedCards.length })}
@@ -565,14 +574,14 @@ export function AIGenerateTab({
         <button
           type="button"
           onClick={resetToPrompt}
-          className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+          className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
         >
           {t('ai.regenerate')}
         </button>
         <button
           type="button"
           onClick={onClose}
-          className="px-4 py-2 rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white transition-colors"
+          className="px-4 py-2 rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
         >
           {t('common.done')}
         </button>

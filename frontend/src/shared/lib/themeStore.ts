@@ -166,7 +166,8 @@ export function getStoredDarkMode(): DarkMode {
   if (typeof window === 'undefined') return 'system'
   const stored = localStorage.getItem(DARK_MODE_KEY)
   if (stored === 'light' || stored === 'dark' || stored === 'system') return stored
-  return 'system'
+  // Dark is the brand default for first-time visitors (see .claude/rules/frontend-design.md).
+  return 'dark'
 }
 
 export function setStoredDarkMode(mode: DarkMode): void {

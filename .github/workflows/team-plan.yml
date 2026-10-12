@@ -1,0 +1,39 @@
+name: Team Plan
+
+on:
+  schedule:
+    - cron: '0 3 * * *'   # 08:00 Tashkent (UTC+5) — morning plan
+  workflow_dispatch:
+  repository_dispatch:
+    types: [run_orchestrator]
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Run Chief of Staff (orchestrator)
+        working-directory: agents/scripts
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python3 orchestrator.py
+
+      - name: Commit plan
+        run: |
+          git config user.email "agent@esli.app"
+          git config user.name "Esli Agent"
+          git add agents/reports/plans/
+          git diff --staged --quiet || git commit -m "chore: daily plan $(date +%Y-%m-%d)"
+          git push

@@ -6,6 +6,7 @@ from jose import jwt, JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.core.security import access_token_matches_password
 from app.db.session import get_db
 from app.db.models.user import User
 from app.services.user_service import get_user_by_id
@@ -27,7 +28,8 @@ async def get_current_user(
     try:
         payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALG])
         user_id_str: str = payload.get("sub")
-        if not user_id_str:
+        # Purpose-scoped tokens (e.g. password reset) are not access tokens
+        if not user_id_str or payload.get("purpose"):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid token: missing subject",
@@ -52,6 +54,11 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found",
         )
+    if not access_token_matches_password(payload, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+        )
 
     return user
 
@@ -67,13 +74,16 @@ async def get_optional_current_user(
     try:
         payload = jwt.decode(credentials.credentials, settings.JWT_SECRET, algorithms=[settings.JWT_ALG])
         user_id_str: str = payload.get("sub")
-        if not user_id_str:
+        if not user_id_str or payload.get("purpose"):
             return None
         user_id = uuid.UUID(user_id_str)
     except (JWTError, ValueError):
         return None
 
-    return await get_user_by_id(db, user_id)
+    user = await get_user_by_id(db, user_id)
+    if user and not access_token_matches_password(payload, user.password_hash):
+        return None
+    return user
 
 
 async def get_admin_user(

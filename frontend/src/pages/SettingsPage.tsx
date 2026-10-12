@@ -9,7 +9,7 @@ import { useAuth } from '@/features/auth/hooks/useAuth'
 import { useDeckRepo } from '@/features/decks/repo'
 import { useTheme } from '@/app/providers/ThemeProvider'
 import { authApi } from '@/features/auth/api'
-import { useSyncImport } from '@/features/sync/hooks'
+import { useGuestSync } from '@/features/sync/useGuestSync'
 import { guestStorage } from '@/shared/lib/guestStorage'
 import { statsKeys } from '@/features/stats/statsHooks'
 import { THEME_PRESETS, type ThemeName, type DarkMode } from '@/shared/lib/themeStore'
@@ -28,31 +28,18 @@ export function SettingsPage() {
   const { mode } = useDeckRepo()
   const queryClient = useQueryClient()
   const { theme, setTheme, darkMode, setDarkMode } = useTheme()
-  const syncImportMutation = useSyncImport()
   const isGuest = !user
 
-  const guestData = guestStorage.read()
-  const hasGuestDecksToSave =
-    !!user &&
-    Array.isArray(guestData.decks) &&
-    typeof guestData.cardsByDeckId === 'object' &&
-    guestData.decks.length >= 1
-  const handleSaveGuestDecks = () => {
-    if (!hasGuestDecksToSave) return
-    syncImportMutation.mutate(
-      { version: 1 as const, decks: guestData.decks, cardsByDeckId: guestData.cardsByDeckId },
-      { onSuccess: () => guestStorage.clear() },
-    )
-  }
+  const { hasGuestDecksToSave, isSyncing, saveGuestDecks } = useGuestSync()
 
-  // Daily new card limit state
-  const [newCardLimit, setNewCardLimit] = useState<number>(() => {
-    if (user) return user.daily_new_card_limit ?? 20
-    return guestStorage.read().settings?.dailyNewCardLimit ?? 20
+  // Daily new card limit state (string so the field can be cleared while typing)
+  const [newCardLimit, setNewCardLimit] = useState<string>(() => {
+    if (user) return String(user.daily_new_card_limit ?? 20)
+    return String(guestStorage.read().settings?.dailyNewCardLimit ?? 20)
   })
   useEffect(() => {
     if (user?.daily_new_card_limit != null) {
-      setNewCardLimit(user.daily_new_card_limit)
+      setNewCardLimit(String(user.daily_new_card_limit))
     }
   }, [user?.daily_new_card_limit])
 
@@ -69,8 +56,10 @@ export function SettingsPage() {
   })
 
   const handleLimitSave = () => {
-    const clampedLimit = Math.max(0, Math.min(9999, newCardLimit))
-    setNewCardLimit(clampedLimit)
+    const parsed = parseInt(newCardLimit, 10)
+    if (Number.isNaN(parsed)) return
+    const clampedLimit = Math.max(0, Math.min(9999, parsed))
+    setNewCardLimit(String(clampedLimit))
 
     if (isGuest) {
       const data = guestStorage.read()
@@ -175,12 +164,12 @@ export function SettingsPage() {
                   : tier === 'pro' ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
                   : 'bg-slate-100 text-slate-600 dark:bg-slate-600 dark:text-slate-300'
                 }`}>
-                  {tier.charAt(0).toUpperCase() + tier.slice(1)}
+                  {tier === 'premium' ? t('tier.premium', 'Premium') : tier === 'pro' ? t('tier.pro', 'Pro') : t('tier.free', 'Free')}
                 </span>
               </div>
               <Link
                 to="/pricing"
-                className="text-sm text-primary-600 dark:text-primary-400 hover:underline"
+                className="text-sm text-primary-600 dark:text-primary-400 hover:underline rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
               >
                 {isFree ? t('pricing.upgrade') : t('subscription.changePlan')}
               </Link>
@@ -212,7 +201,7 @@ export function SettingsPage() {
                 type="button"
                 onClick={() => portalMutation.mutate()}
                 disabled={portalMutation.isPending}
-                className="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-60"
+                className="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800 disabled:opacity-60"
               >
                 {portalMutation.isPending ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -253,7 +242,7 @@ export function SettingsPage() {
                 key={lang.code}
                 type="button"
                 onClick={() => handleLanguageChange(lang.code)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-colors ${
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800 ${
                   isActive
                     ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                     : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
@@ -272,8 +261,8 @@ export function SettingsPage() {
       {/* Daily New Card Limit Section */}
       <section>
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
-            <Layers className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+          <div className="p-2 rounded-lg bg-primary-100 dark:bg-primary-900/30">
+            <Layers className="w-5 h-5 text-primary-600 dark:text-primary-400" />
           </div>
           <div>
             <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
@@ -287,20 +276,23 @@ export function SettingsPage() {
 
         <div className="flex items-center gap-3">
           <input
+            id="daily-new-card-limit"
             type="number"
+            inputMode="numeric"
             min={0}
             max={9999}
+            aria-label={t('settings.dailyNewCardLimit')}
             value={newCardLimit}
-            onChange={(e) => setNewCardLimit(parseInt(e.target.value) || 0)}
+            onChange={(e) => setNewCardLimit(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') handleLimitSave() }}
-            className="w-28 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-center font-medium focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            className="w-28 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-center font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:border-transparent"
           />
-          <span className="text-sm text-slate-600 dark:text-slate-400">{t('settings.cardsPerDay')}</span>
+          <label htmlFor="daily-new-card-limit" className="text-sm text-slate-600 dark:text-slate-400">{t('settings.cardsPerDay')}</label>
           <button
             type="button"
             onClick={handleLimitSave}
-            disabled={updateLimitMutation.isPending}
-            className="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors disabled:opacity-60"
+            disabled={updateLimitMutation.isPending || newCardLimit.trim() === ''}
+            className="px-4 py-2 min-h-[40px] rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800 disabled:opacity-60"
           >
             {updateLimitMutation.isPending ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -311,7 +303,7 @@ export function SettingsPage() {
         </div>
 
         <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-          {t('settings.dailyNewCardLimitHelp')}
+          {t('settings.dailyNewCardLimitHelp')} {t('settings.limitSaveHint', 'Press Enter or click Save to apply.')}
         </p>
       </section>
 
@@ -339,7 +331,7 @@ export function SettingsPage() {
                 key={opt.mode}
                 type="button"
                 onClick={() => handleDarkModeChange(opt.mode)}
-                className={`flex flex-col items-center gap-2 px-4 py-4 rounded-lg border-2 transition-colors ${
+                className={`flex flex-col items-center gap-2 px-4 py-4 rounded-lg border-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800 ${
                   isActive
                     ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                     : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
@@ -384,7 +376,7 @@ export function SettingsPage() {
                 key={preset.name}
                 type="button"
                 onClick={() => handleThemeChange(preset.name)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-colors ${
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800 ${
                   isActive
                     ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                     : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
@@ -408,7 +400,7 @@ export function SettingsPage() {
   )
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-[#0F0F11] grain">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-surface-base grain">
       {/* Decorative background */}
       <div
         className="fixed inset-0 opacity-[0.03] dark:opacity-[0.06] pointer-events-none z-0"
@@ -423,17 +415,17 @@ export function SettingsPage() {
         user={user}
         isApiMode={mode === 'api'}
         hasGuestDecksToSave={hasGuestDecksToSave}
-        isSyncing={syncImportMutation.isPending}
-        onSaveGuestDecks={handleSaveGuestDecks}
+        isSyncing={isSyncing}
+        onSaveGuestDecks={saveGuestDecks}
         onLogout={logout}
       />
 
       <main className="relative z-10 flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-6 md:py-8">
         {/* Breadcrumb */}
-        <nav className="mb-6" aria-label="Breadcrumb">
+        <nav className="mb-6" aria-label={t('nav.breadcrumb', 'Breadcrumb')}>
           <ol className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
             <li>
-              <Link to="/" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+              <Link to="/" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
                 {t('common.home')}
               </Link>
             </li>
@@ -446,7 +438,7 @@ export function SettingsPage() {
           </ol>
         </nav>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700/50 p-6 md:p-8">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-md border border-slate-100 dark:border-slate-700/50 p-6 md:p-8">
           <h1 className="text-2xl font-display font-bold text-slate-800 dark:text-slate-100 mb-6">{t('settings.title')}</h1>
           {settingsContent}
         </div>

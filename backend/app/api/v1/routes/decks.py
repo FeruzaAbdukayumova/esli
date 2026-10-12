@@ -21,8 +21,13 @@ async def list_decks(
 ):
     """Return list of decks owned by the current user."""
     current_user, tier = user_tier
-    decks = await deck_service.list_decks_by_owner(db, current_user.id)
-    return [DeckResponse.model_validate(d) for d in decks]
+    decks_with_counts = await deck_service.list_decks_with_card_counts(db, current_user.id)
+    responses = []
+    for deck, card_count in decks_with_counts:
+        resp = DeckResponse.model_validate(deck)
+        resp.card_count = card_count
+        responses.append(resp)
+    return responses
 
 
 @router.get("/{deck_id}", response_model=DeckResponse)
@@ -36,7 +41,9 @@ async def get_deck(
     deck = await deck_service.get_deck_by_id_for_user(db, deck_id, current_user.id)
     if not deck:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Deck not found")
-    return DeckResponse.model_validate(deck)
+    resp = DeckResponse.model_validate(deck)
+    resp.card_count = await deck_service.count_cards_by_deck(db, deck_id)
+    return resp
 
 
 @router.post("", response_model=DeckResponse, status_code=status.HTTP_201_CREATED)
@@ -84,7 +91,9 @@ async def update_deck(
     deck = await deck_service.update_deck(db, deck_id, current_user.id, data)
     if not deck:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Deck not found")
-    return DeckResponse.model_validate(deck)
+    resp = DeckResponse.model_validate(deck)
+    resp.card_count = await deck_service.count_cards_by_deck(db, deck_id)
+    return resp
 
 
 @router.delete("/{deck_id}", status_code=status.HTTP_204_NO_CONTENT)

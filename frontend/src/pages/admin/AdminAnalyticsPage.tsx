@@ -38,12 +38,12 @@ const RESPONSE_COLORS: Record<string, string> = {
   again: '#ef4444',
   hard: '#f59e0b',
   good: '#10b981',
-  easy: '#6366f1',
+  easy: '#7c3aed',
 }
 
 const TIER_COLORS: Record<string, string> = {
   free: '#94a3b8',
-  pro: '#6366f1',
+  pro: '#7c3aed',
   premium: '#f59e0b',
 }
 
@@ -233,7 +233,7 @@ export function AdminAnalyticsPage() {
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors duration-200 ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
                 activeTab === tab.id
                   ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -288,7 +288,7 @@ export function AdminAnalyticsPage() {
               <TimeSeriesChart
                 data={userGrowthChartData}
                 series={[
-                  { dataKey: 'signups', name: t('admin.analytics.userGrowth.signups', 'Signups'), color: '#6366f1' },
+                  { dataKey: 'signups', name: t('admin.analytics.userGrowth.signups', 'Signups'), color: '#7c3aed' },
                   { dataKey: 'active', name: t('admin.analytics.userGrowth.activeUsers', 'Active Users'), color: '#10b981' },
                 ]}
               />
@@ -303,7 +303,7 @@ export function AdminAnalyticsPage() {
             <ChartCard title={t('admin.analytics.study.reviewsOverTime', 'Reviews Over Time')}>
               <TimeSeriesChart
                 data={(studyEngagement.data?.reviews_over_time ?? []).map((p) => ({ date: p.date, reviews: p.value }))}
-                series={[{ dataKey: 'reviews', name: t('admin.analytics.study.reviewsOverTime', 'Reviews'), color: '#6366f1' }]}
+                series={[{ dataKey: 'reviews', name: t('admin.analytics.study.reviewsOverTime', 'Reviews'), color: '#7c3aed' }]}
               />
             </ChartCard>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -338,7 +338,7 @@ export function AdminAnalyticsPage() {
               <TimeSeriesChart
                 data={contentChartData}
                 series={[
-                  { dataKey: 'decks', name: t('admin.analytics.content.decksCreated', 'Decks'), color: '#6366f1' },
+                  { dataKey: 'decks', name: t('admin.analytics.content.decksCreated', 'Decks'), color: '#7c3aed' },
                   { dataKey: 'cards', name: t('admin.analytics.content.cardsCreated', 'Cards'), color: '#f59e0b' },
                 ]}
               />
@@ -397,9 +397,9 @@ export function AdminAnalyticsPage() {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b border-slate-200 dark:border-slate-700">
-                          <th className="text-left py-2 font-medium text-slate-600 dark:text-slate-400">Code</th>
-                          <th className="text-left py-2 font-medium text-slate-600 dark:text-slate-400">Tier</th>
-                          <th className="text-right py-2 font-medium text-slate-600 dark:text-slate-400">Redemptions</th>
+                          <th className="text-left py-2 font-medium text-slate-600 dark:text-slate-400">{t('admin.analytics.subs.code', 'Code')}</th>
+                          <th className="text-left py-2 font-medium text-slate-600 dark:text-slate-400">{t('admin.analytics.subs.tier', 'Tier')}</th>
+                          <th className="text-right py-2 font-medium text-slate-600 dark:text-slate-400">{t('admin.analytics.subs.redemptions', 'Redemptions')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -408,7 +408,7 @@ export function AdminAnalyticsPage() {
                             <td className="py-2 font-mono text-slate-800 dark:text-slate-200">{p.code}</td>
                             <td className="py-2">
                               <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
-                                p.tier === 'premium' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' : 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400'
+                                p.tier === 'premium' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' : 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400'
                               }`}>
                                 {p.tier}
                               </span>
@@ -431,7 +431,7 @@ export function AdminAnalyticsPage() {
           <div className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <ChartCard title={t('admin.analytics.events.deckCreation', 'Deck Creation Methods')}>
-                <SimpleBarChart data={customEventsGrouped.deckMethods} color="#6366f1" height={250} />
+                <SimpleBarChart data={customEventsGrouped.deckMethods} color="#7c3aed" height={250} />
               </ChartCard>
               <ChartCard title={t('admin.analytics.events.cardAddition', 'Card Addition Methods')}>
                 <SimpleBarChart data={customEventsGrouped.cardMethods} color="#10b981" height={250} />

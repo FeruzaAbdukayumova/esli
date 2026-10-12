@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.deps import get_admin_user, get_optional_current_user
 from app.core.config import settings
+from app.core.security import access_token_matches_password
 from app.db.models.chat_conversation import ChatConversation
 from app.db.models.user import User
 from app.db.session import get_db, AsyncSessionLocal
@@ -193,8 +194,11 @@ async def websocket_endpoint(
             try:
                 payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALG])
                 user_id_str = payload.get("sub")
-                if user_id_str:
+                if user_id_str and not payload.get("purpose"):
                     user = await get_user_by_id(db, uuid.UUID(user_id_str))
+                    if user and not access_token_matches_password(payload, user.password_hash):
+                        await websocket.close(code=4001)
+                        return
             except (JWTError, ValueError):
                 await websocket.close(code=4001)
                 return

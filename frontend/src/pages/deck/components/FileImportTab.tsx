@@ -170,6 +170,9 @@ export function FileImportTab({
     return (
       <div>
         <div
+          role="button"
+          tabIndex={0}
+          aria-label={t('fileImport.dropHere')}
           onDragOver={(e) => {
             e.preventDefault()
             setIsDragging(true)
@@ -177,7 +180,13 @@ export function FileImportTab({
           onDragLeave={() => setIsDragging(false)}
           onDrop={onDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`flex flex-col items-center justify-center gap-3 p-8 sm:p-12 border-2 border-dashed rounded-xl cursor-pointer transition-colors ${
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              fileInputRef.current?.click()
+            }
+          }}
+          className={`flex flex-col items-center justify-center gap-3 p-8 sm:p-12 border-2 border-dashed rounded-xl cursor-pointer transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
             isDragging
               ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
               : 'border-slate-300 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-slate-50 dark:hover:bg-slate-700/30'
@@ -215,7 +224,7 @@ export function FileImportTab({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           >
             {t('common.cancel')}
           </button>
@@ -243,6 +252,9 @@ export function FileImportTab({
               onChange={(e) => setFrontCol(Number(e.target.value))}
               className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
+              <option value={-1} disabled>
+                {t('import.selectColumn', 'Select column…')}
+              </option>
               {headers.map((h, i) => (
                 <option key={i} value={i} disabled={i === backCol}>
                   {h}
@@ -259,6 +271,9 @@ export function FileImportTab({
               onChange={(e) => setBackCol(Number(e.target.value))}
               className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
+              <option value={-1} disabled>
+                {t('import.selectColumn', 'Select column…')}
+              </option>
               {headers.map((h, i) => (
                 <option key={i} value={i} disabled={i === frontCol}>
                   {h}
@@ -326,7 +341,7 @@ export function FileImportTab({
         </div>
 
         {/* Summary */}
-        <div className="flex items-center gap-3 mb-4 text-sm">
+        <div className="flex flex-wrap items-center gap-3 mb-4 text-sm">
           <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
             <FileSpreadsheet className="w-4 h-4 text-primary-500" />
             <strong>{validCards.length}</strong> {t('fileImport.validCards')}
@@ -335,6 +350,12 @@ export function FileImportTab({
             <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
               <AlertTriangle className="w-3.5 h-3.5" />
               {skippedCount} {t('fileImport.emptyRowsSkipped')}
+            </span>
+          )}
+          {validCards.length === 0 && (frontCol === -1 || backCol === -1) && (
+            <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+              <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+              {t('import.columnsUnsetHint', 'Choose the front and back columns above to see which cards will be imported.')}
             </span>
           )}
         </div>
@@ -351,7 +372,7 @@ export function FileImportTab({
           <button
             type="button"
             onClick={resetToUpload}
-            className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+            className="text-sm rounded text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           >
             {t('fileImport.chooseDifferentFile')}
           </button>
@@ -359,7 +380,7 @@ export function FileImportTab({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             >
               {t('common.cancel')}
             </button>
@@ -367,7 +388,7 @@ export function FileImportTab({
               type="button"
               onClick={handleImport}
               disabled={isPending || validCards.length === 0}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             >
               <Upload className="w-4 h-4" />
               {t('fileImport.importCards', { count: validCards.length })}
@@ -411,14 +432,14 @@ export function FileImportTab({
         <button
           type="button"
           onClick={resetToUpload}
-          className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+          className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
         >
           {t('fileImport.importAnotherFile')}
         </button>
         <button
           type="button"
           onClick={onClose}
-          className="px-4 py-2 rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white transition-colors"
+          className="px-4 py-2 rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
         >
           {t('common.done')}
         </button>

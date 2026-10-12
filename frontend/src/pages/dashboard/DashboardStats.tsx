@@ -1,14 +1,7 @@
-import { useState, useRef, useEffect } from 'react'
-import toast from 'react-hot-toast'
-import { Clock, CheckCircle, Flame, Trophy, Target, Layers, ChevronDown, ChevronUp, Settings2, Loader2 } from 'lucide-react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useState, useMemo } from 'react'
+import { ChevronDown, ChevronUp, Target, Trophy, Brain, Check } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { DashboardStats as DashboardStatsType } from '@/features/stats/types'
-import { useAuthContext } from '@/app/providers/AuthProvider'
-import { authApi } from '@/features/auth/api'
-import { guestStorage } from '@/shared/lib/guestStorage'
-import { statsKeys } from '@/features/stats/statsHooks'
-import { StatCard } from './components/StatCard'
 import { ReviewForecast } from './components/ReviewForecast'
 import { DeckProgressBar } from './components/DeckProgressBar'
 
@@ -16,176 +9,32 @@ interface StatsProps {
   stats: DashboardStatsType
 }
 
-/** "Due" chip with clickable popover to adjust daily new card limit */
-function DueChipWithLimit({ stats }: StatsProps) {
-  const { t } = useTranslation()
-  const { user } = useAuthContext()
-  const queryClient = useQueryClient()
-  const [open, setOpen] = useState(false)
-  const [limitValue, setLimitValue] = useState(() => {
-    if (user) return user.daily_new_card_limit ?? 20
-    return guestStorage.read().settings?.dailyNewCardLimit ?? 20
-  })
-  const popoverRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    if (user?.daily_new_card_limit != null) setLimitValue(user.daily_new_card_limit)
-  }, [user?.daily_new_card_limit])
-
-  // Close popover on outside click
-  useEffect(() => {
-    if (!open) return
-    const handle = (e: MouseEvent) => {
-      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) setOpen(false)
-    }
-    document.addEventListener('mousedown', handle)
-    return () => document.removeEventListener('mousedown', handle)
-  }, [open])
-
-  // Auto-focus input when popover opens
-  useEffect(() => {
-    if (open) inputRef.current?.select()
-  }, [open])
-
-  const updateLimitMutation = useMutation({
-    mutationFn: (limit: number) => authApi.updateMe({ daily_new_card_limit: limit }),
-    onSuccess: (updatedUser) => {
-      queryClient.setQueryData(['me'], updatedUser)
-      queryClient.invalidateQueries({ queryKey: statsKeys.dashboard })
-      setOpen(false)
-      toast.success(t('toast.dailyLimitSaved'))
-    },
-    onError: () => {
-      toast.error(t('toast.failedToSaveDailyLimit'))
-    },
-  })
-
-  const handleSave = () => {
-    const clamped = Math.max(0, Math.min(9999, limitValue))
-    setLimitValue(clamped)
-    if (!user) {
-      const data = guestStorage.read()
-      guestStorage.write({ ...data, settings: { ...data.settings, dailyNewCardLimit: clamped } })
-      queryClient.invalidateQueries({ queryKey: statsKeys.dashboard })
-      setOpen(false)
-      toast.success(t('toast.dailyLimitSaved'))
-    } else {
-      updateLimitMutation.mutate(clamped)
-    }
-  }
-
-  const newCount = Math.min(stats.newCardsAvailable, limitValue)
-  const reviewCount = Math.max(0, stats.cardsDueToday - newCount)
-
-  return (
-    <div className="relative" ref={popoverRef}>
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="flex items-center gap-3 rounded-2xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 px-4 py-3 min-w-0 transition-shadow duration-200 hover:shadow-elevation-md group w-full text-left"
-      >
-        <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-amber-600 dark:text-amber-400 shrink-0">
-          <Clock className="w-5 h-5" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-xl font-bold text-slate-800 dark:text-slate-100 leading-tight tabular-nums tracking-tight">
-            {stats.cardsDueToday}
-            <Settings2 className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 group-hover:text-amber-500 transition-colors inline ml-1.5 -mt-1" />
-          </p>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{t('stats.due')}</p>
-        </div>
-      </button>
-
-      {open && (
-        <div className="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-slate-800 rounded-xl shadow-elevation-lg border border-slate-200 dark:border-slate-600 p-4 z-50 animate-fade-in">
-          {/* Breakdown */}
-          <div className="flex items-center gap-3 text-xs text-slate-600 dark:text-slate-400 mb-3">
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-amber-400" />
-              {reviewCount} {t('stats.review')}
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-primary-400" />
-              {newCount} {t('stats.new')}
-            </span>
-            {stats.newCardsAvailable > limitValue && (
-              <span className="text-slate-400 dark:text-slate-500">
-                ({stats.newCardsAvailable} {t('stats.unseen')})
-              </span>
-            )}
-          </div>
-
-          {/* Limit input */}
-          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-            {t('stats.dailyNewCardLimit')}
-          </label>
-          <div className="flex items-center gap-2">
-            <input
-              ref={inputRef}
-              type="number"
-              min={0}
-              max={9999}
-              value={limitValue}
-              onChange={(e) => setLimitValue(parseInt(e.target.value) || 0)}
-              onKeyDown={(e) => { if (e.key === 'Enter') handleSave() }}
-              className="w-20 px-2 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            />
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={updateLimitMutation.isPending}
-              className="px-3 py-1.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-xs font-medium transition-colors disabled:opacity-60"
-            >
-              {updateLimitMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : t('common.save')}
-            </button>
-          </div>
-          <p className="mt-2 text-[10px] text-slate-400 dark:text-slate-500 leading-tight">
-            {t('stats.onlyReviewHelp')}
-          </p>
-        </div>
-      )}
-    </div>
-  )
-}
-
-/** Bento-style stats strip */
-export function StatsStrip({ stats }: StatsProps) {
-  const { t } = useTranslation()
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      <DueChipWithLimit stats={stats} />
-      <StatCard
-        icon={CheckCircle}
-        value={stats.cardsReviewedToday}
-        label={t('stats.reviewed')}
-        color="text-emerald-600 dark:text-emerald-400"
-        variant="bento"
-      />
-      <StatCard
-        icon={Flame}
-        value={`${stats.streakDays}d`}
-        label={t('stats.streak')}
-        color="text-orange-600 dark:text-orange-400"
-        variant="bento"
-      />
-      <StatCard
-        icon={Trophy}
-        value={`${stats.masteryPercent}%`}
-        label={t('stats.mastery')}
-        color="text-primary-600 dark:text-primary-400"
-        variant="bento"
-      />
-    </div>
-  )
-}
-
 const DECK_PROGRESS_LIMIT = 3
 
-/** Stats sidebar for the right column */
+/**
+ * Right-column sidebar: review forecast, per-deck progress, and the
+ * reference stats (retention, mastered, mastery, total). The hero
+ * (MomentumPanel) keeps only the action-oriented numbers: due, streak, goal.
+ */
 export function StatsSidebar({ stats }: StatsProps) {
   const { t } = useTranslation()
   const [showAllDecks, setShowAllDecks] = useState(false)
+
+  const composition = useMemo(() => {
+    const acc = { mature: 0, learning: 0, knew: 0 }
+    for (const d of stats.deckProgress) {
+      acc.mature += d.matureCount
+      acc.learning += d.learningCount
+      acc.knew += d.newCount
+    }
+    const total = acc.mature + acc.learning + acc.knew || 1
+    return {
+      mature: (acc.mature / total) * 100,
+      learning: (acc.learning / total) * 100,
+      knew: (acc.knew / total) * 100,
+      counts: acc,
+    }
+  }, [stats.deckProgress])
 
   const visibleDecks = showAllDecks
     ? stats.deckProgress
@@ -194,22 +43,6 @@ export function StatsSidebar({ stats }: StatsProps) {
 
   return (
     <div className="space-y-3">
-      {/* Retention & Total Cards */}
-      <div className="grid grid-cols-2 gap-2">
-        <StatCard
-          icon={Target}
-          value={`${stats.retentionPercent}%`}
-          label={t('stats.accuracy')}
-          color="text-violet-600 dark:text-violet-400"
-        />
-        <StatCard
-          icon={Layers}
-          value={stats.totalCards}
-          label={t('stats.totalCards')}
-          color="text-slate-600 dark:text-slate-400"
-        />
-      </div>
-
       {/* Review forecast */}
       {stats.reviewForecast.length > 0 && (
         <div className="bg-white dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-600 p-3">
@@ -234,8 +67,9 @@ export function StatsSidebar({ stats }: StatsProps) {
           </div>
           {hasMore && (
             <button
+              type="button"
               onClick={() => setShowAllDecks(!showAllDecks)}
-              className="mt-2 text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium flex items-center gap-1 transition-colors"
+              className="mt-2 text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium flex items-center gap-1 transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             >
               {showAllDecks ? (
                 <>{t('stats.showLess')} <ChevronUp className="w-3 h-3" /></>
@@ -246,18 +80,42 @@ export function StatsSidebar({ stats }: StatsProps) {
           )}
         </div>
       )}
+
+      {/* Reference stats */}
+      <div className="bg-white dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-600 p-3">
+        <div className="grid grid-cols-2 gap-2">
+          <StatTile icon={<Target className="h-4 w-4" aria-hidden />} label={t('momentum.retention', 'Retention')} value={`${stats.retentionPercent}%`} tint="text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20" />
+          <StatTile icon={<Trophy className="h-4 w-4" aria-hidden />} label={t('momentum.mastered', 'Mastered')} value={composition.counts.mature.toLocaleString()} tint="text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20" />
+          <StatTile icon={<Brain className="h-4 w-4" aria-hidden />} label={t('momentum.mastery', 'Mastery')} value={`${stats.masteryPercent}%`} tint="text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20" />
+          <StatTile icon={<Check className="h-4 w-4" aria-hidden />} label={t('momentum.totalCards', 'Total cards')} value={stats.totalCards.toLocaleString()} tint="text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/40" />
+        </div>
+        {stats.totalCards > 0 && (
+          <div className="mt-3">
+            <div className="flex h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+              <div className="bg-emerald-500" style={{ width: `${composition.mature}%` }} />
+              <div className="bg-amber-400" style={{ width: `${composition.learning}%` }} />
+              <div className="bg-slate-300 dark:bg-slate-600" style={{ width: `${composition.knew}%` }} />
+            </div>
+            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-slate-500 dark:text-slate-400">
+              <span className="inline-flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />{t('momentum.legendMastered', 'Mastered {{count}}', { count: composition.counts.mature })}</span>
+              <span className="inline-flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full bg-amber-400" />{t('momentum.legendLearning', 'Learning {{count}}', { count: composition.counts.learning })}</span>
+              <span className="inline-flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full bg-slate-300 dark:bg-slate-600" />{t('momentum.legendNew', 'New {{count}}', { count: composition.counts.knew })}</span>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
 
-/** @deprecated Use StatsStrip and StatsSidebar instead */
-export function DashboardStats({ stats }: StatsProps) {
+function StatTile({ icon, label, value, tint }: { icon: React.ReactNode; label: string; value: string; tint: string }) {
   return (
-    <section className="animate-fade-in">
-      <StatsStrip stats={stats} />
-      <div className="mt-4">
-        <StatsSidebar stats={stats} />
+    <div className="flex items-center gap-2.5 rounded-lg bg-slate-50 dark:bg-slate-700/30 p-2.5">
+      <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${tint}`}>{icon}</span>
+      <div className="min-w-0">
+        <p className="text-sm font-bold leading-tight text-slate-800 dark:text-slate-100">{value}</p>
+        <p className="truncate text-[11px] text-slate-500 dark:text-slate-400">{label}</p>
       </div>
-    </section>
+    </div>
   )
 }

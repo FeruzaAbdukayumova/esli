@@ -20,7 +20,9 @@ import {
   Shield,
   Crown,
   Puzzle,
+  Compass,
 } from 'lucide-react'
+import { EXTENSION_STORE_URL } from '@/shared/config'
 import { useTheme } from '@/app/providers/ThemeProvider'
 import { THEME_PRESETS, type DarkMode } from '@/shared/lib/themeStore'
 import { SUPPORTED_LANGUAGES } from '@/shared/i18n'
@@ -91,6 +93,27 @@ function LanguageDropdown() {
 function AppearanceSection() {
   const { theme, setTheme, darkMode, setDarkMode } = useTheme()
   const { t } = useTranslation()
+  const { user } = useAuthContext()
+  const queryClient = useQueryClient()
+  const persistAppearance = useMutation({
+    mutationFn: (patch: { theme?: string; dark_mode?: string }) => authApi.updateMe(patch),
+    onSuccess: (updatedUser) => { queryClient.setQueryData(['me'], updatedUser) },
+  })
+
+  const handleDarkMode = (mode: DarkMode) => {
+    setDarkMode(mode)
+    if (user) {
+      persistAppearance.mutate({ dark_mode: mode })
+    } else {
+      const data = guestStorage.read()
+      guestStorage.write({ ...data, settings: { ...data.settings, darkMode: mode } })
+    }
+  }
+
+  const handleTheme = (name: string) => {
+    setTheme(name as Parameters<typeof setTheme>[0])
+    if (user) persistAppearance.mutate({ theme: name })
+  }
 
   return (
     <div className="space-y-3">
@@ -101,7 +124,7 @@ function AppearanceSection() {
             <button
               key={opt.mode}
               type="button"
-              onClick={() => setDarkMode(opt.mode)}
+              onClick={() => handleDarkMode(opt.mode)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors duration-200 ${
                 darkMode === opt.mode
                   ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
@@ -121,8 +144,8 @@ function AppearanceSection() {
             <button
               key={preset.name}
               type="button"
-              onClick={() => setTheme(preset.name)}
-              className={`relative w-7 h-7 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-slate-800 ${
+              onClick={() => handleTheme(preset.name)}
+              className={`relative w-7 h-7 rounded-full transition-transform duration-200 ease-bounce-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary-500 dark:focus-visible:ring-offset-slate-800 ${
                 theme === preset.name ? 'ring-2 ring-primary-500 ring-offset-2 scale-110' : 'hover:scale-110'
               }`}
               style={{ backgroundColor: `rgb(${preset.colors[500]})` }}
@@ -164,6 +187,15 @@ export function DashboardNavbar({ user, isApiMode, hasGuestDecksToSave, isSyncin
   const appearanceRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    if (!mobileMenuOpen) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileMenuOpen(false)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [mobileMenuOpen])
+
+  useEffect(() => {
     if (!userMenuOpen && !appearanceOpen) return
     const onPointerDown = (e: PointerEvent) => {
       if (document.activeElement?.tagName === 'SELECT') return
@@ -193,7 +225,7 @@ export function DashboardNavbar({ user, isApiMode, hasGuestDecksToSave, isSyncin
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-sm shadow-black/5 dark:shadow-black/20 border-b border-white/20 dark:border-slate-700/50">
+      <header className="sticky top-0 z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-sm shadow-black/5 dark:shadow-black/20 border-b border-slate-200/60 dark:border-slate-700/50">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-14 sm:h-16">
             <Link to="/" className="text-xl font-bold text-slate-800 dark:text-slate-100 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 flex items-center gap-2 shrink-0">
@@ -203,23 +235,29 @@ export function DashboardNavbar({ user, isApiMode, hasGuestDecksToSave, isSyncin
               {t('nav.brand')}
             </Link>
 
-            <div className="hidden md:flex items-center gap-3 sm:gap-4 min-w-0">
-              <Link to="/pricing" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200 shrink-0">
+            <div className="hidden lg:flex items-center gap-3 sm:gap-4 min-w-0">
+              <Link to="/browse" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
+                <Compass className="w-4 h-4" />
+                {t('nav.browse')}
+              </Link>
+              <Link to="/pricing" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
                 <Sparkles className="w-4 h-4" />
                 {t('nav.pricing')}
               </Link>
-              <a
-                href="https://github.com/feruzaabdukayumova/flashcards-extension"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shrink-0"
-                title={t('nav.extension')}
-              >
-                <Puzzle className="w-4 h-4" />
-                {t('nav.extension')}
-              </a>
+              {EXTENSION_STORE_URL && (
+                <a
+                  href={EXTENSION_STORE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                  title={t('nav.extension')}
+                >
+                  <Puzzle className="w-4 h-4" />
+                  {t('nav.extension')}
+                </a>
+              )}
               {!isApiMode && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 transition-colors duration-200 shrink-0" title="Guest mode">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 transition-colors duration-200 shrink-0" title={t('nav.guestMode')}>
                   <span className="w-2 h-2 rounded-full shrink-0 bg-amber-500" aria-hidden />
                   <UserX className="w-4 h-4 shrink-0" />
                   {t('nav.guestMode')}
@@ -312,7 +350,7 @@ export function DashboardNavbar({ user, isApiMode, hasGuestDecksToSave, isSyncin
               )}
             </div>
 
-            <div className="flex md:hidden items-center gap-2">
+            <div className="flex lg:hidden items-center gap-2">
               {!isApiMode && (
                 <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500" aria-hidden />
@@ -331,8 +369,16 @@ export function DashboardNavbar({ user, isApiMode, hasGuestDecksToSave, isSyncin
       {/* Mobile side drawer */}
       {mobileMenuOpen && (
         <>
-          <div className="fixed inset-0 z-[60] bg-black/30 transition-opacity duration-200 md:hidden" onClick={() => setMobileMenuOpen(false)} aria-hidden />
-          <div className="fixed top-0 right-0 bottom-0 z-[61] w-72 max-w-[85vw] bg-white dark:bg-slate-800 shadow-elevation-lg border-l border-slate-200 dark:border-slate-700 animate-slide-in-right md:hidden overflow-y-auto" role="dialog" aria-label={t('nav.userMenu')}>
+          <div className="fixed inset-0 z-[60] bg-black/30 backdrop-blur-sm transition-opacity duration-200 lg:hidden" onClick={() => setMobileMenuOpen(false)} aria-hidden />
+          <div className="fixed top-0 right-0 bottom-0 z-[61] w-72 max-w-[85vw] bg-white dark:bg-slate-800 shadow-elevation-lg border-l border-slate-200 dark:border-slate-700 animate-slide-in-right lg:hidden overflow-y-auto" role="dialog" aria-label={t('nav.userMenu')}>
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(false)}
+              aria-label={t('common.close')}
+              className="absolute top-3 right-3 flex items-center justify-center w-10 h-10 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            >
+              <X className="w-5 h-5" aria-hidden />
+            </button>
             <div className="flex flex-col h-full pt-14 px-4 pb-6">
               {user && (
                 <div className="py-3 border-b border-slate-200 dark:border-slate-600">
@@ -355,10 +401,12 @@ export function DashboardNavbar({ user, isApiMode, hasGuestDecksToSave, isSyncin
                       <Sparkles className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                       {t('nav.pricing')}
                     </Link>
-                    <a href="https://github.com/feruzaabdukayumova/flashcards-extension" target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200">
-                      <Puzzle className="w-4 h-4 text-rose-500 dark:text-rose-400" />
-                      {t('nav.extension')}
-                    </a>
+                    {EXTENSION_STORE_URL && (
+                      <a href={EXTENSION_STORE_URL} target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200">
+                        <Puzzle className="w-4 h-4 text-primary-500 dark:text-primary-400" />
+                        {t('nav.extension')}
+                      </a>
+                    )}
                     <Link to="/profile" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200">
                       <UserCircle className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                       {t('nav.profile')}
@@ -392,10 +440,12 @@ export function DashboardNavbar({ user, isApiMode, hasGuestDecksToSave, isSyncin
                       <Sparkles className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                       {t('nav.pricing')}
                     </Link>
-                    <a href="https://github.com/feruzaabdukayumova/flashcards-extension" target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200">
-                      <Puzzle className="w-4 h-4 text-rose-500 dark:text-rose-400" />
-                      {t('nav.extension')}
-                    </a>
+                    {EXTENSION_STORE_URL && (
+                      <a href={EXTENSION_STORE_URL} target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200">
+                        <Puzzle className="w-4 h-4 text-primary-500 dark:text-primary-400" />
+                        {t('nav.extension')}
+                      </a>
+                    )}
                     <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-center min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-center transition-colors">{t('nav.getStarted')}</Link>
                     <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-center min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 text-center transition-colors">{t('nav.alreadyHaveAccount')}</Link>
                     <div className="pt-2 border-t border-slate-200 dark:border-slate-600 space-y-3">

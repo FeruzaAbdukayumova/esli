@@ -13,9 +13,10 @@ export function ReviewForecast({ forecast }: ReviewForecastProps) {
 
   return (
     <div className="flex items-end gap-2 h-32">
-      {forecast.map((day) => {
+      {forecast.map((day, i) => {
         const date = new Date(day.date + 'T00:00:00')
-        const label = t(DAY_KEYS[date.getDay()])
+        const isToday = i === 0
+        const label = isToday ? t('forecast.today', 'Today') : t(DAY_KEYS[date.getDay()])
         const height = day.count > 0 ? Math.max((day.count / max) * 100, 8) : 4
 
         return (
@@ -27,14 +28,14 @@ export function ReviewForecast({ forecast }: ReviewForecastProps) {
               <div
                 className={`w-full max-w-[32px] rounded-t transition-[height,background-color] duration-500 ${
                   day.count > 0
-                    ? 'bg-primary-500 dark:bg-primary-400'
+                    ? isToday ? 'bg-primary-600 dark:bg-primary-300' : 'bg-primary-500 dark:bg-primary-400'
                     : 'bg-slate-200 dark:bg-slate-600'
                 }`}
                 style={{ height: `${height}%` }}
                 title={t('forecast.dateCards', { date: day.date, count: day.count })}
               />
             </div>
-            <span className="text-xs text-slate-500 dark:text-slate-400">{label}</span>
+            <span className={`text-xs ${isToday ? 'font-semibold text-primary-600 dark:text-primary-400' : 'text-slate-500 dark:text-slate-400'}`}>{label}</span>
           </div>
         )
       })}

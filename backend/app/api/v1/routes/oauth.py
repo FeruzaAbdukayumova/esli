@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.security import create_access_token
+from app.db.models.user import User
 from app.db.session import get_db
 from app.schemas.auth import OAuthCallbackRequest, TokenResponse
 from app.services import subscription_service
@@ -45,9 +46,9 @@ def _set_refresh_cookie(response: Response, raw_token: str) -> None:
     )
 
 
-async def _issue_tokens(response: Response, db: AsyncSession, user_id) -> TokenResponse:
-    access_token = create_access_token(str(user_id))
-    raw_refresh = await create_refresh_token(db, user_id)
+async def _issue_tokens(response: Response, db: AsyncSession, user: User) -> TokenResponse:
+    access_token = create_access_token(str(user.id), user.password_hash)
+    raw_refresh = await create_refresh_token(db, user.id)
     _set_refresh_cookie(response, raw_refresh)
     return TokenResponse(access_token=access_token)
 
@@ -113,4 +114,4 @@ async def google_callback(
             await subscription_service.create_free_subscription(db, user.id)
             asyncio.create_task(notify_oauth_signup(email, "google", name))
 
-    return await _issue_tokens(response, db, user.id)
+    return await _issue_tokens(response, db, user)

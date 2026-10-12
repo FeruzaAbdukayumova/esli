@@ -4,8 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuthContext } from '@/app/providers/AuthProvider'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { useDeckRepo } from '@/features/decks/repo'
-import { useSyncImport } from '@/features/sync/hooks'
-import { guestStorage } from '@/shared/lib/guestStorage'
+import { useGuestSync } from '@/features/sync/useGuestSync'
 import { usePageMeta } from '@/shared/lib/usePageMeta'
 import { DashboardNavbar } from '@/pages/dashboard/components/DashboardNavbar'
 import { YourDecks } from '@/pages/dashboard/YourDecks'
@@ -16,33 +15,13 @@ export const DecksPage = () => {
   const { user } = useAuthContext()
   const { logout } = useAuth()
   const { mode } = useDeckRepo()
-  const syncImportMutation = useSyncImport()
 
-  const guestData = guestStorage.read()
-  const hasGuestDecksToSave =
-    !!user &&
-    Array.isArray(guestData.decks) &&
-    typeof guestData.cardsByDeckId === 'object' &&
-    guestData.decks.length >= 1
-
-  const handleSaveGuestDecks = () => {
-    if (!hasGuestDecksToSave) return
-    const payload = {
-      version: 1 as const,
-      decks: guestData.decks,
-      cardsByDeckId: guestData.cardsByDeckId,
-    }
-    syncImportMutation.mutate(payload, {
-      onSuccess: () => {
-        guestStorage.clear()
-      },
-    })
-  }
+  const { hasGuestDecksToSave, isSyncing, saveGuestDecks } = useGuestSync()
 
   const isApiMode = mode === 'api'
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-[#0F0F11] grain relative overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-surface-base grain relative overflow-x-hidden">
       {/* Decorative background */}
       <div
         className="fixed inset-0 opacity-[0.03] dark:opacity-[0.06] pointer-events-none z-0"
@@ -59,20 +38,20 @@ export const DecksPage = () => {
         user={user}
         isApiMode={isApiMode}
         hasGuestDecksToSave={hasGuestDecksToSave}
-        isSyncing={syncImportMutation.isPending}
-        onSaveGuestDecks={handleSaveGuestDecks}
+        isSyncing={isSyncing}
+        onSaveGuestDecks={saveGuestDecks}
         onLogout={logout}
       />
 
       <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-6 md:py-8 pb-24 md:pb-8 animate-fade-in">
         {/* Breadcrumb */}
-        <nav className="mb-4 md:mb-6" aria-label="Breadcrumb">
+        <nav className="mb-4 md:mb-6" aria-label={t('nav.breadcrumb', 'Breadcrumb')}>
           <ol className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
             <li>
-              <Link to="/" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Home</Link>
+              <Link to="/" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">{t('nav.home')}</Link>
             </li>
             <li><ChevronRight className="w-4 h-4 shrink-0 text-slate-400 dark:text-slate-500" aria-hidden /></li>
-            <li className="font-medium text-slate-800 dark:text-slate-100" aria-current="page">Your Decks</li>
+            <li className="font-medium text-slate-800 dark:text-slate-100" aria-current="page">{t('dashboard.yourDecks')}</li>
           </ol>
         </nav>
 

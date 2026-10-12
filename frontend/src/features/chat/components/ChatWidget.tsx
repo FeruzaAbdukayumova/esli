@@ -14,7 +14,7 @@ export function ChatWidget() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-[1100] flex items-center gap-2 pl-4 pr-5 h-12 rounded-full bg-primary-600 hover:bg-primary-700 text-white shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 transition-transform transition-shadow duration-200 active:scale-[0.97]"
+          className="fixed bottom-20 lg:bottom-6 right-6 z-[1100] flex items-center gap-2 pl-4 pr-5 h-12 rounded-full bg-primary-600 hover:bg-primary-700 text-white shadow-lg shadow-primary-500/30 transition-transform duration-200 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
           aria-label={t('chat.getHelp')}
           title={t('chat.getHelp')}
         >
@@ -25,7 +25,7 @@ export function ChatWidget() {
 
       {/* Chat panel */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-[1100] w-[380px] h-[520px] max-w-[calc(100vw-48px)] max-h-[calc(100vh-48px)] bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-lg border border-gray-200 dark:border-slate-700 flex flex-col overflow-hidden animate-[slide-up_200ms_ease-out]">
+        <div className="fixed bottom-20 lg:bottom-6 right-6 z-[1100] w-[380px] h-[520px] max-w-[calc(100vw-48px)] max-h-[calc(100vh-6rem)] bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-lg border border-slate-200 dark:border-slate-700 flex flex-col overflow-hidden animate-[slide-up_200ms_ease-out]">
           <ChatPanel onClose={() => setIsOpen(false)} />
         </div>
       )}

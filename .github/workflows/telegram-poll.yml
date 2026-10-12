@@ -1,0 +1,65 @@
+name: Telegram Poll
+
+# Catches Feruza's Telegram messages + button taps and routes them to the team.
+# Free, no Cloudflare.
+#
+# Cost note: GitHub bills Actions per-minute (rounded up). Idle polls do a cheap
+# Python-only check and exit (~1 min billed); only polls with real messages
+# install Node + Claude. At every 15 min that stays inside the free tier.
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: telegram-poll
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Cheap check first — no Node, no Claude. Exits fast if there's nothing.
+      - name: Check for new messages
+        id: check
+        working-directory: agents/scripts
+        env:
+          POLL_CHECK: "1"
+        run: python3 poll_telegram.py
+
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.work == 'true'
+        with:
+          node-version: 22
+
+      - name: Install Claude Code
+        if: steps.check.outputs.work == 'true'
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Process messages and route to agents
+        if: steps.check.outputs.work == 'true'
+        working-directory: agents/scripts
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          API_URL: https://api.esli.app
+          AGENT_EMAIL: ${{ secrets.AGENT_EMAIL }}
+          AGENT_PASSWORD: ${{ secrets.AGENT_PASSWORD }}
+        run: python3 poll_telegram.py
+
+      - name: Commit output (drafts, offset, plans)
+        if: steps.check.outputs.work == 'true'
+        run: |
+          git config user.email "agent@esli.app"
+          git config user.name "Esli Agent"
+          git add agents/
+          git diff --staged --quiet || git commit -m "chore: telegram task run"
+          git pull --rebase --autostash || true
+          git push || true

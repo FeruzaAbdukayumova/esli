@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ArrowLeft } from 'lucide-react'
 
 interface AuthPageLayoutProps {
   children: ReactNode
@@ -19,7 +20,7 @@ export function AuthPageLayout({
 }: AuthPageLayoutProps) {
   const { t } = useTranslation()
   return (
-    <div className="min-h-screen flex flex-col sm:flex-row items-center justify-center p-4 sm:p-6 md:p-8 bg-slate-50 dark:bg-[#0F0F11] grain relative overflow-hidden">
+    <div className="min-h-screen flex flex-col sm:flex-row items-center justify-center p-4 sm:p-6 md:p-8 bg-slate-50 dark:bg-surface-base grain relative overflow-hidden">
       {/* Decorative background pattern */}
       <div
         className="absolute inset-0 opacity-[0.03] dark:opacity-[0.06] pointer-events-none"
@@ -37,9 +38,10 @@ export function AuthPageLayout({
         {showBackToHome && (
           <Link
             to="/"
-            className="self-start mb-4 text-sm text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50 dark:focus-visible:ring-offset-slate-900 rounded"
+            className="self-start mb-4 inline-flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50 dark:focus-visible:ring-offset-slate-900 rounded"
           >
-            ← {t('auth.backToHome')}
+            <ArrowLeft className="w-4 h-4 rtl:rotate-180" aria-hidden />
+            {t('auth.backToHome')}
           </Link>
         )}
 
@@ -71,6 +73,19 @@ export function AuthPageLayout({
             >
               {alternateLink.label}
             </Link>
+          </p>
+        </div>
+
+        {/* Guest escape hatch */}
+        <div className="mt-4 text-center">
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center justify-center min-h-[44px] px-4 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50 dark:focus-visible:ring-offset-slate-900"
+          >
+            {t('auth.continueAsGuest', 'Continue without an account')}
+          </Link>
+          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-500">
+            {t('auth.guestHint', 'Try Esli instantly. Your decks stay on this device until you sign up.')}
           </p>
         </div>
 

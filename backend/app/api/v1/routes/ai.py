@@ -1,4 +1,5 @@
 import asyncio
+import ipaddress
 import json
 import logging
 import re
@@ -51,8 +52,49 @@ def _count_pdf_pages(pdf_data: bytes) -> int:
         return 0
 
 
+# https://www.cloudflare.com/ips/
+_CLOUDFLARE_NETWORKS = [
+    ipaddress.ip_network(n)
+    for n in (
+        "173.245.48.0/20", "103.21.244.0/22", "103.22.200.0/22", "103.31.4.0/22",
+        "141.101.64.0/18", "108.162.192.0/18", "190.93.240.0/20", "188.114.96.0/20",
+        "197.234.240.0/22", "198.41.128.0/17", "162.158.0.0/15", "104.16.0.0/13",
+        "104.24.0.0/14", "172.64.0.0/13", "131.0.72.0/22",
+        "2400:cb00::/32", "2606:4700::/32", "2803:f800::/32", "2405:b500::/32",
+        "2405:8100::/32", "2a06:98c0::/29", "2c0f:f248::/32",
+    )
+]
+
+
+def _is_cloudflare(ip: str) -> bool:
+    try:
+        addr = ipaddress.ip_address(ip)
+    except ValueError:
+        return False
+    return any(addr in net for net in _CLOUDFLARE_NETWORKS)
+
+
+def _client_ip(request: Request) -> str:
+    """Real visitor IP behind Cloudflare + Railway, without trusting spoofable headers.
+
+    request.client.host is Railway's proxy in production. The right-most
+    X-Forwarded-For entry is appended by that proxy, so it is the true peer.
+    Only when that peer is Cloudflare do we trust CF-Connecting-IP; a request
+    hitting the *.up.railway.app domain directly can't forge its way out.
+    """
+    forwarded = request.headers.get("x-forwarded-for")
+    peer = forwarded.split(",")[-1].strip() if forwarded else None
+    if not peer:
+        peer = request.client.host if request.client else "unknown"
+    if _is_cloudflare(peer):
+        cf_ip = request.headers.get("cf-connecting-ip")
+        if cf_ip:
+            return cf_ip.strip()
+    return peer
+
+
 def _check_ip_rate_limit(request: Request) -> None:
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = _client_ip(request)
     now = time.time()
     # Clean old entries
     _ip_usage[client_ip] = [t for t in _ip_usage[client_ip] if now - t < _IP_RATE_WINDOW]

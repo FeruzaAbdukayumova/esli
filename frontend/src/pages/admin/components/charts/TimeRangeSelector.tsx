@@ -21,7 +21,7 @@ export function TimeRangeSelector({ range, granularity, onRangeChange, onGranula
             key={r}
             type="button"
             onClick={() => onRangeChange(r)}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors duration-200 ${
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
               range === r
                 ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -38,7 +38,7 @@ export function TimeRangeSelector({ range, granularity, onRangeChange, onGranula
             key={g}
             type="button"
             onClick={() => onGranularityChange(g)}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors duration-200 ${
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
               granularity === g
                 ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'

@@ -46,6 +46,10 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str | None = None
     GOOGLE_CLIENT_SECRET: str | None = None
 
+    # Transactional email (Resend)
+    RESEND_API_KEY: str | None = None
+    EMAIL_FROM: str = "Esli <noreply@esli.app>"
+
     # Telegram notifications
     TELEGRAM_BOT_TOKEN: str | None = None
     TELEGRAM_CHAT_ID: str | None = None

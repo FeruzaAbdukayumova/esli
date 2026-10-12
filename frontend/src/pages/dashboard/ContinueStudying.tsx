@@ -15,9 +15,11 @@ export function ContinueStudying({ lastStudiedDeck, cardsDue }: ContinueStudying
   return (
     <Link
       to={`/study/${lastStudiedDeck.id}`}
-      className="group block w-full rounded-xl bg-gradient-to-r from-primary-600 to-primary-500 dark:from-primary-600 dark:to-primary-500 shadow-md shadow-primary-200/50 dark:shadow-primary-900/40 hover:shadow-elevation-md hover:from-primary-700 hover:to-primary-600 dark:hover:from-primary-500 dark:hover:to-primary-400 transition-shadow duration-200 px-4 py-3"
+      className="group relative block w-full overflow-hidden rounded-xl bg-gradient-to-r from-primary-600 to-primary-500 shadow-glow-sm hover:shadow-glow-md transition-[box-shadow,transform] duration-200 ease-smooth hover:-translate-y-0.5 active:scale-[0.99] px-4 py-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
     >
-      <div className="flex items-center gap-3">
+      {/* hover darkening layer (opacity animates; gradients cannot) */}
+      <div className="absolute inset-0 bg-primary-800/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200" aria-hidden />
+      <div className="relative flex items-center gap-3">
         <div className="shrink-0 w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
           <Play className="w-5 h-5 text-white fill-white" />
         </div>

@@ -18,7 +18,7 @@ export function BottomNav() {
   if (hiddenPrefixes.some(p => location.pathname.startsWith(p))) return null
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200/50 dark:border-slate-700/50 lg:hidden safe-area-bottom" aria-label="Mobile navigation">
+    <nav className="fixed bottom-0 inset-x-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200/50 dark:border-slate-700/50 lg:hidden safe-area-bottom" aria-label={t('nav.mobileNavigation', 'Mobile navigation')}>
       <div className="flex items-center justify-around h-16 px-2">
         {NAV_ITEMS.map(({ path, icon: Icon, labelKey }) => {
           const isActive = location.pathname === path
@@ -30,10 +30,11 @@ export function BottomNav() {
             <Link
               key={path}
               to={path}
-              className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors ${
+              aria-current={isActive ? 'page' : undefined}
+              className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
                 isActive
                   ? 'text-primary-600 dark:text-primary-400'
-                  : 'text-slate-400 dark:text-slate-500 active:text-slate-600 dark:active:text-slate-300'
+                  : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 active:text-slate-600 dark:active:text-slate-300'
               }`}
             >
               <Icon className="w-5 h-5" />

@@ -4,11 +4,8 @@ import { useAdminStats } from '@/features/admin/adminHooks'
 import { usePageMeta } from '@/shared/lib/usePageMeta'
 
 const STAT_COLORS: Record<string, { bg: string; text: string }> = {
-  blue: { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-600 dark:text-blue-400' },
-  indigo: { bg: 'bg-indigo-100 dark:bg-indigo-900/30', text: 'text-indigo-600 dark:text-indigo-400' },
-  purple: { bg: 'bg-purple-100 dark:bg-purple-900/30', text: 'text-purple-600 dark:text-purple-400' },
-  pink: { bg: 'bg-pink-100 dark:bg-pink-900/30', text: 'text-pink-600 dark:text-pink-400' },
-  green: { bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-600 dark:text-green-400' },
+  primary: { bg: 'bg-primary-100 dark:bg-primary-900/30', text: 'text-primary-600 dark:text-primary-400' },
+  slate: { bg: 'bg-slate-100 dark:bg-slate-700/50', text: 'text-slate-600 dark:text-slate-400' },
   emerald: { bg: 'bg-emerald-100 dark:bg-emerald-900/30', text: 'text-emerald-600 dark:text-emerald-400' },
   amber: { bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-600 dark:text-amber-400' },
   red: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-600 dark:text-red-400' },
@@ -28,13 +25,13 @@ export function AdminDashboardPage() {
   }
 
   const statCards = [
-    { label: t('admin.overview.totalUsers'), value: stats?.total_users ?? 0, icon: Users, color: 'blue' },
-    { label: t('admin.overview.totalDecks'), value: stats?.total_decks ?? 0, icon: Layers, color: 'indigo' },
-    { label: t('admin.overview.totalCards'), value: stats?.total_cards ?? 0, icon: CreditCard, color: 'purple' },
-    { label: t('admin.overview.totalReviews'), value: stats?.total_reviews ?? 0, icon: TrendingUp, color: 'pink' },
-    { label: t('admin.overview.newUsersWeek'), value: stats?.new_users_this_week ?? 0, icon: Users, color: 'green' },
+    { label: t('admin.overview.totalUsers'), value: stats?.total_users ?? 0, icon: Users, color: 'primary' },
+    { label: t('admin.overview.totalDecks'), value: stats?.total_decks ?? 0, icon: Layers, color: 'slate' },
+    { label: t('admin.overview.totalCards'), value: stats?.total_cards ?? 0, icon: CreditCard, color: 'emerald' },
+    { label: t('admin.overview.totalReviews'), value: stats?.total_reviews ?? 0, icon: TrendingUp, color: 'amber' },
+    { label: t('admin.overview.newUsersWeek'), value: stats?.new_users_this_week ?? 0, icon: Users, color: 'amber' },
     { label: t('admin.overview.newUsersMonth'), value: stats?.new_users_this_month ?? 0, icon: Users, color: 'emerald' },
-    { label: t('admin.overview.activeSessions'), value: stats?.active_sessions_today ?? 0, icon: Activity, color: 'amber' },
+    { label: t('admin.overview.activeSessions'), value: stats?.active_sessions_today ?? 0, icon: Activity, color: 'slate' },
     { label: t('admin.overview.openTickets'), value: stats?.open_support_tickets ?? 0, icon: MessageSquare, color: 'red' },
   ]
 

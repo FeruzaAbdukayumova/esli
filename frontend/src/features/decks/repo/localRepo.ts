@@ -87,12 +87,17 @@ function computeLocalSm2(
 class LocalDeckRepository implements DeckRepository {
   async listDecks(): Promise<Deck[]> {
     const data = guestStorage.read()
-    return [...data.decks]
+    return data.decks.map((deck) => ({
+      ...deck,
+      cardCount: data.cardsByDeckId[deck.id]?.length ?? 0,
+    }))
   }
 
   async getDeck(deckId: string): Promise<Deck | null> {
     const data = guestStorage.read()
-    return data.decks.find((deck) => deck.id === deckId) || null
+    const deck = data.decks.find((d) => d.id === deckId)
+    if (!deck) return null
+    return { ...deck, cardCount: data.cardsByDeckId[deck.id]?.length ?? 0 }
   }
 
   async createDeck(input: CreateDeckInput): Promise<Deck> {

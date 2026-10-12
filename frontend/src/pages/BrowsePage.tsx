@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState, useEffect, useMemo, useRef } from 'react'
+import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import {
   Search,
@@ -48,13 +48,12 @@ export const BrowsePage = () => {
       },
     },
   })
-  const navigate = useNavigate()
   const { user } = useAuthContext()
   const { logout } = useAuth()
   const { mode } = useDeckRepo()
   const syncImportMutation = useSyncImport()
 
-  const guestData = guestStorage.read()
+  const guestData = useMemo(() => guestStorage.read(), [])
   const hasGuestDecksToSave =
     !!user &&
     Array.isArray(guestData.decks) &&
@@ -80,6 +79,8 @@ export const BrowsePage = () => {
   const [sortBy, setSortBy] = useState<SortBy>('popular')
   const [page, setPage] = useState(1)
   const [copyingDeckId, setCopyingDeckId] = useState<string | null>(null)
+  // Maps public deck id -> the user's new copied deck id
+  const [copiedDeckIds, setCopiedDeckIds] = useState<Record<string, string>>({})
   const debounceRef = useRef<ReturnType<typeof setTimeout>>()
 
   useEffect(() => {
@@ -103,10 +104,13 @@ export const BrowsePage = () => {
     setCopyingDeckId(deckId)
     try {
       const result = await copyDeckMutation.mutateAsync(deckId)
-      toast.success(t('toast.deckCopied'))
-      setTimeout(() => {
-        navigate(`/deck/${result.id}`)
-      }, 1500)
+      const deckTitle = data?.decks.find(d => d.id === deckId)?.title
+      toast.success(
+        deckTitle
+          ? t('browse.copiedToLibrary', '"{{title}}" copied to your library', { title: deckTitle })
+          : t('toast.deckCopied'),
+      )
+      setCopiedDeckIds(prev => ({ ...prev, [deckId]: result.id }))
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t('toast.failedToCopyDeck'))
     } finally {
@@ -116,11 +120,16 @@ export const BrowsePage = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    setPage(1) // Reset to first page on new search
+    // Apply the pending query immediately on Enter; only reset pagination if it changed
+    if (searchInput !== searchQuery) {
+      clearTimeout(debounceRef.current)
+      setSearchQuery(searchInput)
+      setPage(1)
+    }
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-[#0F0F11] grain relative overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-surface-base grain relative overflow-x-hidden">
       {/* Decorative background */}
       <div
         className="fixed inset-0 opacity-[0.03] dark:opacity-[0.06] pointer-events-none z-0"
@@ -225,7 +234,7 @@ export const BrowsePage = () => {
             <div className="text-center py-16 px-4">
               <p className="text-lg font-medium text-red-600 dark:text-red-400 mb-2">{t('browse.failedToLoadDecks')}</p>
               <p className="text-sm text-slate-500 dark:text-slate-400">
-                {error instanceof Error ? error.message : 'Please try again later'}
+                {error instanceof Error ? error.message : t('browse.tryAgainLater', 'Please try again later')}
               </p>
             </div>
           ) : data && data.decks.length === 0 ? (
@@ -241,17 +250,17 @@ export const BrowsePage = () => {
           ) : data && (
             <>
               <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-                {data.total} {t('browse.decksFound')}
+                {t('browse.decksFoundCount', '{{count}} decks found', { count: data.total })}
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {data.decks.map((deck, index) => (
+                {data.decks.map((deck) => (
                   <PublicDeckCard
                     key={deck.id}
                     deck={deck}
-                    index={index}
                     onCopy={handleCopy}
                     isCopying={copyingDeckId === deck.id}
+                    copiedDeckId={copiedDeckIds[deck.id] ?? null}
                   />
                 ))}
               </div>

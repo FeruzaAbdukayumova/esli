@@ -27,7 +27,7 @@ export function UpgradePrompt({ feature, currentLimit, className = '' }: Upgrade
           </p>
           <Link
             to="/pricing"
-            className="inline-flex items-center gap-1 mt-2 text-sm font-medium text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100 underline"
+            className="inline-flex items-center gap-1 mt-2 text-sm font-medium text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100 underline rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
           >
             {t('subscription.viewPlans')}
           </Link>

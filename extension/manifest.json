@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Esli - Quick Add",
+  "name": "Esli Flashcards - AI Card Creator",
   "version": "1.0.0",
-  "description": "Select text on any page and add it as a flashcard to your decks",
+  "description": "Turn any webpage into flashcards. Highlight text or use AI to auto-generate study cards from articles, docs, anything.",
   "permissions": [
     "contextMenus",
     "activeTab",

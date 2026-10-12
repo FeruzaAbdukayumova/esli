@@ -18,6 +18,18 @@ export const authApi = {
     return apiClient.post<void>('/auth/logout', undefined, { credentials: 'include' })
   },
 
+  forgotPassword: (email: string): Promise<void> => {
+    return apiClient.post<void>('/auth/forgot-password', { email })
+  },
+
+  resetPassword: (token: string, newPassword: string): Promise<TokenResponse> => {
+    return apiClient.post<TokenResponse>(
+      '/auth/reset-password',
+      { token, new_password: newPassword },
+      { credentials: 'include' },
+    )
+  },
+
   getMe: (): Promise<User> => {
     return apiClient.get<User>('/auth/me')
   },

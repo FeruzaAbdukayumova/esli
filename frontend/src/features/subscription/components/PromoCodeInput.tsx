@@ -15,13 +15,20 @@ export function PromoCodeInput({ className = '' }: PromoCodeInputProps) {
   const redeemMutation = useRedeemPromo()
   const [code, setCode] = useState('')
 
+  const tierLabel = (tierValue: string) =>
+    tierValue === 'premium'
+      ? t('tier.premium', 'Premium')
+      : tierValue === 'pro'
+        ? t('tier.pro', 'Pro')
+        : t('tier.free', 'Free')
+
   const handleRedeem = () => {
     if (!code.trim()) return
     redeemMutation.mutate(code.trim(), {
       onSuccess: (data) => {
         toast.success(
           t('promo.redeemSuccess', {
-            tier: data.promo_tier.charAt(0).toUpperCase() + data.promo_tier.slice(1),
+            tier: tierLabel(data.promo_tier),
             date: new Date(data.promo_expires_at).toLocaleDateString(),
           }),
         )
@@ -55,7 +62,7 @@ export function PromoCodeInput({ className = '' }: PromoCodeInputProps) {
           <Sparkles className="w-4 h-4 text-primary-500 shrink-0" />
           <span className="text-sm text-primary-700 dark:text-primary-300">
             {t('promo.activePromo', {
-              tier: promoTier.charAt(0).toUpperCase() + promoTier.slice(1),
+              tier: tierLabel(promoTier),
               date: new Date(promoExpiresAt).toLocaleDateString(),
             })}
           </span>
@@ -69,14 +76,15 @@ export function PromoCodeInput({ className = '' }: PromoCodeInputProps) {
           onChange={(e) => setCode(e.target.value.toUpperCase())}
           onKeyDown={(e) => e.key === 'Enter' && handleRedeem()}
           placeholder={t('promo.enterCode')}
+          aria-label={t('promo.enterCode')}
           maxLength={50}
-          className="flex-1 px-3 py-2 min-h-[40px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+          className="flex-1 px-3 py-2 min-h-[40px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:border-primary-500 transition-colors"
         />
         <button
           type="button"
           onClick={handleRedeem}
           disabled={!code.trim() || redeemMutation.isPending}
-          className="px-4 py-2 min-h-[40px] rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="px-4 py-2 min-h-[40px] rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {redeemMutation.isPending ? (
             <Loader2 className="w-4 h-4 animate-spin" />
