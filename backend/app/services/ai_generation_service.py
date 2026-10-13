@@ -157,7 +157,7 @@ async def generate_cards(
     client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
 
     message = await client.messages.create(
-        model="claude-sonnet-4-20250514",
+        model="claude-sonnet-5-5",
         max_tokens=8192,
         system=FLASHCARD_SYSTEM_PROMPT,
         messages=[{"role": "user", "content": prompt}],
@@ -240,7 +240,7 @@ async def generate_cards_from_pdf(
     client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
 
     message = await client.messages.create(
-        model="claude-sonnet-4-20250514",
+        model="claude-sonnet-5-5",
         max_tokens=8192,
         system=FLASHCARD_SYSTEM_PROMPT,
         messages=[
@@ -330,7 +330,7 @@ async def edit_cards(
     client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
 
     message = await client.messages.create(
-        model="claude-sonnet-4-20250514",
+        model="claude-sonnet-5-5",
         max_tokens=8192,
         system=FLASHCARD_SYSTEM_PROMPT,
         messages=[{"role": "user", "content": prompt}],

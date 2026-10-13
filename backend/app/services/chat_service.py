@@ -127,7 +127,7 @@ async def get_ai_response(
 
     client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
     response = await client.messages.create(
-        model="claude-sonnet-4-20250514",
+        model="claude-sonnet-5-5",
         max_tokens=2048,
         system=SYSTEM_PROMPT,
         messages=claude_messages,
