@@ -84,26 +84,20 @@ export function ProfilePage() {
 
   const statCards = stats
     ? [
-        { icon: Layers, label: t('profile.totalCards'), value: stats.totalCards, color: 'text-primary-600 dark:text-primary-400', bg: 'bg-primary-100 dark:bg-primary-900/30' },
-        { icon: Target, label: t('profile.accuracy'), value: `${stats.retentionPercent}%`, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-900/30' },
-        { icon: Flame, label: t('profile.streak'), value: `${stats.streakDays}d`, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-900/30' },
-        { icon: Trophy, label: t('profile.mastery'), value: `${stats.masteryPercent}%`, color: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-100 dark:bg-violet-900/30' },
-        { icon: Clock, label: t('profile.dueToday'), value: stats.cardsDueToday, color: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-100 dark:bg-rose-900/30' },
-        { icon: Check, label: t('profile.reviewedToday'), value: stats.cardsReviewedToday, color: 'text-slate-600 dark:text-slate-400', bg: 'bg-slate-100 dark:bg-slate-700' },
+        { icon: Layers, label: t('profile.totalCards'), value: stats.totalCards },
+        { icon: Target, label: t('profile.accuracy'), value: `${stats.retentionPercent}%` },
+        { icon: Flame, label: t('profile.streak'), value: `${stats.streakDays}d` },
+        { icon: Trophy, label: t('profile.mastery'), value: `${stats.masteryPercent}%` },
+        { icon: Clock, label: t('profile.dueToday'), value: stats.cardsDueToday },
+        { icon: Check, label: t('profile.reviewedToday'), value: stats.cardsReviewedToday },
       ]
     : []
 
-  return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-surface-base grain">
-      <div
-        className="fixed inset-0 opacity-[0.03] dark:opacity-[0.06] pointer-events-none z-0"
-        style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)',
-          backgroundSize: '24px 24px',
-        }}
-        aria-hidden
-      />
+  const iconBtn =
+    'inline-flex items-center justify-center min-w-[44px] min-h-[44px] rounded-[14px] transition-[transform,background-color,color] duration-150 active:scale-[0.95] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-sky disabled:opacity-60'
 
+  return (
+    <div className="min-h-screen flex flex-col">
       <DashboardNavbar
         user={user}
         isApiMode={mode === 'api'}
@@ -113,16 +107,16 @@ export function ProfilePage() {
         onLogout={logout}
       />
 
-      <main className="relative z-10 flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-6 md:py-8">
+      <main className="relative flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-6 md:py-8">
         <nav className="mb-6" aria-label={t('nav.breadcrumb', 'Breadcrumb')}>
-          <ol className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
+          <ol className="flex items-center gap-1.5 text-sm text-muted">
             <li>
-              <Link to="/" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
+              <Link to="/" className="rounded font-medium underline decoration-brand/40 underline-offset-4 hover:text-fg hover:decoration-brand active:opacity-70 transition-[color,opacity] duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand">
                 {t('common.home')}
               </Link>
             </li>
-            <li><ChevronRight className="w-4 h-4 text-slate-400" aria-hidden /></li>
-            <li className="font-medium text-slate-800 dark:text-slate-100" aria-current="page">
+            <li><ChevronRight className="w-4 h-4" aria-hidden /></li>
+            <li className="font-bold text-fg" aria-current="page">
               {t('profile.title')}
             </li>
           </ol>
@@ -130,10 +124,10 @@ export function ProfilePage() {
 
         <div className="space-y-6">
           {/* User Info Card */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-md border border-slate-100 dark:border-slate-700/50 p-6 md:p-8">
-            <div className="flex items-start gap-5">
-              <div className="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center shrink-0">
-                <span className="text-xl font-bold text-primary-600 dark:text-primary-400">
+          <div className="sheet p-5 sm:p-6">
+            <div className="flex items-start gap-4 sm:gap-5">
+              <div className="w-16 h-16 rounded-full border-[2.5px] border-ink bg-coral flex items-center justify-center shrink-0 -rotate-3">
+                <span className="font-display text-xl text-ink">
                   {getInitials(user?.email || 'G', user?.username)}
                 </span>
               </div>
@@ -148,7 +142,7 @@ export function ProfilePage() {
                           value={usernameInput}
                           onChange={(e) => setUsernameInput(e.target.value)}
                           onKeyDown={(e) => { if (e.key === 'Enter') handleUsernameSave(); if (e.key === 'Escape') setEditingUsername(false) }}
-                          className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-lg font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:border-transparent w-48"
+                          className="field min-w-0 flex-1 sm:flex-none sm:!w-56 font-bold"
                           placeholder={t('profile.usernamePlaceholder')}
                           maxLength={50}
                           autoFocus
@@ -157,27 +151,29 @@ export function ProfilePage() {
                           type="button"
                           onClick={handleUsernameSave}
                           disabled={updateUsernameMutation.isPending || !usernameInput.trim()}
-                          className="p-1.5 rounded-lg bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800"
+                          className="btn-brand shrink-0 min-w-[44px] min-h-[44px] px-0"
+                          aria-label={t('common.save')}
                         >
-                          {updateUsernameMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                          {updateUsernameMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" strokeWidth={3} />}
                         </button>
                         <button
                           type="button"
                           onClick={() => { setEditingUsername(false); setUsernameInput(user?.username || '') }}
-                          className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                          className={`${iconBtn} shrink-0 text-muted hover:text-fg hover:bg-fg/[0.07]`}
+                          aria-label={t('common.cancel')}
                         >
                           <X className="w-4 h-4" />
                         </button>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2">
-                        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+                      <div className="flex items-center gap-1">
+                        <h1 className="font-display text-xl sm:text-2xl text-fg min-w-0 truncate">
                           {user?.username || t('profile.setUsername')}
-                        </h2>
+                        </h1>
                         <button
                           type="button"
                           onClick={() => { setUsernameInput(user?.username || ''); setEditingUsername(true) }}
-                          className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] -my-2.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                          className={`${iconBtn} -my-2.5 text-muted hover:text-fg hover:bg-fg/[0.07]`}
                           aria-label={t('profile.editUsername')}
                         >
                           <Pencil className="w-4 h-4" />
@@ -186,7 +182,7 @@ export function ProfilePage() {
                     )}
 
                     {updateUsernameMutation.isError && (
-                      <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                      <p role="alert" className="text-sm font-medium text-again mt-1">
                         {(updateUsernameMutation.error as Error)?.message || t('profile.failedToSaveUsername')}
                       </p>
                     )}
@@ -194,25 +190,25 @@ export function ProfilePage() {
                 )}
 
                 {isGuest && (
-                  <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">{t('profile.guest')}</h2>
+                  <h1 className="font-display text-xl sm:text-2xl text-fg mb-2">{t('profile.guest')}</h1>
                 )}
 
-                <div className="space-y-1.5 text-sm text-slate-600 dark:text-slate-400">
+                <div className="space-y-1.5 text-sm text-muted">
                   {user && (
                     <>
-                      <div className="flex items-center gap-2">
-                        <Mail className="w-4 h-4 text-slate-400 dark:text-slate-500" />
-                        <span>{user.email}</span>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Mail className="w-4 h-4 shrink-0" aria-hidden />
+                        <span className="truncate">{user.email}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                        <Calendar className="w-4 h-4 shrink-0" aria-hidden />
                         <span>{t('profile.memberSince')} {formatDate(user.created_at, i18n.language)}</span>
                       </div>
                     </>
                   )}
                   {isGuest && (
                     <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                      <User className="w-4 h-4 shrink-0" aria-hidden />
                       <span>{t('profile.dataStoredLocally')}</span>
                     </div>
                   )}
@@ -224,15 +220,15 @@ export function ProfilePage() {
           {/* Stats loading skeletons (mirror the stats + forecast card layout) */}
           {statsLoading && (
             <>
-              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-md border border-slate-100 dark:border-slate-700/50 p-6 md:p-8">
+              <div className="sheet p-5 sm:p-6">
                 <Skeleton className="h-6 w-44 mb-5" />
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   {Array.from({ length: 6 }).map((_, i) => (
-                    <Skeleton key={i} className="h-16 rounded-xl" />
+                    <Skeleton key={i} className="h-14 rounded-xl" />
                   ))}
                 </div>
               </div>
-              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-md border border-slate-100 dark:border-slate-700/50 p-6 md:p-8">
+              <div className="sheet p-5 sm:p-6">
                 <Skeleton className="h-6 w-44 mb-5" />
                 <Skeleton className="h-32" />
               </div>
@@ -241,8 +237,8 @@ export function ProfilePage() {
 
           {/* Stats error (inline, with retry) */}
           {!statsLoading && !!statsError && (
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-md border border-red-200 dark:border-red-900/50 p-6 md:p-8 text-center">
-              <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+            <div className="sheet !border-again p-5 sm:p-6 text-center">
+              <p className="text-sm text-muted mb-4">
                 {t('profile.statsError', 'Could not load your stats. Check your connection and try again.')}
               </p>
               <Button variant="secondary" size="sm" onClick={() => refetchStats()}>
@@ -253,53 +249,51 @@ export function ProfilePage() {
 
           {/* Stats Overview */}
           {stats && (
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-md border border-slate-100 dark:border-slate-700/50 p-6 md:p-8">
-              <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-5">{t('profile.statsOverview')}</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <section className="sheet p-5 sm:p-6">
+              <h2 className="font-display text-lg text-fg mb-4">{t('profile.statsOverview')}</h2>
+              <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-5">
                 {statCards.map((stat) => (
-                  <div key={stat.label} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-700/30">
-                    <div className={`p-2 rounded-lg ${stat.bg}`}>
-                      <stat.icon className={`w-5 h-5 ${stat.color}`} />
-                    </div>
-                    <div>
-                      <p className="text-lg font-bold text-slate-800 dark:text-slate-100 tabular-nums">{stat.value}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">{stat.label}</p>
-                    </div>
+                  <div key={stat.label} className="min-w-0">
+                    <dt className="flex items-center gap-1.5 text-sm text-muted">
+                      <stat.icon className="w-4 h-4 shrink-0" aria-hidden />
+                      <span className="truncate">{stat.label}</span>
+                    </dt>
+                    <dd className="mt-0.5 text-2xl font-extrabold text-fg tabular-nums">{stat.value}</dd>
                   </div>
                 ))}
-              </div>
-            </div>
+              </dl>
+            </section>
           )}
 
           {/* Review Forecast */}
           {stats && stats.reviewForecast.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-md border border-slate-100 dark:border-slate-700/50 p-6 md:p-8">
-              <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-5">{t('profile.sevenDayForecast')}</h2>
+            <section className="sheet p-5 sm:p-6">
+              <h2 className="font-display text-lg text-fg mb-5">{t('profile.sevenDayForecast')}</h2>
               <ReviewForecast forecast={stats.reviewForecast} />
-            </div>
+            </section>
           )}
 
           {/* Deck Progress */}
           {stats && stats.deckProgress.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-md border border-slate-100 dark:border-slate-700/50 p-6 md:p-8">
-              <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-5">{t('profile.deckProgress')}</h2>
+            <section className="sheet p-5 sm:p-6">
+              <h2 className="font-display text-lg text-fg mb-5">{t('profile.deckProgress')}</h2>
               <div className="space-y-4">
                 {stats.deckProgress.map((deck) => (
                   <DeckProgressBar key={deck.deckId} deck={deck} />
                 ))}
               </div>
-              <div className="flex items-center gap-4 mt-5 text-xs text-slate-500 dark:text-slate-400">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-5 text-sm text-muted">
                 <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-full bg-emerald-500" /> {t('profile.mature')}
+                  <span className="w-3 h-3 rounded-full border-2 border-edge bg-grass" aria-hidden /> {t('profile.mature')}
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-full bg-amber-400" /> {t('profile.learning')}
+                  <span className="w-3 h-3 rounded-full border-2 border-edge bg-sun" aria-hidden /> {t('profile.learning')}
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-500" /> {t('profile.new')}
+                  <span className="w-3 h-3 rounded-full border-2 border-edge bg-surface" aria-hidden /> {t('profile.new')}
                 </span>
               </div>
-            </div>
+            </section>
           )}
         </div>
       </main>

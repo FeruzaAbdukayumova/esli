@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { CheckCircle } from 'lucide-react'
+import { Check } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import { subscriptionKeys } from '@/features/subscription/hooks'
@@ -15,21 +15,23 @@ export function SubscriptionSuccessPage() {
   }, [queryClient])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-surface-base grain px-4">
-      <div className="max-w-md w-full text-center bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-md border border-slate-100 dark:border-slate-700/50 p-8">
-        <CheckCircle className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
-        <h1 className="text-2xl font-display font-bold text-slate-800 dark:text-slate-100 mb-2">
-          {t('subscription.successTitle')}
-        </h1>
-        <p className="text-slate-600 dark:text-slate-400 mb-6">
-          {t('subscription.successMessage')}
-        </p>
-        <Link
-          to="/dashboard"
-          className="inline-block px-6 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800"
-        >
-          {t('subscription.goToDashboard')}
-        </Link>
+    <div className="min-h-screen flex items-center justify-center px-4 py-8">
+      <div className="relative max-w-md w-full">
+        <span className="tape bg-sun/80 -top-3 left-1/2 -translate-x-1/2 rotate-2" aria-hidden />
+        <div className="sheet text-center p-6 sm:p-8">
+          <div className="sticker mx-auto mb-5 flex h-16 w-16 items-center justify-center bg-mint -rotate-3">
+            <Check className="h-8 w-8 text-ink" strokeWidth={3} aria-hidden />
+          </div>
+          <h1 className="font-display text-[1.75rem] leading-[1.1] text-fg mb-2 [text-wrap:balance]">
+            {t('subscription.successTitle')}
+          </h1>
+          <p className="text-base text-muted mb-6">
+            {t('subscription.successMessage')}
+          </p>
+          <Link to="/dashboard" className="btn-brand w-full min-h-[52px] px-5 text-base">
+            {t('subscription.goToDashboard')}
+          </Link>
+        </div>
       </div>
     </div>
   )

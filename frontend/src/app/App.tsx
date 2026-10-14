@@ -37,18 +37,24 @@ function App() {
             position="top-center"
             toastOptions={{
               duration: 3000,
+              // Sticker toasts (DESIGN.md)
               style: {
-                borderRadius: '0.75rem',
-                padding: '12px 16px',
-                fontSize: '14px',
+                borderRadius: '16px',
+                border: '2.5px solid #17171A',
+                background: '#fff',
+                color: '#17171A',
+                padding: '10px 16px',
+                fontSize: '15px',
+                fontWeight: 600,
+                boxShadow: '0 0 0 3px #fff, 0 10px 20px -10px rgb(22 30 60 / 0.45)',
               },
               success: {
                 duration: 2000,
-                iconTheme: { primary: '#10b981', secondary: '#fff' },
+                iconTheme: { primary: '#44D07B', secondary: '#17171A' },
               },
               error: {
                 duration: 4000,
-                iconTheme: { primary: '#ef4444', secondary: '#fff' },
+                iconTheme: { primary: '#E5484D', secondary: '#fff' },
               },
             }}
           />

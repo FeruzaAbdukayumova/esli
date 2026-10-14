@@ -18,8 +18,8 @@ export function BottomNav() {
   if (hiddenPrefixes.some(p => location.pathname.startsWith(p))) return null
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200/50 dark:border-slate-700/50 lg:hidden safe-area-bottom" aria-label={t('nav.mobileNavigation', 'Mobile navigation')}>
-      <div className="flex items-center justify-around h-16 px-2">
+    <nav className="fixed bottom-0 inset-x-0 z-50 bg-canvas border-t-2 border-line lg:hidden safe-area-bottom" aria-label={t('nav.mobileNavigation', 'Mobile navigation')}>
+      <div className="flex items-center justify-around h-[68px] px-2">
         {NAV_ITEMS.map(({ path, icon: Icon, labelKey }) => {
           const isActive = location.pathname === path
             || (location.pathname === '/' && path === '/dashboard')
@@ -31,14 +31,18 @@ export function BottomNav() {
               key={path}
               to={path}
               aria-current={isActive ? 'page' : undefined}
-              className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
-                isActive
-                  ? 'text-primary-600 dark:text-primary-400'
-                  : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 active:text-slate-600 dark:active:text-slate-300'
+              className={`group flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-transform duration-150 active:scale-[0.94] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-sky ${
+                isActive ? 'text-fg' : 'text-muted hover:text-fg'
               }`}
             >
-              <Icon className="w-5 h-5" />
-              <span className="text-[10px] font-medium">{t(labelKey)}</span>
+              <span
+                className={`flex h-8 w-11 items-center justify-center rounded-[12px] border-2 transition-[background-color] duration-150 ${
+                  isActive ? 'border-ink bg-sky text-ink' : 'border-transparent group-hover:bg-fg/[0.07]'
+                }`}
+              >
+                <Icon className="w-5 h-5" aria-hidden />
+              </span>
+              <span className={`text-[11px] ${isActive ? 'font-extrabold' : 'font-semibold'}`}>{t(labelKey)}</span>
             </Link>
           )
         })}

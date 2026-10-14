@@ -12,21 +12,21 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div
-        className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
+        className={`max-w-[85%] rounded-[18px] border-2 px-3.5 py-2.5 text-sm font-medium leading-relaxed ${
           isUser
-            ? 'bg-primary-600 text-white rounded-br-md'
-            : 'bg-slate-100 dark:bg-slate-600 text-slate-900 dark:text-white rounded-bl-md'
+            ? 'bg-sky border-ink text-ink rounded-br-[6px]'
+            : 'bg-surface border-edge text-fg rounded-bl-[6px]'
         }`}
       >
         {message.role === 'admin' && (
-          <div className="text-xs font-medium opacity-70 mb-1">
+          <div className="text-xs font-bold text-muted mb-1">
             {t('chat.supportLabel', 'Support')}
           </div>
         )}
         <div className="whitespace-pre-wrap break-words">{message.content}</div>
         <div
           className={`text-[10px] mt-1 ${
-            isUser ? 'text-white/60' : 'text-slate-400 dark:text-slate-400'
+            isUser ? 'text-ink/60' : 'text-muted'
           }`}
         >
           {new Date(message.created_at).toLocaleTimeString(undefined, {

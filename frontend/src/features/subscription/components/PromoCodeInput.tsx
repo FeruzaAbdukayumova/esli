@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
-import { Gift, Loader2, Sparkles } from 'lucide-react'
+import { Gift, Loader2 } from 'lucide-react'
 import { useRedeemPromo } from '../hooks'
 import { useTier } from '../useTier'
 
@@ -46,21 +46,20 @@ export function PromoCodeInput({ className = '' }: PromoCodeInputProps) {
 
   return (
     <div className={className}>
-      <div className="flex items-center gap-2 mb-3">
-        <Gift className="w-4 h-4 text-primary-500" />
-        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+      <div className="flex items-center gap-2 mb-1">
+        <Gift className="w-4 h-4 text-fg" aria-hidden />
+        <span className="text-sm font-bold text-fg">
           {t('promo.title')}
         </span>
       </div>
 
-      <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
+      <p className="text-sm text-muted mb-3">
         {t('promo.description')}
       </p>
 
       {hasActivePromo && promoTier && promoExpiresAt && (
-        <div className="flex items-center gap-2 p-2.5 rounded-lg bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 mb-3">
-          <Sparkles className="w-4 h-4 text-primary-500 shrink-0" />
-          <span className="text-sm text-primary-700 dark:text-primary-300">
+        <div className="rounded-[14px] border-2 border-ink bg-mint px-3 py-2.5 mb-3">
+          <span className="text-sm font-semibold text-ink">
             {t('promo.activePromo', {
               tier: tierLabel(promoTier),
               date: new Date(promoExpiresAt).toLocaleDateString(),
@@ -78,13 +77,13 @@ export function PromoCodeInput({ className = '' }: PromoCodeInputProps) {
           placeholder={t('promo.enterCode')}
           aria-label={t('promo.enterCode')}
           maxLength={50}
-          className="flex-1 px-3 py-2 min-h-[40px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:border-primary-500 transition-colors"
+          className="field min-w-0 flex-1 !w-auto font-bold tracking-wide"
         />
         <button
           type="button"
           onClick={handleRedeem}
           disabled={!code.trim() || redeemMutation.isPending}
-          className="px-4 py-2 min-h-[40px] rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800 disabled:opacity-60 disabled:cursor-not-allowed"
+          className="btn-quiet shrink-0 min-h-[48px] px-4 text-sm"
         >
           {redeemMutation.isPending ? (
             <Loader2 className="w-4 h-4 animate-spin" />

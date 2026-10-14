@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { ChevronRight, Check, Loader2, Layers, Palette, Sun, Moon, Monitor, Languages, CreditCard, Sparkles } from 'lucide-react'
+import { ChevronRight, Check, Loader2, Sun, Moon, Monitor } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useAuthContext } from '@/app/providers/AuthProvider'
@@ -12,7 +12,7 @@ import { authApi } from '@/features/auth/api'
 import { useGuestSync } from '@/features/sync/useGuestSync'
 import { guestStorage } from '@/shared/lib/guestStorage'
 import { statsKeys } from '@/features/stats/statsHooks'
-import { THEME_PRESETS, type ThemeName, type DarkMode } from '@/shared/lib/themeStore'
+import { type DarkMode } from '@/shared/lib/themeStore'
 import { SUPPORTED_LANGUAGES } from '@/shared/i18n'
 import { useTier } from '@/features/subscription/useTier'
 import { usePortalSession } from '@/features/subscription/hooks'
@@ -27,7 +27,7 @@ export function SettingsPage() {
   const { logout } = useAuth()
   const { mode } = useDeckRepo()
   const queryClient = useQueryClient()
-  const { theme, setTheme, darkMode, setDarkMode } = useTheme()
+  const { darkMode, setDarkMode } = useTheme()
   const isGuest = !user
 
   const { hasGuestDecksToSave, isSyncing, saveGuestDecks } = useGuestSync()
@@ -68,23 +68,6 @@ export function SettingsPage() {
       toast.success(t('toast.dailyLimitSaved'))
     } else {
       updateLimitMutation.mutate(clampedLimit)
-    }
-  }
-
-  const updateThemeMutation = useMutation({
-    mutationFn: (themeName: string) => authApi.updateMe({ theme: themeName }),
-    onSuccess: (updatedUser) => {
-      queryClient.setQueryData(['me'], updatedUser)
-    },
-    onError: () => {
-      toast.error(t('toast.failedToSaveTheme'))
-    },
-  })
-
-  const handleThemeChange = (name: ThemeName) => {
-    setTheme(name)
-    if (!isGuest) {
-      updateThemeMutation.mutate(name)
     }
   }
 
@@ -134,66 +117,56 @@ export function SettingsPage() {
   const { tier, isFree, subscription } = useTier()
   const portalMutation = usePortalSession()
 
+  const sectionHead = (title: string, description: string) => (
+    <div className="mb-5">
+      <h2 className="font-display text-lg text-fg">{title}</h2>
+      <p className="mt-1 text-sm text-muted">{description}</p>
+    </div>
+  )
+
   const settingsContent = (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Subscription Section */}
       {!isGuest && (
-        <section>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
-              <CreditCard className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
-                {t('subscription.title')}
-              </h2>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                {t('subscription.manageDescription')}
-              </p>
-            </div>
-          </div>
+        <section className="sheet p-5 sm:p-6">
+          {sectionHead(t('subscription.title'), t('subscription.manageDescription'))}
 
           <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50">
-              <div>
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-fg">
                   {t('subscription.currentPlan')}
                 </span>
-                <span className={`ml-2 px-2 py-0.5 text-xs font-semibold rounded-full ${
-                  tier === 'premium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
-                  : tier === 'pro' ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
-                  : 'bg-slate-100 text-slate-600 dark:bg-slate-600 dark:text-slate-300'
+                <span className={`rounded-lg border-2 border-ink px-2 py-0.5 text-xs font-extrabold text-ink ${
+                  tier === 'premium' ? 'bg-sun' : tier === 'pro' ? 'bg-sky' : 'bg-white'
                 }`}>
                   {tier === 'premium' ? t('tier.premium', 'Premium') : tier === 'pro' ? t('tier.pro', 'Pro') : t('tier.free', 'Free')}
                 </span>
               </div>
               <Link
                 to="/pricing"
-                className="text-sm text-primary-600 dark:text-primary-400 hover:underline rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                className="rounded text-sm font-bold text-fg underline decoration-brand/50 underline-offset-4 hover:decoration-brand active:opacity-70 transition-opacity duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
               >
                 {isFree ? t('pricing.upgrade') : t('subscription.changePlan')}
               </Link>
             </div>
 
             {subscription && subscription.usage && (
-              <div className="flex items-center gap-2 p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50">
-                <Sparkles className="w-4 h-4 text-primary-500" />
-                <span className="text-sm text-slate-700 dark:text-slate-300">
-                  {subscription.usage.ai_generations_limit === -1
-                    ? t('subscription.aiUsageUnlimited', { used: subscription.usage.ai_generations_used })
-                    : t('subscription.aiUsage', { used: subscription.usage.ai_generations_used, limit: subscription.usage.ai_generations_limit })
-                  }
-                </span>
-              </div>
+              <p className="text-sm text-muted">
+                {subscription.usage.ai_generations_limit === -1
+                  ? t('subscription.aiUsageUnlimited', { used: subscription.usage.ai_generations_used })
+                  : t('subscription.aiUsage', { used: subscription.usage.ai_generations_used, limit: subscription.usage.ai_generations_limit })
+                }
+              </p>
             )}
 
             {subscription?.current_period_end && (
-              <div className="text-sm text-slate-500 dark:text-slate-400 px-3">
+              <p className="text-sm text-muted">
                 {subscription.cancel_at_period_end
                   ? t('subscription.cancelsAt', { date: new Date(subscription.current_period_end).toLocaleDateString() })
                   : t('subscription.renewsAt', { date: new Date(subscription.current_period_end).toLocaleDateString() })
                 }
-              </div>
+              </p>
             )}
 
             {!isFree && (
@@ -201,7 +174,7 @@ export function SettingsPage() {
                 type="button"
                 onClick={() => portalMutation.mutate()}
                 disabled={portalMutation.isPending}
-                className="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800 disabled:opacity-60"
+                className="btn-quiet min-h-[44px] px-4 text-sm"
               >
                 {portalMutation.isPending ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -211,7 +184,7 @@ export function SettingsPage() {
               </button>
             )}
 
-            <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+            <div className="mt-4 pt-5 border-t-2 border-dashed border-line">
               <PromoCodeInput />
             </div>
           </div>
@@ -219,20 +192,8 @@ export function SettingsPage() {
       )}
 
       {/* Language Section */}
-      <section>
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-teal-100 dark:bg-teal-900/30">
-            <Languages className="w-5 h-5 text-teal-600 dark:text-teal-400" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
-              {t('settings.language')}
-            </h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              {t('settings.languageDescription')}
-            </p>
-          </div>
-        </div>
+      <section className="sheet p-5 sm:p-6">
+        {sectionHead(t('settings.language'), t('settings.languageDescription'))}
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {SUPPORTED_LANGUAGES.map((lang) => {
@@ -241,17 +202,12 @@ export function SettingsPage() {
               <button
                 key={lang.code}
                 type="button"
+                aria-pressed={isActive}
                 onClick={() => handleLanguageChange(lang.code)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800 ${
-                  isActive
-                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                    : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
-                }`}
+                className={`btn-sticker min-h-[46px] justify-start px-3.5 text-sm font-bold ${isActive ? 'bg-sky' : 'bg-white'}`}
               >
-                <span className={`text-sm font-medium ${isActive ? 'text-primary-700 dark:text-primary-300' : 'text-slate-700 dark:text-slate-300'}`}>
-                  {lang.nativeLabel}
-                </span>
-                {isActive && <Check className="w-4 h-4 ml-auto text-primary-600 dark:text-primary-400" />}
+                <span className="truncate">{lang.nativeLabel}</span>
+                {isActive && <Check className="w-4 h-4 ml-auto shrink-0" strokeWidth={3} aria-hidden />}
               </button>
             )
           })}
@@ -259,22 +215,10 @@ export function SettingsPage() {
       </section>
 
       {/* Daily New Card Limit Section */}
-      <section>
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-primary-100 dark:bg-primary-900/30">
-            <Layers className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
-              {t('settings.dailyNewCardLimit')}
-            </h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              {t('settings.dailyNewCardLimitDescription')}
-            </p>
-          </div>
-        </div>
+      <section className="sheet p-5 sm:p-6">
+        {sectionHead(t('settings.dailyNewCardLimit'), t('settings.dailyNewCardLimitDescription'))}
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <input
             id="daily-new-card-limit"
             type="number"
@@ -285,14 +229,14 @@ export function SettingsPage() {
             value={newCardLimit}
             onChange={(e) => setNewCardLimit(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') handleLimitSave() }}
-            className="w-28 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-center font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:border-transparent"
+            className="field !w-28 text-center font-bold"
           />
-          <label htmlFor="daily-new-card-limit" className="text-sm text-slate-600 dark:text-slate-400">{t('settings.cardsPerDay')}</label>
+          <label htmlFor="daily-new-card-limit" className="text-sm font-medium text-muted">{t('settings.cardsPerDay')}</label>
           <button
             type="button"
             onClick={handleLimitSave}
             disabled={updateLimitMutation.isPending || newCardLimit.trim() === ''}
-            className="px-4 py-2 min-h-[40px] rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800 disabled:opacity-60"
+            className="btn-brand min-h-[46px] px-5 text-sm"
           >
             {updateLimitMutation.isPending ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -302,48 +246,33 @@ export function SettingsPage() {
           </button>
         </div>
 
-        <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+        <p className="mt-3 text-sm text-muted">
           {t('settings.dailyNewCardLimitHelp')} {t('settings.limitSaveHint', 'Press Enter or click Save to apply.')}
         </p>
       </section>
 
       {/* Appearance Section */}
-      <section>
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-sky-100 dark:bg-sky-900/30">
-            <Sun className="w-5 h-5 text-sky-600 dark:text-sky-400" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
-              {t('settings.appearance')}
-            </h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              {t('settings.appearanceDescription')}
-            </p>
-          </div>
-        </div>
+      <section className="sheet p-5 sm:p-6">
+        {sectionHead(t('settings.appearance'), t('settings.appearanceDescription'))}
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-1.5 rounded-[18px] border-2 border-edge/80 p-1.5">
           {darkModeOptions.map((opt) => {
             const isActive = darkMode === opt.mode
             return (
               <button
                 key={opt.mode}
                 type="button"
+                aria-pressed={isActive}
                 onClick={() => handleDarkModeChange(opt.mode)}
-                className={`flex flex-col items-center gap-2 px-4 py-4 rounded-lg border-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800 ${
+                className={`flex flex-col items-center gap-1.5 rounded-[14px] px-2 py-3 transition-[transform,background-color] duration-150 active:scale-[0.97] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-sky ${
                   isActive
-                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                    : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
+                    ? 'border-[2.5px] border-ink bg-sky text-ink shadow-sticker-sm'
+                    : 'border-[2.5px] border-transparent text-fg hover:bg-fg/[0.07]'
                 }`}
               >
-                <span className={isActive ? 'text-primary-600 dark:text-primary-400' : 'text-slate-500 dark:text-slate-400'}>
-                  {opt.icon}
-                </span>
-                <span className={`text-sm font-medium ${isActive ? 'text-primary-700 dark:text-primary-300' : 'text-slate-700 dark:text-slate-300'}`}>
-                  {opt.label}
-                </span>
-                <span className="text-xs text-slate-500 dark:text-slate-400 text-center">
+                {opt.icon}
+                <span className="text-sm font-bold">{opt.label}</span>
+                <span className={`hidden sm:block text-xs text-center ${isActive ? 'text-ink/70' : 'text-muted'}`}>
                   {opt.description}
                 </span>
               </button>
@@ -351,66 +280,11 @@ export function SettingsPage() {
           })}
         </div>
       </section>
-
-      {/* Theme Section */}
-      <section>
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-primary-100 dark:bg-primary-900/30">
-            <Palette className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
-              {t('settings.theme')}
-            </h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              {t('settings.themeDescription')}
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {THEME_PRESETS.map((preset) => {
-            const isActive = theme === preset.name
-            return (
-              <button
-                key={preset.name}
-                type="button"
-                onClick={() => handleThemeChange(preset.name)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800 ${
-                  isActive
-                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                    : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
-                }`}
-              >
-                <div
-                  className="w-8 h-8 rounded-full shrink-0"
-                  style={{ backgroundColor: `rgb(${preset.colors[500]})` }}
-                />
-                <span className={`text-sm font-medium ${isActive ? 'text-primary-700 dark:text-primary-300' : 'text-slate-700 dark:text-slate-300'}`}>
-                  {preset.label}
-                </span>
-                {isActive && <Check className="w-4 h-4 ml-auto text-primary-600 dark:text-primary-400" />}
-              </button>
-            )
-          })}
-        </div>
-      </section>
-
     </div>
   )
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-surface-base grain">
-      {/* Decorative background */}
-      <div
-        className="fixed inset-0 opacity-[0.03] dark:opacity-[0.06] pointer-events-none z-0"
-        style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)',
-          backgroundSize: '24px 24px',
-        }}
-        aria-hidden
-      />
-
+    <div className="min-h-screen flex flex-col">
       <DashboardNavbar
         user={user}
         isApiMode={mode === 'api'}
@@ -420,28 +294,26 @@ export function SettingsPage() {
         onLogout={logout}
       />
 
-      <main className="relative z-10 flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-6 md:py-8">
+      <main className="relative flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-6 md:py-8">
         {/* Breadcrumb */}
-        <nav className="mb-6" aria-label={t('nav.breadcrumb', 'Breadcrumb')}>
-          <ol className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
+        <nav className="mb-4" aria-label={t('nav.breadcrumb', 'Breadcrumb')}>
+          <ol className="flex items-center gap-1.5 text-sm text-muted">
             <li>
-              <Link to="/" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
+              <Link to="/" className="rounded font-medium underline decoration-brand/40 underline-offset-4 hover:text-fg hover:decoration-brand active:opacity-70 transition-[color,opacity] duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand">
                 {t('common.home')}
               </Link>
             </li>
             <li>
-              <ChevronRight className="w-4 h-4 text-slate-400" aria-hidden />
+              <ChevronRight className="w-4 h-4" aria-hidden />
             </li>
-            <li className="font-medium text-slate-800 dark:text-slate-100" aria-current="page">
+            <li className="font-bold text-fg" aria-current="page">
               {t('settings.title')}
             </li>
           </ol>
         </nav>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-md border border-slate-100 dark:border-slate-700/50 p-6 md:p-8">
-          <h1 className="text-2xl font-display font-bold text-slate-800 dark:text-slate-100 mb-6">{t('settings.title')}</h1>
-          {settingsContent}
-        </div>
+        <h1 className="font-display text-[1.75rem] leading-[1.1] md:text-[2.25rem] text-fg mb-6">{t('settings.title')}</h1>
+        {settingsContent}
       </main>
     </div>
   )

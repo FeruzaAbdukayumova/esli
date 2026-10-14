@@ -69,10 +69,10 @@ function ToolbarButton({ onClick, isActive, title, children }: ToolbarButtonProp
       title={title}
       aria-label={title}
       aria-pressed={isActive}
-      className={`p-1 rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
+      className={`min-w-[32px] min-h-[32px] flex items-center justify-center rounded-lg transition-[transform,background-color,color] duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-sky ${
         isActive
-          ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300'
-          : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700 active:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200 dark:active:bg-slate-600'
+          ? 'bg-sky text-ink'
+          : 'text-muted hover:bg-fg/[0.07] hover:text-fg'
       }`}
     >
       {children}
@@ -234,9 +234,9 @@ export function RichTextEditor({
   const iconSize = compact ? 14 : 16
 
   return (
-    <div className={`border border-slate-300 dark:border-slate-600 rounded-lg overflow-hidden bg-white dark:bg-slate-800 ${className}`}>
+    <div className={`rounded-[14px] border-2 border-edge/80 bg-sheet text-fg transition-[border-color] duration-150 hover:border-edge focus-within:border-edge focus-within:ring-[3px] focus-within:ring-sky ${className}`}>
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 border-b border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50">
+      <div className="flex flex-wrap items-center gap-0.5 px-1.5 py-1 rounded-t-[12px] border-b-2 border-line bg-fg/[0.03]">
         {/* Text formatting */}
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
@@ -267,7 +267,7 @@ export function RichTextEditor({
           <Strikethrough size={iconSize} />
         </ToolbarButton>
 
-        <div className="w-px h-5 bg-slate-300 dark:bg-slate-500 mx-0.5" />
+        <div className="w-0.5 h-5 rounded-full bg-line mx-1" aria-hidden />
 
         {/* Headings */}
         <ToolbarButton
@@ -292,7 +292,7 @@ export function RichTextEditor({
           <Heading3 size={iconSize} />
         </ToolbarButton>
 
-        <div className="w-px h-5 bg-slate-300 dark:bg-slate-500 mx-0.5" />
+        <div className="w-0.5 h-5 rounded-full bg-line mx-1" aria-hidden />
 
         {/* Lists */}
         <ToolbarButton
@@ -310,7 +310,7 @@ export function RichTextEditor({
           <ListOrdered size={iconSize} />
         </ToolbarButton>
 
-        <div className="w-px h-5 bg-slate-300 dark:bg-slate-500 mx-0.5" />
+        <div className="w-0.5 h-5 rounded-full bg-line mx-1" aria-hidden />
 
         {/* Code & Quote */}
         <ToolbarButton
@@ -328,7 +328,7 @@ export function RichTextEditor({
           <Quote size={iconSize} />
         </ToolbarButton>
 
-        <div className="w-px h-5 bg-slate-300 dark:bg-slate-500 mx-0.5" />
+        <div className="w-0.5 h-5 rounded-full bg-line mx-1" aria-hidden />
 
         {/* Color picker */}
         <div className="relative" ref={colorPopoverRef}>
@@ -345,14 +345,14 @@ export function RichTextEditor({
             <Palette size={iconSize} />
           </ToolbarButton>
           {showColorPicker && (
-            <div className="absolute top-full left-0 z-10 mt-1 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg shadow-elevation-md flex gap-1 flex-wrap w-[140px]">
+            <div className="absolute top-full left-0 z-10 mt-1 p-2 bg-sheet text-fg border-2 border-edge rounded-[14px] shadow-sticker-sm flex gap-1 flex-wrap w-[140px]">
               <button
                 type="button"
                 onClick={() => {
                   editor.chain().focus().unsetColor().run()
                   setShowColorPicker(false)
                 }}
-                className="w-5 h-5 rounded border border-slate-300 dark:border-slate-500 hover:scale-110 active:scale-95 transition-transform text-xs flex items-center justify-center text-slate-700 dark:text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                className="w-6 h-6 rounded-md border-2 border-edge/40 hover:scale-110 active:scale-95 transition-transform text-xs flex items-center justify-center text-fg focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-sky"
                 title={t('editor.colorDefault', 'Default color')}
                 aria-label={t('editor.colorDefault', 'Default color')}
               >
@@ -366,7 +366,7 @@ export function RichTextEditor({
                     editor.chain().focus().setColor(color).run()
                     setShowColorPicker(false)
                   }}
-                  className="w-5 h-5 rounded border border-slate-300 dark:border-slate-500 ring-1 ring-inset ring-black/10 dark:ring-white/20 hover:scale-110 active:scale-95 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                  className="w-6 h-6 rounded-md border-2 border-edge/40 hover:scale-110 active:scale-95 transition-transform focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-sky"
                   style={{ backgroundColor: color }}
                   title={color}
                   aria-label={color}
@@ -396,7 +396,7 @@ export function RichTextEditor({
             {editor.isActive('link') ? <Unlink size={iconSize} /> : <LinkIcon size={iconSize} />}
           </ToolbarButton>
           {showLinkInput && (
-            <div className="absolute top-full left-0 z-10 mt-1 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg shadow-elevation-md flex gap-1">
+            <div className="absolute top-full left-0 z-10 mt-1 p-2 bg-sheet text-fg border-2 border-edge rounded-[14px] shadow-sticker-sm flex gap-1">
               <input
                 ref={linkInputRef}
                 type="url"
@@ -407,12 +407,12 @@ export function RichTextEditor({
                   if (e.key === 'Escape') setShowLinkInput(false)
                 }}
                 placeholder={t('editor.linkUrl')}
-                className="px-2 py-1 text-sm border border-slate-300 dark:border-slate-500 rounded bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 w-48"
+                className="field !min-h-[36px] !w-48 !rounded-[10px] !px-2.5 !py-1 !text-sm"
               />
               <button
                 type="button"
                 onClick={insertLink}
-                className="px-2 py-1 text-xs bg-primary-600 text-white rounded hover:bg-primary-700 active:bg-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-slate-800"
+                className="btn-quiet !rounded-[12px] min-h-[36px] px-3 text-xs"
               >
                 {t('editor.linkInsert')}
               </button>
@@ -435,7 +435,7 @@ export function RichTextEditor({
             <ImageIcon size={iconSize} />
           </ToolbarButton>
           {showImageInput && (
-            <div className="absolute top-full right-0 z-10 mt-1 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg shadow-elevation-md flex gap-1">
+            <div className="absolute top-full right-0 z-10 mt-1 p-2 bg-sheet text-fg border-2 border-edge rounded-[14px] shadow-sticker-sm flex gap-1">
               <input
                 ref={imageInputRef}
                 type="url"
@@ -446,12 +446,12 @@ export function RichTextEditor({
                   if (e.key === 'Escape') setShowImageInput(false)
                 }}
                 placeholder={t('editor.imageUrl')}
-                className="px-2 py-1 text-sm border border-slate-300 dark:border-slate-500 rounded bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 w-48"
+                className="field !min-h-[36px] !w-48 !rounded-[10px] !px-2.5 !py-1 !text-sm"
               />
               <button
                 type="button"
                 onClick={insertImage}
-                className="px-2 py-1 text-xs bg-primary-600 text-white rounded hover:bg-primary-700 active:bg-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-slate-800"
+                className="btn-quiet !rounded-[12px] min-h-[36px] px-3 text-xs"
               >
                 {t('editor.imageInsert')}
               </button>
@@ -475,12 +475,12 @@ export function RichTextEditor({
             <TableIcon size={iconSize} />
           </ToolbarButton>
           {showTableMenu && (
-            <div className="absolute top-full right-0 z-10 mt-1 p-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg shadow-elevation-md min-w-[160px]">
+            <div className="absolute top-full right-0 z-10 mt-1 p-1 bg-sheet text-fg border-2 border-edge rounded-[14px] shadow-sticker-sm min-w-[160px]">
               {!editor.isActive('table') ? (
                 <button
                   type="button"
                   onClick={insertTable}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 text-sm text-left hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
+                  className="flex items-center gap-2 w-full min-h-[36px] px-2 py-1.5 text-sm font-medium text-left rounded-lg transition-[background-color] duration-150 hover:bg-fg/[0.07] active:bg-fg/[0.12] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-sky focus-visible:ring-inset text-fg"
                 >
                   <Plus size={14} />
                   {t('editor.tableInsert')}
@@ -490,7 +490,7 @@ export function RichTextEditor({
                   <button
                     type="button"
                     onClick={() => { editor.chain().focus().addRowAfter().run(); setShowTableMenu(false) }}
-                    className="flex items-center gap-2 w-full px-2 py-1.5 text-sm text-left hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
+                    className="flex items-center gap-2 w-full min-h-[36px] px-2 py-1.5 text-sm font-medium text-left rounded-lg transition-[background-color] duration-150 hover:bg-fg/[0.07] active:bg-fg/[0.12] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-sky focus-visible:ring-inset text-fg"
                   >
                     <RowsIcon size={14} />
                     {t('editor.tableAddRow')}
@@ -498,7 +498,7 @@ export function RichTextEditor({
                   <button
                     type="button"
                     onClick={() => { editor.chain().focus().addColumnAfter().run(); setShowTableMenu(false) }}
-                    className="flex items-center gap-2 w-full px-2 py-1.5 text-sm text-left hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
+                    className="flex items-center gap-2 w-full min-h-[36px] px-2 py-1.5 text-sm font-medium text-left rounded-lg transition-[background-color] duration-150 hover:bg-fg/[0.07] active:bg-fg/[0.12] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-sky focus-visible:ring-inset text-fg"
                   >
                     <ColumnsIcon size={14} />
                     {t('editor.tableAddColumn')}
@@ -506,7 +506,7 @@ export function RichTextEditor({
                   <button
                     type="button"
                     onClick={() => { editor.chain().focus().deleteRow().run(); setShowTableMenu(false) }}
-                    className="flex items-center gap-2 w-full px-2 py-1.5 text-sm text-left hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset text-red-600 dark:text-red-400"
+                    className="flex items-center gap-2 w-full min-h-[36px] px-2 py-1.5 text-sm font-medium text-left rounded-lg transition-[background-color] duration-150 hover:bg-fg/[0.07] active:bg-fg/[0.12] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-sky focus-visible:ring-inset text-again"
                   >
                     <RowsIcon size={14} />
                     {t('editor.tableDeleteRow')}
@@ -514,16 +514,16 @@ export function RichTextEditor({
                   <button
                     type="button"
                     onClick={() => { editor.chain().focus().deleteColumn().run(); setShowTableMenu(false) }}
-                    className="flex items-center gap-2 w-full px-2 py-1.5 text-sm text-left hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset text-red-600 dark:text-red-400"
+                    className="flex items-center gap-2 w-full min-h-[36px] px-2 py-1.5 text-sm font-medium text-left rounded-lg transition-[background-color] duration-150 hover:bg-fg/[0.07] active:bg-fg/[0.12] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-sky focus-visible:ring-inset text-again"
                   >
                     <ColumnsIcon size={14} />
                     {t('editor.tableDeleteColumn')}
                   </button>
-                  <hr className="my-1 border-slate-200 dark:border-slate-600" />
+                  <hr className="my-1 border-line" />
                   <button
                     type="button"
                     onClick={() => { editor.chain().focus().deleteTable().run(); setShowTableMenu(false) }}
-                    className="flex items-center gap-2 w-full px-2 py-1.5 text-sm text-left hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset text-red-600 dark:text-red-400"
+                    className="flex items-center gap-2 w-full min-h-[36px] px-2 py-1.5 text-sm font-medium text-left rounded-lg transition-[background-color] duration-150 hover:bg-fg/[0.07] active:bg-fg/[0.12] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-sky focus-visible:ring-inset text-again"
                   >
                     <Trash2 size={14} />
                     {t('editor.tableDelete')}
@@ -549,8 +549,8 @@ export function RichTextEditor({
             <Sigma size={iconSize} />
           </ToolbarButton>
           {showMathHint && (
-            <div className="absolute top-full right-0 z-10 mt-1 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg shadow-elevation-md w-56">
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1.5 leading-relaxed">
+            <div className="absolute top-full right-0 z-10 mt-1 p-2 bg-sheet text-fg border-2 border-edge rounded-[14px] shadow-sticker-sm w-56">
+              <p className="text-xs text-muted mb-2 leading-relaxed">
                 {t('editor.mathHint', 'Wrap math in $...$ - e.g. $x^2 + y^2 = z^2$')}
               </p>
               <button
@@ -559,7 +559,7 @@ export function RichTextEditor({
                   editor.chain().focus().insertContent('$E = mc^2$').run()
                   setShowMathHint(false)
                 }}
-                className="px-2 py-1 text-xs bg-primary-600 text-white rounded hover:bg-primary-700 active:bg-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-slate-800"
+                className="btn-quiet !rounded-[12px] min-h-[36px] px-3 text-xs"
               >
                 {t('editor.mathInsertExample', 'Insert example')}
               </button>
@@ -572,9 +572,9 @@ export function RichTextEditor({
       <EditorContent editor={editor} />
 
       {/* Character count */}
-      <div className="flex justify-end px-2 py-1 border-t border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50">
+      <div className="flex justify-end px-3 py-1 rounded-b-[12px] border-t-2 border-line">
         <span
-          className={`text-xs ${nearLimit ? 'text-red-500' : 'text-slate-400 dark:text-slate-500'}`}
+          className={`text-xs tabular-nums ${nearLimit ? 'text-again font-bold' : 'text-muted'}`}
           title={nearLimit ? t('editor.charLimitNear', 'Approaching the {{max}} character limit', { max: maxLength }) : undefined}
           aria-label={nearLimit ? t('editor.charLimitNear', 'Approaching the {{max}} character limit', { max: maxLength }) : undefined}
         >

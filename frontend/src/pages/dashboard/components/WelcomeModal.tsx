@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Sparkles, FileSpreadsheet, Globe, Keyboard, Users, Puzzle } from 'lucide-react'
+import { PenLine, FileSpreadsheet, Globe, Keyboard, Users, Puzzle } from 'lucide-react'
 import { Modal } from '@/shared/ui/Modal'
 import { Button } from '@/shared/ui/Button'
 
@@ -12,46 +12,40 @@ interface WelcomeModalProps {
 
 const FEATURES = [
   {
-    icon: Sparkles,
+    icon: PenLine,
     titleKey: 'welcome.feature.aiGeneration',
     descKey: 'welcome.feature.aiGenerationDesc',
-    color: 'text-primary-600 dark:text-primary-400',
-    bg: 'bg-primary-100 dark:bg-primary-900/30',
+    chip: 'bg-lilac',
   },
   {
     icon: FileSpreadsheet,
     titleKey: 'welcome.feature.fileImport',
     descKey: 'welcome.feature.fileImportDesc',
-    color: 'text-emerald-600 dark:text-emerald-400',
-    bg: 'bg-emerald-100 dark:bg-emerald-900/30',
+    chip: 'bg-mint',
   },
   {
     icon: Globe,
     titleKey: 'welcome.feature.translation',
     descKey: 'welcome.feature.translationDesc',
-    color: 'text-slate-600 dark:text-slate-300',
-    bg: 'bg-slate-100 dark:bg-slate-700/60',
+    chip: 'bg-sky',
   },
   {
     icon: Keyboard,
     titleKey: 'welcome.feature.shortcuts',
     descKey: 'welcome.feature.shortcutsDesc',
-    color: 'text-amber-600 dark:text-amber-400',
-    bg: 'bg-amber-100 dark:bg-amber-900/30',
+    chip: 'bg-white',
   },
   {
     icon: Users,
     titleKey: 'welcome.feature.sharedDecks',
     descKey: 'welcome.feature.sharedDecksDesc',
-    color: 'text-primary-600 dark:text-primary-400',
-    bg: 'bg-primary-100 dark:bg-primary-900/30',
+    chip: 'bg-grass',
   },
   {
     icon: Puzzle,
     titleKey: 'welcome.feature.extension',
     descKey: 'welcome.feature.extensionDesc',
-    color: 'text-rose-600 dark:text-rose-400',
-    bg: 'bg-rose-100 dark:bg-rose-900/30',
+    chip: 'bg-bubblegum',
   },
 ] as const
 
@@ -65,34 +59,34 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} labelledBy="welcome-title" size="md">
-      <h2 id="welcome-title" className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2 pr-10">
+      <h2 id="welcome-title" className="font-display text-2xl leading-tight text-fg mb-1.5 pr-10 [text-wrap:balance]">
         {t('welcome.title')}
       </h2>
-      <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
+      <p className="text-[15px] text-muted mb-6">
         {t('welcome.subtitle')}
       </p>
 
       {/* Feature list */}
-      <div className="space-y-3 mb-6">
+      <ul className="space-y-4 mb-7">
         {FEATURES.map((f) => (
-          <div key={f.titleKey} className="flex items-start gap-3">
-            <div className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${f.bg}`}>
-              <f.icon className={`w-5 h-5 ${f.color}`} aria-hidden />
-            </div>
+          <li key={f.titleKey} className="flex items-start gap-3">
+            <span className={`shrink-0 w-10 h-10 rounded-[12px] border-2 border-ink text-ink flex items-center justify-center ${f.chip}`}>
+              <f.icon className="w-5 h-5" aria-hidden />
+            </span>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+              <p className="text-[15px] font-bold text-fg">
                 {t(f.titleKey)}
               </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-sm text-muted mt-0.5">
                 {t(f.descKey)}
               </p>
             </div>
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
 
       {/* CTA */}
-      <Button fullWidth onClick={handleClose} data-autofocus>
+      <Button fullWidth size="lg" onClick={handleClose} data-autofocus>
         {t('welcome.getStarted')}
       </Button>
     </Modal>

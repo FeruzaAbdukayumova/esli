@@ -15,6 +15,8 @@ import {
 } from '@/features/decks/utils/parseSpreadsheet'
 import type { CreateCardInput } from '@/features/decks/types'
 import type { Card } from '@/features/decks/types'
+import { Button } from '@/shared/ui/Button'
+import { labelCls } from './deckStyles'
 
 const MAX_CARD_CHARS = 5000
 const BATCH_SIZE = 500
@@ -186,24 +188,18 @@ export function FileImportTab({
               fileInputRef.current?.click()
             }
           }}
-          className={`flex flex-col items-center justify-center gap-3 p-8 sm:p-12 border-2 border-dashed rounded-xl cursor-pointer transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
+          className={`flex flex-col items-center justify-center gap-3 p-8 sm:p-12 rounded-[18px] border-[2.5px] border-dashed cursor-pointer transition-[background-color,border-color] duration-150 focus:outline-none focus-visible:ring-[3px] focus-visible:ring-sky ${
             isDragging
-              ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-              : 'border-slate-300 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-slate-50 dark:hover:bg-slate-700/30'
+              ? 'border-edge bg-sky/25'
+              : 'border-edge/60 hover:border-edge hover:bg-fg/[0.04] active:bg-fg/[0.07]'
           }`}
         >
-          <div
-            className={`p-3 rounded-full ${isDragging ? 'bg-primary-100 dark:bg-primary-900/40' : 'bg-slate-100 dark:bg-slate-700'}`}
-          >
-            <Upload
-              className={`w-6 h-6 ${isDragging ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400 dark:text-slate-500'}`}
-            />
+          <div className={`sticker !shadow-sticker-sm !rounded-full p-3 -rotate-3 ${isDragging ? 'bg-sky' : 'bg-bubblegum'}`}>
+            <Upload className="w-6 h-6 text-ink" aria-hidden />
           </div>
-          <div className="text-center">
-            <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
-              {t('fileImport.dropHere')}
-            </p>
-          </div>
+          <p className="text-center text-sm font-bold text-fg">
+            {t('fileImport.dropHere')}
+          </p>
           <input
             ref={fileInputRef}
             type="file"
@@ -214,20 +210,16 @@ export function FileImportTab({
         </div>
 
         {parseError && (
-          <div className="mt-3 flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
-            <AlertTriangle className="w-4 h-4 shrink-0" />
+          <div role="alert" className="mt-3 flex items-center gap-2 text-sm font-medium text-again">
+            <AlertTriangle className="w-4 h-4 shrink-0" aria-hidden />
             {parseError}
           </div>
         )}
 
-        <div className="flex items-center justify-end pt-4 mt-4 border-t border-slate-200 dark:border-slate-600">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-          >
+        <div className="flex items-center justify-end pt-4 mt-4 border-t-2 border-line">
+          <Button variant="ghost" onClick={onClose}>
             {t('common.cancel')}
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -244,13 +236,14 @@ export function FileImportTab({
         {/* Column mapping */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+            <label htmlFor="file-import-front-col" className={labelCls}>
               {t('fileImport.frontColumn')}
             </label>
             <select
+              id="file-import-front-col"
               value={frontCol}
               onChange={(e) => setFrontCol(Number(e.target.value))}
-              className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="field cursor-pointer"
             >
               <option value={-1} disabled>
                 {t('import.selectColumn', 'Select column…')}
@@ -263,13 +256,14 @@ export function FileImportTab({
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+            <label htmlFor="file-import-back-col" className={labelCls}>
               {t('fileImport.backColumn')}
             </label>
             <select
+              id="file-import-back-col"
               value={backCol}
               onChange={(e) => setBackCol(Number(e.target.value))}
-              className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="field cursor-pointer"
             >
               <option value={-1} disabled>
                 {t('import.selectColumn', 'Select column…')}
@@ -284,47 +278,40 @@ export function FileImportTab({
         </div>
 
         {/* Preview table */}
-        <div className="border border-slate-200 dark:border-slate-600 rounded-lg overflow-hidden mb-4">
+        <div className="rounded-[18px] border-2 border-edge/80 overflow-hidden mb-4">
           <div className="overflow-x-auto max-h-[320px] overflow-y-auto">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 dark:bg-slate-700 sticky top-0">
+              <thead className="bg-sheet sticky top-0 border-b-2 border-line">
                 <tr>
-                  <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 w-8">
+                  <th className="px-3 py-2 text-left text-xs font-bold text-muted w-8">
                     #
                   </th>
-                  <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-primary-600 dark:text-primary-400">
+                  <th className="px-3 py-2 text-left text-xs font-bold text-fg">
                     {t('deck.frontLabel')}
                   </th>
-                  <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-primary-600 dark:text-primary-400">
+                  <th className="px-3 py-2 text-left text-xs font-bold text-fg">
                     {t('deck.backLabel')}
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-slate-600">
+              <tbody className="divide-y divide-line">
                 {previewRows.map((row, i) => {
                   const front = row[headers[frontCol]] || ''
                   const back = row[headers[backCol]] || ''
                   const isEmpty = !front && !back
                   return (
-                    <tr
-                      key={i}
-                      className={
-                        isEmpty
-                          ? 'bg-red-50/50 dark:bg-red-900/10'
-                          : 'hover:bg-slate-50 dark:hover:bg-slate-700/30'
-                      }
-                    >
-                      <td className="px-3 py-2 text-xs text-slate-400 dark:text-slate-500">
+                    <tr key={i} className={isEmpty ? 'bg-again/10' : undefined}>
+                      <td className="px-3 py-2 text-xs text-muted tabular-nums">
                         {i + 1}
                       </td>
-                      <td className="px-3 py-2 text-slate-800 dark:text-slate-100 max-w-[200px] truncate">
+                      <td className="px-3 py-2 font-medium text-fg max-w-[200px] truncate">
                         {front || (
-                          <span className="text-slate-400 italic">{t('fileImport.empty')}</span>
+                          <span className="text-muted italic">{t('fileImport.empty')}</span>
                         )}
                       </td>
-                      <td className="px-3 py-2 text-slate-700 dark:text-slate-200 max-w-[200px] truncate">
+                      <td className="px-3 py-2 text-fg max-w-[200px] truncate">
                         {back || (
-                          <span className="text-slate-400 italic">{t('fileImport.empty')}</span>
+                          <span className="text-muted italic">{t('fileImport.empty')}</span>
                         )}
                       </td>
                     </tr>
@@ -334,63 +321,55 @@ export function FileImportTab({
             </table>
           </div>
           {hasMore && (
-            <div className="px-3 py-2 bg-slate-50 dark:bg-slate-700 text-xs text-slate-500 dark:text-slate-400 text-center border-t border-slate-200 dark:border-slate-600">
+            <div className="px-3 py-2 text-xs text-muted text-center border-t-2 border-line">
               ...{t('fileImport.andMoreRows', { count: (parseResult?.rows.length ?? 0) - 20 })}
             </div>
           )}
         </div>
 
         {/* Summary */}
-        <div className="flex flex-wrap items-center gap-3 mb-4 text-sm">
-          <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-            <FileSpreadsheet className="w-4 h-4 text-primary-500" />
-            <strong>{validCards.length}</strong> {t('fileImport.validCards')}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-4 text-sm">
+          <span className="flex items-center gap-1.5 text-fg">
+            <FileSpreadsheet className="w-4 h-4 text-muted" aria-hidden />
+            <strong className="font-extrabold">{validCards.length}</strong> {t('fileImport.validCards')}
           </span>
           {skippedCount > 0 && (
-            <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
-              <AlertTriangle className="w-3.5 h-3.5" />
+            <span className="flex items-center gap-1.5 text-muted">
+              <AlertTriangle className="w-4 h-4 text-again" aria-hidden />
               {skippedCount} {t('fileImport.emptyRowsSkipped')}
             </span>
           )}
           {validCards.length === 0 && (frontCol === -1 || backCol === -1) && (
-            <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
-              <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+            <span className="flex items-center gap-1.5 text-fg font-medium">
+              <AlertTriangle className="w-4 h-4 shrink-0 text-again" aria-hidden />
               {t('import.columnsUnsetHint', 'Choose the front and back columns above to see which cards will be imported.')}
             </span>
           )}
         </div>
 
         {importError && (
-          <div className="mb-4 flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
-            <AlertTriangle className="w-4 h-4 shrink-0" />
+          <div role="alert" className="mb-4 flex items-center gap-2 text-sm font-medium text-again">
+            <AlertTriangle className="w-4 h-4 shrink-0" aria-hidden />
             {importError}
           </div>
         )}
 
         {/* Actions */}
-        <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-600">
-          <button
-            type="button"
-            onClick={resetToUpload}
-            className="text-sm rounded text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-          >
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t-2 border-line">
+          <Button variant="ghost" size="sm" onClick={resetToUpload} className="-ml-3 text-muted">
             {t('fileImport.chooseDifferentFile')}
-          </button>
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-            >
+          </Button>
+          <div className="flex gap-3 ml-auto">
+            <Button variant="ghost" onClick={onClose}>
               {t('common.cancel')}
-            </button>
+            </Button>
             <button
               type="button"
               onClick={handleImport}
               disabled={isPending || validCards.length === 0}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              className="btn-ink min-h-[46px] px-5 text-[15px]"
             >
-              <Upload className="w-4 h-4" />
+              <Upload className="w-4 h-4" aria-hidden />
               {t('fileImport.importCards', { count: validCards.length })}
             </button>
           </div>
@@ -404,15 +383,21 @@ export function FileImportTab({
     const percent = importTotal > 0 ? Math.round((importProgress / importTotal) * 100) : 0
 
     return (
-      <div className="flex flex-col items-center justify-center py-12 gap-4">
-        <Loader2 className="w-8 h-8 animate-spin text-primary-600 dark:text-primary-400" />
-        <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+      <div className="flex flex-col items-center justify-center py-12 gap-4" aria-live="polite">
+        <Loader2 className="w-8 h-8 animate-spin text-fg" aria-hidden />
+        <p className="text-sm font-bold text-fg">
           {t('fileImport.importingCards', { imported: importProgress, total: importTotal })}
         </p>
-        <div className="w-full max-w-xs bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+        <div
+          className="w-full max-w-xs h-3 overflow-hidden rounded-full border-2 border-ink bg-white"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={percent}
+        >
           <div
-            className="bg-primary-600 dark:bg-primary-500 h-2 rounded-full transition-[width] duration-300"
-            style={{ width: `${percent}%` }}
+            className="h-full w-full origin-left bg-grass transition-transform duration-300"
+            style={{ transform: `scaleX(${percent / 100})` }}
           />
         </div>
       </div>
@@ -421,26 +406,18 @@ export function FileImportTab({
 
   // ---- Done step ----
   return (
-    <div className="flex flex-col items-center justify-center py-12 gap-4">
-      <div className="p-3 rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-        <CheckCircle2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+    <div className="flex flex-col items-center justify-center py-12 gap-4 text-center">
+      <div className="sticker !shadow-sticker-sm bg-mint !rounded-full p-3 -rotate-3">
+        <CheckCircle2 className="w-8 h-8 text-ink" aria-hidden />
       </div>
-      <p className="text-lg font-medium text-slate-800 dark:text-slate-100">
+      <p className="font-display text-xl text-fg">
         {t('fileImport.successfullyImported', { count: importedCount })}
       </p>
-      <div className="flex gap-3 mt-2">
-        <button
-          type="button"
-          onClick={resetToUpload}
-          className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-        >
+      <div className="flex flex-wrap justify-center gap-3 mt-2">
+        <Button variant="secondary" onClick={resetToUpload}>
           {t('fileImport.importAnotherFile')}
-        </button>
-        <button
-          type="button"
-          onClick={onClose}
-          className="px-4 py-2 rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-        >
+        </Button>
+        <button type="button" onClick={onClose} className="btn-ink min-h-[46px] px-5 text-[15px]">
           {t('common.done')}
         </button>
       </div>

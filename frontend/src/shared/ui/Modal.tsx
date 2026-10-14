@@ -53,6 +53,13 @@ export function Modal({
   const panelRef = useRef<HTMLDivElement>(null)
   const previouslyFocused = useRef<HTMLElement | null>(null)
 
+  // While a dialog is open the help button steps aside (it sits above modals)
+  useEffect(() => {
+    if (!isOpen) return
+    document.body.dataset.modal = 'open'
+    return () => { delete document.body.dataset.modal }
+  }, [isOpen])
+
   useEffect(() => {
     if (!isOpen) return
     previouslyFocused.current = document.activeElement as HTMLElement | null
@@ -106,7 +113,7 @@ export function Modal({
 
   return createPortal(
     <div
-      className="fixed inset-0 flex items-center justify-center p-4 bg-black/50 dark:bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 flex items-center justify-center p-4 bg-ink/55 dark:bg-black/65"
       style={{ zIndex }}
       onClick={locked ? undefined : onClose}
       role="dialog"
@@ -117,8 +124,7 @@ export function Modal({
         ref={panelRef}
         tabIndex={-1}
         className={cn(
-          'relative w-full bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-lg',
-          'border border-slate-100 dark:border-slate-700/50 p-6 animate-slide-up',
+          'sheet relative w-full !shadow-sticker p-6 sm:p-7 animate-slide-up',
           'max-h-[calc(100vh-2rem)] overflow-y-auto focus:outline-none',
           sizeClasses[size],
           className,
@@ -126,7 +132,7 @@ export function Modal({
         onClick={(e) => e.stopPropagation()}
       >
         {title != null && (
-          <h2 id={headingId} className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2 pr-10">
+          <h2 id={headingId} className="font-display text-2xl leading-tight text-fg mb-2 pr-10 [text-wrap:balance]">
             {title}
           </h2>
         )}
@@ -136,7 +142,7 @@ export function Modal({
             onClick={onClose}
             disabled={locked}
             aria-label={t('common.close')}
-            className="absolute top-4 right-4 flex items-center justify-center w-9 h-9 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:text-slate-200 dark:hover:bg-slate-700 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:opacity-50"
+            className="absolute top-4 right-4 flex items-center justify-center w-10 h-10 rounded-xl text-muted hover:text-fg hover:bg-fg/[0.07] active:scale-[0.95] transition-[transform,color,background-color] duration-150 focus:outline-none focus-visible:ring-[3px] focus-visible:ring-sky disabled:opacity-50"
           >
             <X className="w-5 h-5" aria-hidden />
           </button>

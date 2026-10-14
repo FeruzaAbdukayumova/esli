@@ -1,26 +1,19 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import {
-  type ThemeName,
   type DarkMode,
-  getStoredTheme,
-  setStoredTheme,
-  applyThemeToDocument,
+  clearLegacyColorTheme,
   getStoredDarkMode,
   setStoredDarkMode,
   applyDarkModeToDocument,
 } from '@/shared/lib/themeStore'
 
 interface ThemeContextValue {
-  theme: ThemeName
-  setTheme: (name: ThemeName) => void
   darkMode: DarkMode
   setDarkMode: (mode: DarkMode) => void
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  theme: 'indigo',
-  setTheme: () => {},
   darkMode: 'system',
   setDarkMode: () => {},
 })
@@ -30,12 +23,11 @@ export function useTheme() {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeName>(getStoredTheme)
   const [darkMode, setDarkModeState] = useState<DarkMode>(getStoredDarkMode)
 
   useEffect(() => {
-    applyThemeToDocument(theme)
-  }, [theme])
+    clearLegacyColorTheme()
+  }, [])
 
   // Apply dark mode on mount and when it changes
   useEffect(() => {
@@ -51,12 +43,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return () => mq.removeEventListener('change', handler)
   }, [darkMode])
 
-  const setTheme = useCallback((name: ThemeName) => {
-    setThemeState(name)
-    setStoredTheme(name)
-    applyThemeToDocument(name)
-  }, [])
-
   const setDarkMode = useCallback((mode: DarkMode) => {
     setDarkModeState(mode)
     setStoredDarkMode(mode)
@@ -64,7 +50,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, darkMode, setDarkMode }}>
+    <ThemeContext.Provider value={{ darkMode, setDarkMode }}>
       {children}
     </ThemeContext.Provider>
   )

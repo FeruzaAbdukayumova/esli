@@ -50,10 +50,10 @@ export const ForgotPasswordPage = () => {
     >
       {sentTo ? (
         <div className="text-center space-y-4" role="status" aria-live="polite">
-          <div className="mx-auto w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/40 flex items-center justify-center">
-            <MailCheck className="w-6 h-6 text-primary-600 dark:text-primary-400" aria-hidden />
+          <div className="sticker mx-auto w-16 h-16 bg-sky -rotate-3 flex items-center justify-center">
+            <MailCheck className="w-7 h-7 text-ink" strokeWidth={2.25} aria-hidden />
           </div>
-          <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+          <p className="text-base leading-relaxed text-muted">
             {t('auth.forgot.sentBody', {
               email: sentTo,
               defaultValue:
@@ -80,14 +80,14 @@ export const ForgotPasswordPage = () => {
             disabled={submitting}
           />
           {error && (
-            <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+            <p role="alert" className="text-sm font-medium text-again">
               {error}
             </p>
           )}
           <Button type="submit" fullWidth loading={submitting}>
             {t('auth.forgot.submit', 'Send reset link')}
           </Button>
-          <p className="text-center text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-center text-sm text-muted">
             {t('auth.forgot.googleHint', 'Signed up with Google? Sign in with Google instead, no password needed.')}
           </p>
         </form>

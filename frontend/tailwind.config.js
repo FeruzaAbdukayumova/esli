@@ -5,10 +5,29 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Plus Jakarta Sans Variable"', '"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
-        display: ['"Source Serif 4"', 'Georgia', '"Times New Roman"', 'serif'],
+        sans: ['"Onest Variable"', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['"Dela Gothic One"', '"Onest Variable"', 'system-ui', 'sans-serif'],
       },
       colors: {
+        /* App tokens - see DESIGN.md */
+        canvas: 'rgb(var(--canvas) / <alpha-value>)',
+        line: 'rgb(var(--line) / <alpha-value>)',
+        fg: 'rgb(var(--fg) / <alpha-value>)',
+        muted: 'rgb(var(--muted) / <alpha-value>)',
+        sheet: 'rgb(var(--sheet) / <alpha-value>)',
+        edge: 'rgb(var(--edge) / <alpha-value>)',
+        /* Sticker palette: flat fills, always outlined in ink, same in both themes */
+        ink: '#17171A',
+        /* Links and focus rings (deeper sky, readable on white and dark) */
+        brand: '#2E8FD9',
+        sun: '#FFC93C',
+        sky: '#8FD3FF',
+        grass: '#44D07B',
+        mint: '#B8F2C9',
+        coral: '#FF7A59',
+        lilac: '#CDBBFF',
+        bubblegum: '#FFB8CC',
+        again: '#E5484D',
         primary: {
           50: 'rgb(var(--color-primary-50) / <alpha-value>)',
           100: 'rgb(var(--color-primary-100) / <alpha-value>)',
@@ -22,6 +41,7 @@ export default {
           900: 'rgb(var(--color-primary-900) / <alpha-value>)',
         },
         surface: {
+          DEFAULT: 'rgb(var(--surface) / <alpha-value>)',
           base: 'rgb(var(--surface-base) / <alpha-value>)',
           elevated: 'rgb(var(--surface-elevated) / <alpha-value>)',
           floating: 'rgb(var(--surface-floating) / <alpha-value>)',
@@ -81,6 +101,9 @@ export default {
         "shimmer": "shimmer 1.5s ease-in-out infinite",
       },
       boxShadow: {
+        /* Real sticker: white die-cut rim + soft lift off the paper (DESIGN.md) */
+        sticker: "0 0 0 4px #fff, 0 14px 28px -12px rgb(var(--shadow) / 0.45), 0 3px 6px -2px rgb(var(--shadow) / 0.2)",
+        "sticker-sm": "0 5px 12px -5px rgb(var(--shadow) / 0.45)",
         "focus-primary": "0 0 0 3px rgb(var(--color-primary-500) / 0.25)",
         "focus-primary-dark": "0 0 0 3px rgb(var(--color-primary-400) / 0.35)",
         /* Color-tinted elevation shadows */

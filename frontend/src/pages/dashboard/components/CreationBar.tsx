@@ -2,17 +2,17 @@ import { useRef, useState, DragEvent, ClipboardEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
-import { Sparkles, Paperclip, ArrowRight } from 'lucide-react'
+import { Paperclip, ArrowRight } from 'lucide-react'
 import { useCreateDeck } from '@/features/decks/hooks'
 import { AIGenerateDeckModal } from './AIGenerateDeckModal'
 import { CreateDeckModal, type CreateMethod } from './CreateDeckModal'
+import { CREATE_INPUT_ID } from '../constants'
 
 const SPREADSHEET_RE = /\.(xlsx|xls|csv)$/i
 
 /**
- * Compact "magic intake" for the populated dashboard — the same
- * give-Esli-anything promise as the first-run screen, always available.
- * Type a topic, drop a PDF or spreadsheet, or paste a list of cards.
+ * The dashboard's hero: making a deck is the core of Esli, so it sits first.
+ * Type a topic, tap an example, drop a PDF or spreadsheet, or paste a list of cards.
  */
 export function CreationBar() {
   const { t } = useTranslation()
@@ -80,68 +80,124 @@ export function CreationBar() {
     }
   }
 
+  const examples = [
+    t('create.example1', 'IELTS band 7 words'),
+    t('create.example2', 'Phrasal verbs with get'),
+    t('create.example3', 'Irregular verbs'),
+  ]
+
+  const startExample = (topic: string) => {
+    setAiTopic(topic)
+    setAiFile(null)
+    setShowAIModal(true)
+  }
+
+  const submit = () => {
+    if (text.trim()) openTopic()
+    else document.getElementById(CREATE_INPUT_ID)?.focus()
+  }
+
   return (
     <>
-      <div
+      <section
+        aria-labelledby="create-title"
         onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
-        className={`group relative flex items-center gap-2 rounded-2xl border bg-white/70 dark:bg-slate-800/60 backdrop-blur-md p-2 pl-4 shadow-elevation-sm transition-[border-color,box-shadow] duration-200 focus-within:border-primary-400 focus-within:shadow-glow-md ${
-          dragOver
-            ? 'border-primary-500 shadow-glow-md'
-            : 'border-slate-200/80 dark:border-slate-700/60'
-        }`}
+        className={`sticker relative bg-lilac rotate-[0.6deg] p-5 sm:p-8 ${dragOver ? 'border-dashed' : ''}`}
       >
-        <Sparkles className="h-4 w-4 shrink-0 text-primary-500 dark:text-primary-400" aria-hidden />
-        <input
-          type="text"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter') openTopic() }}
-          onPaste={handlePaste}
-          placeholder={`${t('emptyDash.headline', 'Give Esli anything.')} ${t('emptyDash.hintTopic', 'Type a topic…')}`}
-          aria-label={t('emptyDash.inputAria', 'Type a topic, paste notes, or drop a file')}
-          className="min-w-0 flex-1 bg-transparent text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none"
-        />
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".pdf,.xlsx,.xls,.csv"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0]
-            if (file) routeFile(file)
-            e.target.value = ''
-          }}
-        />
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          title={t('emptyDash.fileHint', 'PDF or spreadsheet')}
-          aria-label={t('emptyDash.attachFile', 'Attach file')}
-          className="hidden sm:flex items-center gap-1.5 shrink-0 min-h-[38px] px-3 rounded-xl text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+        <svg
+          viewBox="0 0 64 64"
+          className="pointer-events-none absolute -right-4 -top-6 h-14 w-14 rotate-12 sm:-right-6 sm:-top-8 sm:h-[72px] sm:w-[72px]"
+          aria-hidden
         >
-          <Paperclip className="h-3.5 w-3.5" aria-hidden />
-          {t('emptyDash.attachFile', 'Attach file')}
-        </button>
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          aria-label={t('emptyDash.attachFile', 'Attach file')}
-          className="sm:hidden flex items-center justify-center shrink-0 min-w-[38px] min-h-[38px] rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-        >
-          <Paperclip className="h-4 w-4" aria-hidden />
-        </button>
-        <button
-          type="button"
-          onClick={openTopic}
-          disabled={!text.trim()}
-          className="flex items-center gap-1.5 shrink-0 min-h-[38px] px-4 rounded-xl text-xs font-semibold text-white bg-primary-600 hover:bg-primary-700 disabled:opacity-40 disabled:pointer-events-none transition-[background-color,opacity] duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
-        >
-          {t('emptyDash.makeMyCards', 'Make my cards')}
-          <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-        </button>
-      </div>
+          <path
+            d="M32 4l7.6 16.4L57 22.6 44 35l3.4 18L32 44.4 16.6 53 20 35 7 22.6l17.4-2.2z"
+            fill="#FFC93C"
+            stroke="#fff"
+            strokeWidth="9"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M32 4l7.6 16.4L57 22.6 44 35l3.4 18L32 44.4 16.6 53 20 35 7 22.6l17.4-2.2z"
+            fill="#FFC93C"
+            stroke="#17171A"
+            strokeWidth="3"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <h2 id="create-title" className="font-display text-[1.75rem] leading-[1.1] text-ink sm:text-[2.25rem] [text-wrap:balance]">
+          {dragOver ? t('desk.dropHere', 'Drop it here') : t('create.title', 'Make a deck from anything')}
+        </h2>
+        <p className="mt-2 max-w-[52ch] text-base font-medium text-ink/75">
+          {t('create.subtitle', 'Type a topic or drop a PDF. Esli writes the cards in seconds.')}
+        </p>
+
+        <div className="mt-5 flex items-center gap-2 rounded-[18px] border-[2.5px] border-ink bg-white p-2 pl-4 shadow-[inset_0_3px_0_rgb(23_23_26/0.08)] focus-within:ring-[3px] focus-within:ring-sky">
+          <input
+            id={CREATE_INPUT_ID}
+            type="text"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') openTopic() }}
+            onPaste={handlePaste}
+            placeholder={t('desk.creationPlaceholder', 'Topic, notes or PDF')}
+            aria-label={t('emptyDash.inputAria', 'Type a topic, paste notes, or drop a file')}
+            className="min-w-0 flex-1 min-h-[48px] bg-transparent text-lg font-medium text-ink placeholder:text-ink/45 focus:outline-none"
+          />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,.xlsx,.xls,.csv"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file) routeFile(file)
+              e.target.value = ''
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            title={t('emptyDash.fileHint', 'PDF or spreadsheet')}
+            aria-label={t('emptyDash.attachFile', 'Attach file')}
+            className="flex items-center justify-center gap-1.5 shrink-0 min-w-[48px] min-h-[48px] sm:px-3 rounded-xl text-sm font-semibold text-ink/60 hover:text-ink hover:bg-ink/5 active:scale-[0.97] transition-[transform,color,background-color] duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky"
+          >
+            <Paperclip className="h-5 w-5" aria-hidden />
+            <span className="hidden sm:inline">{t('emptyDash.attachFile', 'Attach file')}</span>
+          </button>
+          <button
+            type="button"
+            onClick={submit}
+            aria-label={t('desk.makeCards', 'Make cards')}
+            className="btn-ink shrink-0 min-h-[48px] min-w-[48px] sm:px-5 text-base"
+          >
+            <span className="hidden sm:inline">{t('desk.makeCards', 'Make cards')}</span>
+            <ArrowRight className="h-5 w-5 sm:hidden" aria-hidden />
+          </button>
+        </div>
+
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <span className="text-sm font-semibold text-ink/70">{t('create.try', 'Try:')}</span>
+          {examples.map((ex) => (
+            <button
+              key={ex}
+              type="button"
+              onClick={() => startExample(ex)}
+              className="min-h-[36px] rounded-full border-2 border-ink bg-white px-3 shadow-sticker-sm text-sm font-semibold text-ink transition-transform duration-150 ease-out hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-sky"
+            >
+              {ex}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => setCreateMethod('empty')}
+            className="min-h-[36px] w-full rounded-lg px-1 text-left sm:ml-auto sm:w-auto text-sm font-semibold text-ink/70 underline decoration-2 underline-offset-4 hover:text-ink active:scale-[0.97] transition-[transform,color] duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky"
+          >
+            {t('create.byHand', 'Or write cards yourself')}
+          </button>
+        </div>
+      </section>
 
       <AIGenerateDeckModal
         isOpen={showAIModal}

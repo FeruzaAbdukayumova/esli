@@ -1,16 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import {
-  X,
-  Sparkles,
-  Loader2,
-  Trash2,
-  RefreshCw,
-  AlertTriangle,
-  FileText,
-  Upload,
-} from 'lucide-react'
+import { X, Check, Type, Loader2, Trash2, RefreshCw, AlertTriangle, FileText, Upload } from 'lucide-react'
 import {
   generateCardsAI,
   generateCardsFromPDF,
@@ -223,6 +214,25 @@ export function AIGenerateDeckModal({
     t,
   ])
 
+  // Three-step strip in the header: write the topic, Esli writes cards, check and save.
+  const stepIndex = step === 'prompt' ? 0 : step === 'generating' ? 1 : 2
+  const cap = inputMode === 'pdf' ? maxCardsPerPdf : maxCardsPerGen
+  const segment = (active: boolean) =>
+    `inline-flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-[12px] px-4 text-sm font-bold transition-transform duration-150 active:scale-[0.97] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-sky sm:flex-none ${
+      active
+        ? 'border-2 border-ink bg-sky text-ink shadow-sticker-sm'
+        : 'border-2 border-transparent text-muted hover:text-fg hover:bg-fg/[0.07]'
+    }`
+  const errorBox = error && (
+    <div
+      role="alert"
+      className="flex items-start gap-2 rounded-[14px] border-2 border-again bg-again/10 px-3 py-2.5 text-sm font-medium text-fg"
+    >
+      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-again" aria-hidden />
+      <span className="min-w-0 break-words">{error}</span>
+    </div>
+  )
+
   return (
     <Modal
       isOpen={isOpen}
@@ -233,54 +243,53 @@ export function AIGenerateDeckModal({
     >
       {/* Header */}
       <div className="mb-6 pr-10">
+        <div className="mb-4 flex w-28 gap-1.5" aria-hidden>
+          {[0, 1, 2].map((i) => (
+            <span
+              key={i}
+              className={`h-2 flex-1 rounded-full ${i <= stepIndex ? 'bg-grass' : 'bg-fg/15'}`}
+            />
+          ))}
+        </div>
         <h2
           id="ai-generate-deck-title"
-          className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1"
+          className="font-display text-2xl leading-tight text-fg sm:text-[1.75rem] [text-wrap:balance]"
         >
-          {t('ai.generateDeckTitle')}
+          {t('create.title', 'Make a deck from anything')}
         </h2>
-        <p className="text-sm text-slate-600 dark:text-slate-400">
-          {t('ai.generateDeckSubtitle')}
+        <p className="mt-1.5 text-[15px] text-muted">
+          {t('create.subtitle', 'Type a topic or drop a PDF. Esli writes the cards in seconds.')}
         </p>
       </div>
 
       {/* ---- Prompt step ---- */}
       {step === 'prompt' && (
-        <div className="space-y-4">
+        <div className="space-y-5">
           {/* Mode toggle */}
-          <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-700 rounded-lg w-fit">
+          <div className="flex gap-1 rounded-[16px] border-2 border-edge/25 p-1 sm:w-fit">
             <button
               type="button"
               onClick={() => setInputMode('topic')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                inputMode === 'topic'
-                  ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-sm'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-              }`}
+              aria-pressed={inputMode === 'topic'}
+              className={segment(inputMode === 'topic')}
             >
-              <Sparkles className="w-3.5 h-3.5" />
+              <Type className="h-4 w-4" aria-hidden />
               {t('ai.topic')}
             </button>
             <button
               type="button"
               onClick={() => setInputMode('pdf')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                inputMode === 'pdf'
-                  ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-sm'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-              }`}
+              aria-pressed={inputMode === 'pdf'}
+              className={segment(inputMode === 'pdf')}
             >
-              <FileText className="w-3.5 h-3.5" />
+              <FileText className="h-4 w-4" aria-hidden />
               {t('ai.pdf')}
             </button>
           </div>
 
           {inputMode === 'topic' ? (
             <div>
-              <label
-                htmlFor="ai-deck-topic"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
-              >
+              <label htmlFor="ai-deck-topic" className="mb-1.5 block text-sm font-bold text-fg">
                 {t('ai.topicLabel')}
               </label>
               <textarea
@@ -290,30 +299,34 @@ export function AIGenerateDeckModal({
                 rows={3}
                 maxLength={500}
                 data-autofocus
-                className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 resize-none"
+                className="field resize-none text-lg leading-snug"
                 placeholder={t('ai.topicPlaceholder')}
               />
-              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 text-right">
-                {topic.length}/500
-              </p>
+              <p className="mt-1 text-right text-xs text-muted tabular-nums">{topic.length}/500</p>
             </div>
           ) : (
             <div>
               {/* PDF upload area */}
               {!pdfFile ? (
                 <div
+                  role="button"
+                  tabIndex={0}
                   onDrop={handleDrop}
                   onDragOver={(e) => e.preventDefault()}
                   onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-8 text-center cursor-pointer hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-50/50 dark:hover:bg-primary-900/10 transition-colors"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      fileInputRef.current?.click()
+                    }
+                  }}
+                  className="group cursor-pointer rounded-[18px] border-2 border-dashed border-edge/50 px-6 py-8 text-center transition-[transform,border-color,background-color] duration-150 hover:border-edge hover:bg-fg/[0.04] active:scale-[0.99] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-sky"
                 >
-                  <Upload className="w-8 h-8 mx-auto mb-3 text-slate-400 dark:text-slate-500" />
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    {t('ai.dropPdfHere')}
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    {t('ai.maxFileSize')}
-                  </p>
+                  <span className="mx-auto mb-3 flex h-12 w-12 -rotate-6 items-center justify-center rounded-[14px] border-2 border-ink bg-coral text-ink shadow-sticker-sm transition-transform duration-150 group-hover:rotate-0">
+                    <Upload className="h-5 w-5" aria-hidden />
+                  </span>
+                  <p className="text-[15px] font-bold text-fg">{t('ai.dropPdfHere')}</p>
+                  <p className="mt-1 text-sm text-muted">{t('ai.maxFileSize')}</p>
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -326,37 +339,30 @@ export function AIGenerateDeckModal({
                   />
                 </div>
               ) : (
-                <div className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50">
-                  <FileText className="w-5 h-5 text-primary-500 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">
-                      {pdfFile.name}
-                    </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      {(pdfFile.size / 1024 / 1024).toFixed(1)} MB
-                    </p>
+                <div className="flex items-center gap-3 rounded-[16px] border-2 border-ink bg-white p-3 text-ink shadow-sticker-sm">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] border-2 border-ink bg-coral">
+                    <FileText className="h-5 w-5" aria-hidden />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-bold">{pdfFile.name}</p>
+                    <p className="text-xs text-ink/60">{(pdfFile.size / 1024 / 1024).toFixed(1)} MB</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setPdfFile(null)}
-                    className="p-1 rounded text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] text-ink/60 transition-[transform,color,background-color] duration-150 hover:bg-ink/10 hover:text-again active:scale-[0.95] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-sky"
                     aria-label={t('common.delete')}
                   >
-                    <X className="w-4 h-4" />
+                    <X className="h-4 w-4" aria-hidden />
                   </button>
                 </div>
               )}
 
               {/* Optional focus topic for PDF */}
-              <div className="mt-3">
-                <label
-                  htmlFor="ai-deck-pdf-topic"
-                  className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
-                >
+              <div className="mt-4">
+                <label htmlFor="ai-deck-pdf-topic" className="mb-1.5 block text-sm font-bold text-fg">
                   {t('ai.focusTopic')}{' '}
-                  <span className="text-slate-400 dark:text-slate-500 font-normal">
-                    ({t('ai.focusTopicOptional')})
-                  </span>
+                  <span className="font-medium text-muted">({t('ai.focusTopicOptional')})</span>
                 </label>
                 <input
                   id="ai-deck-pdf-topic"
@@ -364,51 +370,48 @@ export function AIGenerateDeckModal({
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
                   maxLength={500}
-                  className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200"
+                  className="field"
                   placeholder={t('ai.focusTopicPlaceholder')}
                 />
               </div>
             </div>
           )}
 
-          <div>
-            <label
-              htmlFor="ai-deck-count"
-              className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
-            >
-              {t('ai.numberOfCards')}
-            </label>
-            <input
-              id="ai-deck-count"
-              type="number"
-              min={1}
-              max={inputMode === 'pdf' ? maxCardsPerPdf : maxCardsPerGen}
-              value={countInput}
-              onChange={(e) => {
-                const raw = e.target.value
-                setCountInput(raw)
-                const num = parseInt(raw, 10)
-                if (!isNaN(num) && num > 0) {
-                  const cap = inputMode === 'pdf' ? maxCardsPerPdf : maxCardsPerGen
-                  setCount(Math.min(cap, num))
-                }
-              }}
-              onBlur={() => {
-                const cap = inputMode === 'pdf' ? maxCardsPerPdf : maxCardsPerGen
-                const clamped = Math.min(cap, Math.max(1, count))
-                setCount(clamped)
-                setCountInput(String(clamped))
-              }}
-              className="w-32 px-4 py-2.5 min-h-[44px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200"
-            />
-          </div>
+          <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
+            <div>
+              <label htmlFor="ai-deck-count" className="mb-1.5 block text-sm font-bold text-fg">
+                {t('ai.numberOfCards')}
+              </label>
+              <input
+                id="ai-deck-count"
+                type="number"
+                min={1}
+                max={cap}
+                value={countInput}
+                onChange={(e) => {
+                  const raw = e.target.value
+                  setCountInput(raw)
+                  const num = parseInt(raw, 10)
+                  if (!isNaN(num) && num > 0) {
+                    setCount(Math.min(cap, num))
+                  }
+                }}
+                onBlur={() => {
+                  const clamped = Math.min(cap, Math.max(1, count))
+                  setCount(clamped)
+                  setCountInput(String(clamped))
+                }}
+                className="field w-28 tabular-nums"
+              />
+            </div>
 
-          {/* AI usage counter */}
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            {aiLimit === -1
-              ? t('subscription.aiUsageUnlimited', { used: aiUsed })
-              : t('subscription.aiUsage', { used: aiUsed, limit: aiLimit })}
-          </p>
+            {/* AI usage counter */}
+            <p className="pb-3 text-sm text-muted">
+              {aiLimit === -1
+                ? t('subscription.aiUsageUnlimited', { used: aiUsed })
+                : t('subscription.aiUsage', { used: aiUsed, limit: aiLimit })}
+            </p>
+          </div>
 
           {isAtLimit && (
             <UpgradePrompt
@@ -417,23 +420,19 @@ export function AIGenerateDeckModal({
             />
           )}
 
-          {error && (
-            <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
-              <AlertTriangle className="w-4 h-4 shrink-0" />
-              {error}
-            </div>
-          )}
+          {errorBox}
 
-          <div className="flex justify-end gap-3 pt-2">
-            <Button variant="secondary" onClick={handleClose}>
+          <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end sm:gap-3">
+            <Button variant="ghost" onClick={handleClose} className="min-h-[46px]">
               {t('common.cancel')}
             </Button>
             <Button
+              size="lg"
               onClick={handleGenerate}
               disabled={isAtLimit || (inputMode === 'topic' ? !topic.trim() : !pdfFile)}
+              className="w-full sm:w-auto"
             >
-              <Sparkles className="w-4 h-4" />
-              {t('ai.generate')}
+              {t('desk.makeCards', 'Make cards')}
             </Button>
           </div>
         </div>
@@ -441,17 +440,24 @@ export function AIGenerateDeckModal({
 
       {/* ---- Generating step ---- */}
       {step === 'generating' && (
-        <div className="flex flex-col items-center justify-center py-12 gap-4">
-          <Loader2 className="w-8 h-8 animate-spin text-primary-600 dark:text-primary-400" />
-          <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        <div className="flex flex-col items-center py-8 text-center" role="status" aria-live="polite">
+          {/* A small stack of blank cards being written */}
+          <div className="relative mb-8 h-[120px] w-[180px]" aria-hidden>
+            <span className="absolute inset-0 -rotate-6 rounded-[16px] border-2 border-ink bg-mint shadow-sticker-sm" />
+            <span className="absolute inset-0 rotate-3 rounded-[16px] border-2 border-ink bg-sky shadow-sticker-sm" />
+            <span className="absolute inset-0 flex flex-col justify-center gap-2.5 rounded-[16px] border-2 border-ink bg-white px-5 shadow-sticker-sm">
+              <span className="h-3 w-3/4 rounded-full bg-ink/80 motion-safe:animate-pulse" />
+              <span className="h-2.5 w-full rounded-full bg-ink/15 motion-safe:animate-pulse [animation-delay:200ms]" />
+              <span className="h-2.5 w-2/3 rounded-full bg-ink/15 motion-safe:animate-pulse [animation-delay:400ms]" />
+            </span>
+          </div>
+          <p className="max-w-[40ch] text-base font-bold text-fg [overflow-wrap:anywhere]">
             {inputMode === 'pdf' && pdfFile
               ? t('ai.analyzingPdf', { count })
               : t('ai.generatingCards', { count, topic: topic.slice(0, 60) + (topic.length > 60 ? '...' : '') })}
           </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            {t('ai.generatingWait')}
-          </p>
-          <Button variant="secondary" onClick={handleCancelGeneration} className="mt-2">
+          <p className="mt-1.5 text-sm text-muted">{t('ai.generatingWait')}</p>
+          <Button variant="ghost" onClick={handleCancelGeneration} className="mt-6 min-h-[44px]">
             {t('common.cancel')}
           </Button>
         </div>
@@ -459,14 +465,11 @@ export function AIGenerateDeckModal({
 
       {/* ---- Preview step ---- */}
       {step === 'preview' && (
-        <div className="space-y-4">
+        <div className="space-y-5">
           {/* Deck info */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1.4fr_1fr]">
             <div>
-              <label
-                htmlFor="ai-deck-title-edit"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
-              >
+              <label htmlFor="ai-deck-title-edit" className="mb-1.5 block text-sm font-bold text-fg">
                 {t('ai.deckTitle')}
               </label>
               <input
@@ -475,128 +478,87 @@ export function AIGenerateDeckModal({
                 value={deckTitle}
                 onChange={(e) => setDeckTitle(e.target.value)}
                 maxLength={100}
-                className="w-full px-4 py-2.5 min-h-[44px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200"
+                className="field font-bold"
               />
             </div>
             <div>
-              <label
-                htmlFor="ai-deck-tags-edit"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
-              >
-                {t('ai.tags')}{' '}
-                <span className="text-slate-400 dark:text-slate-500 font-normal">
-                  ({t('ai.tagsHelp')})
-                </span>
+              <label htmlFor="ai-deck-tags-edit" className="mb-1.5 block text-sm font-bold text-fg">
+                {t('ai.tags')} <span className="font-medium text-muted">({t('ai.tagsHelp')})</span>
               </label>
               <input
                 id="ai-deck-tags-edit"
                 type="text"
                 value={deckTags}
                 onChange={(e) => setDeckTags(e.target.value)}
-                className="w-full px-4 py-2.5 min-h-[44px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200"
+                className="field"
                 placeholder={t('ai.tagsPlaceholder')}
               />
             </div>
           </div>
 
-          {/* Cards table */}
-          <div className="border border-slate-200 dark:border-slate-600 rounded-lg overflow-hidden">
-            <div className="overflow-x-auto max-h-[320px] overflow-y-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-slate-50 dark:bg-slate-700 sticky top-0">
-                  <tr>
-                    <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 w-8">
-                      #
-                    </th>
-                    <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-primary-600 dark:text-primary-400">
-                      {t('deck.frontLabel')}
-                    </th>
-                    <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-primary-600 dark:text-primary-400">
-                      {t('deck.backLabel')}
-                    </th>
-                    <th className="px-3 py-2 w-10" />
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200 dark:divide-slate-600">
-                  {generatedCards.map((card, i) => (
-                    <tr
-                      key={i}
-                      className="hover:bg-slate-50 dark:hover:bg-slate-700/30"
-                    >
-                      <td className="px-3 py-2 text-xs text-slate-400 dark:text-slate-500">
-                        {i + 1}
-                      </td>
-                      <td className="px-3 py-2">
-                        <input
-                          type="text"
-                          value={card.frontText}
-                          onChange={(e) =>
-                            updateCard(i, 'frontText', e.target.value)
-                          }
-                          className="w-full px-2 py-1 text-sm rounded border border-transparent hover:border-slate-300 dark:hover:border-slate-600 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 bg-transparent text-slate-800 dark:text-slate-100 transition-colors"
-                        />
-                      </td>
-                      <td className="px-3 py-2">
-                        <input
-                          type="text"
-                          value={card.backText}
-                          onChange={(e) =>
-                            updateCard(i, 'backText', e.target.value)
-                          }
-                          className="w-full px-2 py-1 text-sm rounded border border-transparent hover:border-slate-300 dark:hover:border-slate-600 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 bg-transparent text-slate-700 dark:text-slate-200 transition-colors"
-                        />
-                      </td>
-                      <td className="px-3 py-2">
-                        <button
-                          type="button"
-                          onClick={() => removeCard(i)}
-                          className="p-1 rounded text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                          aria-label={t('ai.removeCard')}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Summary */}
-          <div className="flex items-center gap-3 text-sm">
-            <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-              <Sparkles className="w-4 h-4 text-primary-500" />
+          {/* Generated cards as small stickers, editable in place */}
+          <div>
+            <p className="mb-2 flex items-center gap-2 text-sm font-bold text-fg">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-ink bg-grass text-ink">
+                <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden />
+              </span>
               {t('ai.cardsGenerated', { count: generatedCards.length })}
-            </span>
+            </p>
+            <ul className="-mx-2 grid max-h-[min(46vh,400px)] grid-cols-1 gap-3 overflow-y-auto px-2 pb-2 pt-1 sm:grid-cols-2">
+              {generatedCards.map((card, i) => (
+                <li
+                  key={i}
+                  className="group relative rounded-[16px] border-2 border-ink bg-white p-3 pr-10 text-ink shadow-sticker-sm focus-within:ring-[3px] focus-within:ring-sky"
+                >
+                  <span className="absolute left-3 top-2 text-[11px] font-bold text-ink/40 tabular-nums" aria-hidden>
+                    {i + 1}
+                  </span>
+                  <input
+                    type="text"
+                    value={card.frontText}
+                    onChange={(e) => updateCard(i, 'frontText', e.target.value)}
+                    aria-label={`${t('deck.frontLabel')} ${i + 1}`}
+                    className="mt-3 w-full rounded-[8px] bg-transparent px-1 py-1 text-[15px] font-bold text-ink hover:bg-ink/5 focus:bg-ink/5 focus:outline-none"
+                  />
+                  <div className="my-1.5 border-t-2 border-dashed border-ink/15" aria-hidden />
+                  <input
+                    type="text"
+                    value={card.backText}
+                    onChange={(e) => updateCard(i, 'backText', e.target.value)}
+                    aria-label={`${t('deck.backLabel')} ${i + 1}`}
+                    className="w-full rounded-[8px] bg-transparent px-1 py-1 text-sm font-medium text-ink/75 hover:bg-ink/5 focus:bg-ink/5 focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeCard(i)}
+                    className="absolute right-1.5 top-1.5 flex h-9 w-9 items-center justify-center rounded-[10px] text-ink/45 transition-[transform,color,background-color] duration-150 hover:bg-ink/10 hover:text-again active:scale-[0.95] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-again"
+                    aria-label={t('ai.removeCard')}
+                  >
+                    <Trash2 className="h-4 w-4" aria-hidden />
+                  </button>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          {error && (
-            <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
-              <AlertTriangle className="w-4 h-4 shrink-0" />
-              {error}
-            </div>
-          )}
+          {errorBox}
 
           {/* Actions */}
-          <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-600">
-            <button
-              type="button"
-              onClick={handleBackToPrompt}
-              className="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
+          <div className="flex flex-col-reverse gap-2 border-t border-line pt-4 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+            <Button variant="ghost" onClick={handleBackToPrompt} className="min-h-[44px] text-sm">
+              <RefreshCw className="h-4 w-4" aria-hidden />
               {t('ai.editAndRegenerate')}
-            </button>
-            <div className="flex gap-3">
-              <Button variant="secondary" onClick={handleClose}>
+            </Button>
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:gap-3">
+              <Button variant="ghost" onClick={handleClose} className="min-h-[46px]">
                 {t('common.cancel')}
               </Button>
               <Button
+                size="lg"
                 onClick={handleCreate}
                 disabled={!deckTitle.trim() || generatedCards.length === 0}
+                className="w-full sm:w-auto"
               >
-                <Sparkles className="w-4 h-4" />
                 {t('ai.createDeck')}
               </Button>
             </div>
@@ -606,9 +568,9 @@ export function AIGenerateDeckModal({
 
       {/* ---- Creating step ---- */}
       {step === 'creating' && (
-        <div className="flex flex-col items-center justify-center py-12 gap-4">
-          <Loader2 className="w-8 h-8 animate-spin text-primary-600 dark:text-primary-400" />
-          <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        <div className="flex flex-col items-center justify-center gap-4 py-12" role="status" aria-live="polite">
+          <Loader2 className="h-8 w-8 text-fg motion-safe:animate-spin" aria-hidden />
+          <p className="text-base font-bold text-fg">
             {t('ai.creatingDeck', { count: generatedCards.length })}
           </p>
         </div>
@@ -616,13 +578,11 @@ export function AIGenerateDeckModal({
 
       {/* ---- Done step ---- */}
       {step === 'done' && (
-        <div className="flex flex-col items-center justify-center py-12 gap-4">
-          <div className="p-3 rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-            <Sparkles className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
-          </div>
-          <p className="text-lg font-medium text-slate-800 dark:text-slate-100">
-            {t('ai.deckCreatedRedirecting')}
-          </p>
+        <div className="flex flex-col items-center justify-center gap-5 py-12" role="status" aria-live="polite">
+          <span className="flex h-16 w-16 -rotate-6 items-center justify-center rounded-[18px] border-[2.5px] border-ink bg-mint text-ink shadow-sticker">
+            <Check className="h-8 w-8" strokeWidth={3} aria-hidden />
+          </span>
+          <p className="font-display text-xl text-fg">{t('ai.deckCreatedRedirecting')}</p>
         </div>
       )}
     </Modal>

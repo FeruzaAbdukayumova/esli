@@ -4,6 +4,8 @@ description: Design rules for all frontend work - new projects, redesigns, landi
 
 # Frontend Design Rules
 
+**For the Esli app, `DESIGN.md` at the repo root is the source of truth** (tokens, fonts, banned patterns). Where this file and DESIGN.md disagree, DESIGN.md wins.
+
 Apply to ALL frontend work - new projects, redesigns, landing pages, dashboards.
 
 ## Reference Images
@@ -25,21 +27,14 @@ Apply to ALL frontend work - new projects, redesigns, landing pages, dashboards.
 - Use CSS variables for theme colors
 
 ### Typography
-- NEVER use same font for headings and body - pair display/serif with clean sans
+- NEVER use same font for headings and body - pair a characterful display face with a clean sans (no serif "editorial" headlines, see DESIGN.md)
 - Tight tracking (`-0.03em`) on large headings
 - Generous line-height (`1.7`) on body text
 - Font sizes: use a consistent scale, not random values
 
-### Shadows
-- NEVER use flat `shadow-md`
-- Use layered, color-tinted shadows with low opacity
-- Example: `shadow-[0_4px_20px_rgba(var(--brand-rgb),0.15)]`
-
-### Gradients & Depth
-- Layer multiple radial gradients for backgrounds
-- Add grain/texture via SVG noise filter for depth
-- Surfaces need a layering system (base -> elevated -> floating)
-- Not everything sits at the same z-plane
+### Depth
+- No blurred shadows, gradients, glows, blobs, grain or glassmorphism. They are AI-template tells.
+- Depth comes from solid bottom edges (tactile buttons and cards) and surface color steps, per DESIGN.md.
 
 ### Animations
 - Only animate `transform` and `opacity`
@@ -49,10 +44,6 @@ Apply to ALL frontend work - new projects, redesigns, landing pages, dashboards.
 ### Interactive States
 - EVERY clickable element needs: hover, focus-visible, and active states
 - No exceptions - buttons, links, cards, icons, everything
-
-### Images
-- Add gradient overlay (`bg-gradient-to-t from-black/60`) on hero images
-- Color treatment layer with `mix-blend-multiply` for consistency
 
 ### Spacing
 - Use intentional, consistent spacing tokens
@@ -64,4 +55,4 @@ Apply to ALL frontend work - new projects, redesigns, landing pages, dashboards.
 - Do NOT use `transition-all`
 - Do NOT use default Tailwind blue/indigo as primary
 - Do NOT skip interactive states
-- Dark theme by default (our brand preference)
+- Dark theme by default (our brand preference), designed with equal care in light mode

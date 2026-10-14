@@ -121,8 +121,8 @@ export const router = createBrowserRouter([
     element: (
       <Suspense
         fallback={
-          <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-surface-base">
-            <span className="inline-block w-8 h-8 border-[3px] border-primary-500 border-t-transparent rounded-full animate-spin" aria-hidden />
+          <div className="min-h-screen flex items-center justify-center">
+            <span className="inline-block w-8 h-8 border-[3px] border-fg border-t-transparent rounded-full animate-spin" aria-hidden />
           </div>
         }
       >

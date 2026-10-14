@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Check } from 'lucide-react'
 import { storage } from '@/shared/lib/storage'
 
 export const ExtensionAuthDonePage = () => {
@@ -11,20 +12,15 @@ export const ExtensionAuthDonePage = () => {
   }, [])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
-      <div className="text-center p-8">
-        <svg
-          className="w-12 h-12 text-green-500 mx-auto mb-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-        </svg>
-        <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-2">
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="sheet w-full max-w-sm p-6 sm:p-8 text-center" role="status">
+        <div className="sticker mx-auto mb-5 flex h-16 w-16 items-center justify-center bg-mint -rotate-3">
+          <Check className="h-8 w-8 text-ink" strokeWidth={3} aria-hidden />
+        </div>
+        <h1 className="font-display text-2xl leading-tight text-fg mb-2">
           Signed in successfully!
-        </h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400">
+        </h1>
+        <p className="text-base text-muted">
           Returning to extension... You can close this tab.
         </p>
       </div>

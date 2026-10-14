@@ -58,13 +58,10 @@ export const OAuthCallbackPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-surface-base">
-        <div className="text-center p-8">
-          <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
-          <Link
-            to="/login"
-            className="inline-flex items-center justify-center min-h-[44px] px-4 rounded-lg text-primary-600 dark:text-primary-400 hover:underline transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50 dark:focus-visible:ring-offset-surface-base"
-          >
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="sheet w-full max-w-sm p-6 sm:p-8 text-center">
+          <p role="alert" className="mb-6 text-base font-medium text-fg">{error}</p>
+          <Link to="/login" className="btn-brand w-full min-h-[52px] px-5 text-base">
             {t('auth.backToLogin')}
           </Link>
         </div>
@@ -73,10 +70,10 @@ export const OAuthCallbackPage = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-surface-base">
-      <div className="text-center">
-        <svg
-          className="animate-spin h-8 w-8 text-primary-600 mx-auto mb-4"
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="text-center" role="status" aria-live="polite">
+        <svg aria-hidden
+          className="animate-spin h-8 w-8 text-fg mx-auto mb-4"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
@@ -84,7 +81,7 @@ export const OAuthCallbackPage = () => {
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
         </svg>
-        <p className="text-slate-600 dark:text-slate-400">{t('auth.oauthAuthenticating')}</p>
+        <p className="text-base font-medium text-muted">{t('auth.oauthAuthenticating')}</p>
       </div>
     </div>
   )

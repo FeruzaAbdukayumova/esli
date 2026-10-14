@@ -6,9 +6,7 @@ export function Skeleton({ className }: { className?: string }) {
     <div
       aria-hidden="true"
       className={cn(
-        'rounded-lg bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200',
-        'dark:from-slate-700 dark:via-slate-600 dark:to-slate-700',
-        'bg-[length:200%_100%] animate-shimmer',
+        'rounded-lg bg-fg/[0.08] animate-pulse',
         className,
       )}
     />

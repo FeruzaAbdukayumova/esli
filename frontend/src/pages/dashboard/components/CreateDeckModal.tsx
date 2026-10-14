@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Sparkles, FileSpreadsheet, Upload } from 'lucide-react'
+import { Plus, Type, FileSpreadsheet, Upload } from 'lucide-react'
 import { trackEvent } from '@/shared/lib/analytics'
 import { Modal } from '@/shared/ui/Modal'
 import { Button } from '@/shared/ui/Button'
@@ -79,52 +79,45 @@ export function CreateDeckModal({ isOpen, isPending, initialMethod, onClose, onS
     onSubmit(trimmed, categoryTags, method)
   }
 
+  // Each way to start is a white sticker; its icon chip carries a palette fill (DESIGN.md)
   const methods = [
     {
       id: 'empty' as CreateMethod,
       icon: Plus,
       label: t('dashboard.createEmpty', 'Empty Deck'),
       desc: t('dashboard.createEmptyDesc', 'Create a blank deck and add cards manually'),
-      color: 'text-primary-600 dark:text-primary-400',
-      bg: 'bg-primary-50 dark:bg-primary-900/20',
-      border: 'border-primary-200 dark:border-primary-800 hover:border-primary-400 dark:hover:border-primary-600',
+      chip: 'bg-sky',
     },
     {
       id: 'ai' as CreateMethod,
-      icon: Sparkles,
+      icon: Type,
       label: t('dashboard.generateWithAI', 'Generate with AI'),
       desc: t('dashboard.generateWithAIDesc', 'Describe a topic and AI creates flashcards'),
-      color: 'text-primary-600 dark:text-primary-400',
-      bg: 'bg-primary-50 dark:bg-primary-900/20',
-      border: 'border-primary-200 dark:border-primary-800 hover:border-primary-400 dark:hover:border-primary-600',
+      chip: 'bg-lilac',
     },
     {
       id: 'file' as CreateMethod,
       icon: FileSpreadsheet,
       label: t('dashboard.importFile', 'Import from File'),
       desc: t('dashboard.importFileDesc', 'Upload an Excel or CSV spreadsheet'),
-      color: 'text-emerald-600 dark:text-emerald-400',
-      bg: 'bg-emerald-50 dark:bg-emerald-900/20',
-      border: 'border-emerald-200 dark:border-emerald-800 hover:border-emerald-400 dark:hover:border-emerald-600',
+      chip: 'bg-mint',
     },
     {
       id: 'bulk' as CreateMethod,
       icon: Upload,
       label: t('dashboard.bulkImport', 'Bulk Import'),
       desc: t('dashboard.bulkImportDesc', 'Paste text with front|back per line'),
-      color: 'text-amber-600 dark:text-amber-400',
-      bg: 'bg-amber-50 dark:bg-amber-900/20',
-      border: 'border-amber-200 dark:border-amber-800 hover:border-amber-400 dark:hover:border-amber-600',
+      chip: 'bg-bubblegum',
     },
   ]
 
   return (
     <Modal isOpen={isOpen} onClose={handleDismiss} labelledBy="create-deck-title" size="md" locked={isPending}>
       <div className="mb-6 pr-10">
-        <h2 id="create-deck-title" className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1">
+        <h2 id="create-deck-title" className="font-display text-2xl leading-tight text-fg [text-wrap:balance]">
           {step === 'method' ? t('deck.createNewDeck') : t('deck.deckDetails', 'Deck Details')}
         </h2>
-        <p className="text-sm text-slate-600 dark:text-slate-400">
+        <p className="mt-1.5 text-[15px] text-muted">
           {step === 'method'
             ? t('dashboard.chooseMethod', 'Choose how to create your deck')
             : t('deck.createNewDeckSubtitle')}
@@ -132,7 +125,7 @@ export function CreateDeckModal({ isOpen, isPending, initialMethod, onClose, onS
       </div>
 
       {step === 'method' ? (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2">
           {methods.map((m) => {
             const Icon = m.icon
             return (
@@ -140,15 +133,15 @@ export function CreateDeckModal({ isOpen, isPending, initialMethod, onClose, onS
                 key={m.id}
                 type="button"
                 onClick={() => handleSelectMethod(m.id)}
-                className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 ${m.border} ${m.bg} transition-[color,background-color,border-color,box-shadow] duration-200 hover:shadow-elevation-md focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                className="flex items-start gap-3 rounded-[18px] border-[2.5px] border-ink bg-white p-4 text-left text-ink shadow-sticker-sm transition-transform duration-150 ease-out hover:-translate-y-0.5 hover:-rotate-[0.6deg] active:translate-y-0 active:rotate-0 active:scale-[0.98] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-sky focus-visible:ring-offset-2 focus-visible:ring-offset-sheet min-[400px]:flex-col"
               >
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${m.color}`}>
-                  <Icon className="w-6 h-6" />
-                </div>
-                <div className="text-center">
-                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{m.label}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{m.desc}</p>
-                </div>
+                <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] border-2 border-ink ${m.chip}`}>
+                  <Icon className="h-5 w-5" aria-hidden />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[15px] font-extrabold leading-snug">{m.label}</span>
+                  <span className="mt-1 block text-sm leading-snug text-ink/65">{m.desc}</span>
+                </span>
               </button>
             )
           })}
@@ -156,7 +149,7 @@ export function CreateDeckModal({ isOpen, isPending, initialMethod, onClose, onS
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="deck-title" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">{t('deck.deckTitle')}</label>
+            <label htmlFor="deck-title" className="mb-1.5 block text-sm font-bold text-fg">{t('deck.deckTitle')}</label>
             <input
               ref={inputRef}
               id="deck-title"
@@ -167,15 +160,15 @@ export function CreateDeckModal({ isOpen, isPending, initialMethod, onClose, onS
               maxLength={TITLE_MAX_LENGTH}
               disabled={isPending}
               data-autofocus
-              className="w-full px-4 py-2.5 min-h-[44px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-60 transition-colors duration-200"
+              className="field"
               placeholder={t('deck.deckTitleExample')}
             />
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 text-right">{title.length}/{TITLE_MAX_LENGTH}</p>
+            <p className="mt-1 text-right text-xs text-muted tabular-nums">{title.length}/{TITLE_MAX_LENGTH}</p>
           </div>
 
           <div>
-            <label htmlFor="deck-tags" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-              {t('deck.categoryTags')} <span className="text-slate-400 dark:text-slate-500 font-normal">({t('deck.categoryTagsHelp')})</span>
+            <label htmlFor="deck-tags" className="mb-1.5 block text-sm font-bold text-fg">
+              {t('deck.categoryTags')} <span className="font-medium text-muted">({t('deck.categoryTagsHelp')})</span>
             </label>
             <input
               id="deck-tags"
@@ -183,18 +176,18 @@ export function CreateDeckModal({ isOpen, isPending, initialMethod, onClose, onS
               value={tagsInput}
               onChange={(e) => setTagsInput(e.target.value)}
               disabled={isPending}
-              className="w-full px-4 py-2.5 min-h-[44px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-60 transition-colors duration-200"
+              className="field"
               placeholder={t('deck.categoryTagsPlaceholder')}
             />
           </div>
 
-          <div className="flex justify-end gap-3 pt-2">
+          <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end sm:gap-3">
             {!initialMethod && (
-              <Button variant="secondary" onClick={() => setStep('method')} disabled={isPending}>
+              <Button variant="ghost" onClick={() => setStep('method')} disabled={isPending} className="min-h-[46px]">
                 {t('common.back')}
               </Button>
             )}
-            <Button type="submit" loading={isPending} disabled={isPending || !title.trim()}>
+            <Button type="submit" size="lg" loading={isPending} disabled={isPending || !title.trim()} className="w-full sm:w-auto">
               {isPending ? t('deck.creating') : t('deck.create')}
             </Button>
           </div>

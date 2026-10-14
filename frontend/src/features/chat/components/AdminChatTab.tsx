@@ -63,11 +63,11 @@ export function AdminChatTab() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto p-3 space-y-3">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 && !sendMutation.isPending && (
-          <div className="flex flex-col items-center justify-center h-full text-slate-400 dark:text-slate-500 text-sm">
-            <Headphones className="w-10 h-10 mb-2 opacity-50" />
-            <p className="text-center">{t('chat.supportWelcome')}</p>
+          <div className="flex flex-col items-center justify-center h-full text-muted text-sm px-6">
+            <Headphones className="w-10 h-10 mb-2 opacity-60" aria-hidden />
+            <p className="text-center leading-relaxed">{t('chat.supportWelcome')}</p>
           </div>
         )}
         {messages.map((msg) => (
@@ -75,8 +75,8 @@ export function AdminChatTab() {
         ))}
         {(sendMutation.isPending || creating) && (
           <div className="flex justify-end">
-            <div className="bg-primary-600 rounded-2xl rounded-br-md px-4 py-3 text-sm text-white/70 flex items-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin" />
+            <div className="bg-sky border-2 border-ink rounded-[18px] rounded-br-[6px] px-4 py-3 text-sm font-medium text-ink/70 flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
               {t('chat.sending')}
             </div>
           </div>
