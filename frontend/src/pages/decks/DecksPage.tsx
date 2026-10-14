@@ -21,19 +21,7 @@ export const DecksPage = () => {
   const isApiMode = mode === 'api'
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-surface-base grain relative overflow-x-hidden">
-      {/* Decorative background */}
-      <div
-        className="fixed inset-0 opacity-[0.03] dark:opacity-[0.06] pointer-events-none z-0"
-        style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)',
-          backgroundSize: '24px 24px',
-        }}
-        aria-hidden
-      />
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary-400/10 dark:bg-primary-500/10 rounded-full blur-3xl pointer-events-none z-0" aria-hidden />
-      <div className="fixed bottom-0 right-0 w-[400px] h-[200px] bg-primary-300/10 dark:bg-primary-600/10 rounded-full blur-3xl pointer-events-none z-0" aria-hidden />
-
+    <div className="paper min-h-screen flex flex-col text-fg">
       <DashboardNavbar
         user={user}
         isApiMode={isApiMode}
@@ -43,21 +31,19 @@ export const DecksPage = () => {
         onLogout={logout}
       />
 
-      <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-6 md:py-8 pb-24 md:pb-8 animate-fade-in">
+      <main className="flex-1 w-full max-w-5xl xl:max-w-7xl mx-auto px-4 sm:px-8 pt-8 sm:pt-12 pb-28 md:pb-16">
         {/* Breadcrumb */}
         <nav className="mb-4 md:mb-6" aria-label={t('nav.breadcrumb', 'Breadcrumb')}>
-          <ol className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
+          <ol className="flex items-center gap-1.5 text-sm text-muted">
             <li>
-              <Link to="/" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">{t('nav.home')}</Link>
+              <Link to="/" className="font-semibold underline-offset-4 hover:text-fg hover:underline active:opacity-70 transition-opacity duration-150 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-brand">{t('nav.home')}</Link>
             </li>
-            <li><ChevronRight className="w-4 h-4 shrink-0 text-slate-400 dark:text-slate-500" aria-hidden /></li>
-            <li className="font-medium text-slate-800 dark:text-slate-100" aria-current="page">{t('dashboard.yourDecks')}</li>
+            <li><ChevronRight className="w-4 h-4 shrink-0" aria-hidden /></li>
+            <li className="font-medium text-fg" aria-current="page">{t('dashboard.yourDecks')}</li>
           </ol>
         </nav>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-md border border-slate-100 dark:border-slate-700/50 p-4 sm:p-6 md:p-8">
-          <YourDecks isGuest={!user} />
-        </div>
+        <YourDecks isGuest={!user} />
       </main>
     </div>
   )

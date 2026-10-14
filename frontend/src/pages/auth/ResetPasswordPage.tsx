@@ -72,12 +72,12 @@ export const ResetPasswordPage = () => {
     >
       {linkInvalid ? (
         <div className="text-center space-y-4">
-          <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+          <p className="text-base leading-relaxed text-muted">
             {t('auth.reset.invalidBody', 'Reset links work once and expire after 1 hour. Request a fresh one and use it right away.')}
           </p>
           <Link
             to="/forgot-password"
-            className="inline-flex w-full items-center justify-center min-h-[44px] px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 active:scale-[0.98] transition-[background-color,transform] duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800"
+            className="btn-brand w-full min-h-[52px] px-5 text-base"
           >
             {t('auth.reset.requestNew', 'Send me a new link')}
           </Link>
@@ -106,7 +106,7 @@ export const ResetPasswordPage = () => {
             disabled={submitting}
           />
           {error && (
-            <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+            <p role="alert" className="text-sm font-medium text-again">
               {error}
             </p>
           )}

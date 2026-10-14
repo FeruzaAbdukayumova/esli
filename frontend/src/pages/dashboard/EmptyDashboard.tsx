@@ -3,23 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
-import {
-  Sparkles,
-  ArrowRight,
-  FileText,
-  FileSpreadsheet,
-  ClipboardList,
-  Pencil,
-  Globe,
-  Telescope,
-  Wand2,
-  Paperclip,
-} from 'lucide-react'
+import { Paperclip, Telescope } from 'lucide-react'
 import { generateCardsAI } from '@/features/decks/aiApi'
 import { useCreateDeck, useAddCardsBatch } from '@/features/decks/hooks'
 import { CreateDeckModal, type CreateMethod } from './components/CreateDeckModal'
 import { AIGenerateDeckModal } from './components/AIGenerateDeckModal'
 import { seedDemoSky } from '@/shared/lib/devSeed'
+import { Plant } from './components/WordGarden'
 
 interface EmptyDashboardProps {
   greetingName?: string
@@ -45,10 +35,10 @@ export function EmptyDashboard({ greetingName }: EmptyDashboardProps) {
   // Built with t() inside the component so language switches apply live.
   const hints = useMemo(
     () => [
-      { icon: Sparkles, text: t('emptyDash.hintTopic', 'Type a topic…') },
-      { icon: FileText, text: t('emptyDash.hintPdf', '…or drop a PDF') },
-      { icon: FileSpreadsheet, text: t('emptyDash.hintSpreadsheet', '…or a spreadsheet') },
-      { icon: ClipboardList, text: t('emptyDash.hintNotes', '…or paste your notes') },
+      t('emptyDash.hintTopic', 'Type a topic…'),
+      t('emptyDash.hintPdf', '…or drop a PDF'),
+      t('emptyDash.hintSpreadsheet', '…or a spreadsheet'),
+      t('emptyDash.hintNotes', '…or paste your notes'),
     ],
     [t],
   )
@@ -88,7 +78,7 @@ export function EmptyDashboard({ greetingName }: EmptyDashboardProps) {
     if (file.type === 'application/pdf' || name.endsWith('.pdf')) {
       openAI('pdf', file)
     } else if (/\.(xlsx|xls|csv)$/.test(name) || file.type.includes('sheet') || file.type.includes('csv')) {
-      toast(t('emptyDash.toastSpreadsheet', 'Spreadsheet detected. Name your deck, then import it.'), { icon: '📊' })
+      toast(t('emptyDash.toastSpreadsheet', 'Spreadsheet detected. Name your deck, then import it.'))
       openCreate('file')
     } else {
       toast.error(t('emptyDash.toastUnsupportedFile', 'Drop a PDF or a spreadsheet (.xlsx / .csv)'))
@@ -155,30 +145,23 @@ export function EmptyDashboard({ greetingName }: EmptyDashboardProps) {
     }
   }
 
-  const HintIcon = hints[hintIdx].icon
+
+  const linkBtn =
+    'font-medium text-fg underline decoration-line underline-offset-4 hover:decoration-brand rounded active:opacity-70 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand'
 
   return (
-    <div className="w-full max-w-2xl mx-auto py-10 sm:py-16 text-center">
-      <style>{`
-        @keyframes esli-sheen { 0%{background-position:0% 50%} 100%{background-position:200% 50%} }
-        @keyframes esli-bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
-      `}</style>
-
-      <div className="inline-flex items-center gap-1.5 px-3 py-1 mb-5 rounded-full bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 text-xs font-medium">
-        <Wand2 className="w-3.5 h-3.5" aria-hidden />
-        {t('emptyDash.badge', 'AI-powered learning')}
-      </div>
-      <h1 className="text-3xl sm:text-[2.6rem] font-bold tracking-[-0.03em] leading-tight text-slate-900 dark:text-slate-50">
+    <div className="w-full max-w-2xl mx-auto pt-2 sm:pt-6">
+      <Plant stage={0} mood="new" className="-ml-3 mb-2 h-24 w-20" />
+      <h1 className="font-display text-[1.75rem] sm:text-[2.5rem] leading-[1.15] text-fg">
         {greetingName
           ? t('emptyDash.headlineNamed', '{{name}}, give Esli anything.', { name: greetingName })
-          : t('emptyDash.headline', 'Give Esli anything.')}
-        <br className="hidden sm:block" /> {t('emptyDash.headlineTail', 'Get flashcards.')}
+          : t('emptyDash.headline', 'Give Esli anything.')}{' '}
+        {t('emptyDash.headlineTail', 'Get flashcards.')}
       </h1>
-      <p className="mt-3 text-base text-slate-600 dark:text-slate-400">
+      <p className="mt-3 text-lg leading-relaxed text-muted">
         {t('emptyDash.subtitle', 'A topic, a PDF, a spreadsheet, your messy notes. Drop it in and it becomes a deck.')}
       </p>
 
-      {/* The one magic intake */}
       <form onSubmit={generate} className="mt-8">
         <div
           onDragOver={(e) => {
@@ -187,17 +170,9 @@ export function EmptyDashboard({ greetingName }: EmptyDashboardProps) {
           }}
           onDragLeave={() => setDragging(false)}
           onDrop={onDrop}
-          className="relative rounded-3xl p-[2px] transition-transform duration-200"
-          style={{
-            background: dragging
-              ? 'linear-gradient(90deg, rgb(var(--color-primary-500)), rgb(var(--color-primary-600)), rgb(var(--color-primary-400)), rgb(var(--color-primary-600)))'
-              : 'linear-gradient(90deg, rgba(var(--color-primary-500),0.4), rgba(var(--color-primary-400),0.15), rgba(var(--color-primary-500),0.4))',
-            backgroundSize: '200% 100%',
-            animation: 'esli-sheen 4s linear infinite',
-            transform: dragging ? 'scale(1.02)' : 'scale(1)',
-          }}
+          className={`sticker -rotate-1 transition-transform duration-150 focus-within:rotate-0 focus-within:ring-[3px] focus-within:ring-sky ${dragging ? 'border-dashed' : ''}`}
         >
-          <div className="relative rounded-[1.4rem] bg-white dark:bg-slate-800 p-3">
+          <div className="relative px-5 pt-4">
             <textarea
               ref={taRef}
               value={text}
@@ -208,114 +183,92 @@ export function EmptyDashboard({ greetingName }: EmptyDashboardProps) {
               autoFocus
               placeholder=" "
               aria-label={t('emptyDash.inputAria', 'Type a topic, paste notes, or drop a file')}
-              className="w-full resize-none bg-transparent px-2 pt-1 text-lg text-slate-900 dark:text-slate-100 placeholder-transparent focus:outline-none"
+              className="block w-full resize-none bg-transparent text-lg font-medium leading-relaxed text-ink placeholder-transparent focus:outline-none"
             />
-
-            {/* Animated empty-state hint (only when nothing typed) */}
             {!text && !dragging && (
-              <div className="pointer-events-none absolute left-5 top-5 flex items-center gap-2 text-lg text-slate-400 dark:text-slate-500">
+              <div className="pointer-events-none absolute left-5 top-4 text-lg leading-relaxed text-ink/50">
                 <AnimatePresence mode="wait">
                   <motion.span
                     key={hintIdx}
-                    initial={{ opacity: 0, y: 8 }}
+                    initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.3 }}
-                    className="inline-flex items-center gap-2"
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.25 }}
+                    className="inline-block"
                   >
-                    <HintIcon className="h-4 w-4" aria-hidden />
-                    {hints[hintIdx].text}
+                    {hints[hintIdx]}
                   </motion.span>
                 </AnimatePresence>
               </div>
             )}
-
-            {/* Drag overlay */}
             {dragging && (
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-[1.4rem] bg-primary-50/90 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 font-semibold">
-                {t('emptyDash.dropOverlay', "Drop it and I'll turn it into cards ✨")}
+              <div className="pointer-events-none absolute left-5 top-4 text-lg leading-relaxed font-bold text-ink">
+                {t('desk.dropHere', 'Drop it here')}
               </div>
             )}
-
-            <div className="flex items-center justify-between gap-2 px-2 pb-1">
-              <div className="flex items-center gap-2">
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept=".pdf,.xlsx,.xls,.csv,application/pdf"
-                  onChange={onPickFile}
-                  className="hidden"
-                />
-                <button
-                  type="button"
-                  onClick={() => fileRef.current?.click()}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-700 px-2.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 transition-[transform,border-color,color] duration-150 hover:-translate-y-0.5 hover:border-primary-400 hover:text-primary-600 dark:hover:text-primary-400 active:translate-y-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-                >
-                  <Paperclip className="h-3.5 w-3.5" aria-hidden />
-                  {t('emptyDash.attachFile', 'Attach file')}
-                </button>
-                <span className="hidden sm:inline text-xs text-slate-400 dark:text-slate-500">
-                  {pasteList
-                    ? t('emptyDash.looksLikeList', 'Looks like a list of cards')
-                    : t('emptyDash.fileHint', 'PDF or spreadsheet')}
-                </span>
-              </div>
-              {pasteList ? (
-                <button
-                  type="button"
-                  onClick={() => openCreate('bulk')}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-white transition-[transform,background-color] duration-150 hover:bg-amber-600 active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
-                >
-                  <ClipboardList className="h-4 w-4" aria-hidden />
-                  {t('emptyDash.importAsCards', 'Import as cards')}
-                </button>
-              ) : (
-                <button
-                  type="submit"
-                  disabled={!text.trim() || generating}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-primary-600 px-5 py-2 text-sm font-semibold text-white transition-[transform,background-color] duration-150 hover:bg-primary-700 active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-                >
-                  {generating ? t('emptyDash.building', 'Building…') : t('emptyDash.makeMyCards', 'Make my cards')}
-                  {!generating && <ArrowRight className="h-4 w-4" aria-hidden />}
-                </button>
-              )}
+          </div>
+          <div className="flex items-center justify-between gap-3 px-3 pb-3 pt-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <input
+                ref={fileRef}
+                type="file"
+                accept=".pdf,.xlsx,.xls,.csv,application/pdf"
+                onChange={onPickFile}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                className="inline-flex items-center gap-1.5 min-h-[44px] rounded-xl px-3 text-sm font-semibold text-ink/60 hover:text-ink hover:bg-ink/5 active:scale-[0.97] transition-[transform,color,background-color] duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+              >
+                <Paperclip className="h-4 w-4" aria-hidden />
+                {t('emptyDash.attachFile', 'Attach file')}
+              </button>
+              <span className="hidden sm:inline truncate text-sm text-ink/50">
+                {pasteList
+                  ? t('emptyDash.looksLikeList', 'Looks like a list of cards')
+                  : t('emptyDash.fileHint', 'PDF or spreadsheet')}
+              </span>
             </div>
+            {pasteList ? (
+              <button type="button" onClick={() => openCreate('bulk')} className="btn-brand shrink-0 min-h-[48px] px-5 text-base">
+                {t('emptyDash.importAsCards', 'Import as cards')}
+              </button>
+            ) : (
+              <button type="submit" disabled={!text.trim() || generating} className="btn-brand shrink-0 min-h-[48px] px-5 text-base">
+                {generating ? t('emptyDash.building', 'Building…') : t('emptyDash.makeMyCards', 'Make my cards')}
+              </button>
+            )}
           </div>
         </div>
       </form>
 
-      {/* "Esli understands:" — the clarity anchor + clickable shortcuts */}
-      <div className="mt-7">
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
-          {t('emptyDash.understands', 'Esli understands')}
-        </p>
-        <div className="mt-3 flex flex-wrap items-center justify-center gap-2.5">
-          <Shortcut icon={Sparkles} label={t('emptyDash.pillTopic', 'A topic')} tint="primary" onClick={() => taRef.current?.focus()} />
-          <Shortcut icon={FileText} label={t('emptyDash.pillPdf', 'A PDF')} tint="rose" badge={t('emptyDash.pillAiBadge', 'AI')} onClick={() => openAI('pdf')} />
-          <Shortcut icon={FileSpreadsheet} label={t('emptyDash.pillSpreadsheet', 'A spreadsheet')} tint="emerald" onClick={() => openCreate('file')} />
-          <Shortcut icon={ClipboardList} label={t('emptyDash.pillPastedList', 'A pasted list')} tint="amber" onClick={() => openCreate('bulk')} />
-          <Shortcut icon={Pencil} label={t('emptyDash.pillWriteOwn', 'Write your own')} tint="sky" onClick={() => openCreate('empty')} />
-        </div>
-      </div>
-
-      {/* Community fallback */}
-      <button
-        type="button"
-        onClick={() => navigate('/browse')}
-        className="group mt-8 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 transition-[transform,color,background-color] duration-150 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-white dark:hover:bg-slate-800 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-      >
-        <Globe className="h-4 w-4" aria-hidden />
-        {t('emptyDash.browseCommunity', 'Or copy a ready-made deck from 800+ community decks')}
-        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
-      </button>
+      <p className="mt-8 leading-relaxed text-muted">
+        {t('desk.otherWays', 'Other ways to start:')}{' '}
+        <button type="button" onClick={() => openCreate('file')} className={linkBtn}>
+          {t('emptyDash.pillSpreadsheet', 'A spreadsheet')}
+        </button>
+        {', '}
+        <button type="button" onClick={() => openCreate('bulk')} className={linkBtn}>
+          {t('emptyDash.pillPastedList', 'A pasted list')}
+        </button>
+        {', '}
+        <button type="button" onClick={() => openCreate('empty')} className={linkBtn}>
+          {t('emptyDash.pillWriteOwn', 'Write your own')}
+        </button>
+        {', '}
+        <button type="button" onClick={() => navigate('/browse')} className={linkBtn}>
+          {t('desk.copyReadyMade', 'Copy a ready-made deck')}
+        </button>
+      </p>
 
       {import.meta.env.DEV && (
         <div className="mt-12">
           <button
             type="button"
             onClick={seedDemoSky}
-            className="inline-flex items-center gap-2 rounded-lg border border-dashed border-primary-400/50 px-3 py-1.5 text-xs font-medium text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
-            title="Dev only — seeds guest decks so the populated dashboard renders"
+            className="inline-flex items-center gap-2 rounded-md border border-dashed border-line px-3 py-1.5 text-xs font-medium text-muted hover:bg-surface active:scale-[0.97] transition-transform duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            title="Dev only: seeds guest decks so the populated dashboard renders"
           >
             <Telescope className="h-3.5 w-3.5" aria-hidden />
             Seed demo data (dev)
@@ -340,43 +293,5 @@ export function EmptyDashboard({ greetingName }: EmptyDashboardProps) {
         }}
       />
     </div>
-  )
-}
-
-const TINT: Record<string, string> = {
-  primary: 'text-primary-600 dark:text-primary-400',
-  rose: 'text-rose-500',
-  emerald: 'text-emerald-500',
-  amber: 'text-amber-500',
-  sky: 'text-sky-500',
-}
-
-function Shortcut({
-  icon: Icon,
-  label,
-  tint,
-  badge,
-  onClick,
-}: {
-  icon: typeof Sparkles
-  label: string
-  tint: string
-  badge?: string
-  onClick: () => void
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="group inline-flex items-center gap-2 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 transition-[transform,border-color] duration-150 hover:-translate-y-0.5 hover:border-slate-300 dark:hover:border-slate-600 active:translate-y-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-    >
-      <Icon className={`h-4 w-4 ${TINT[tint]}`} aria-hidden />
-      {label}
-      {badge && (
-        <span className="rounded-full bg-primary-100 dark:bg-primary-900/40 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-primary-600 dark:text-primary-400">
-          {badge}
-        </span>
-      )}
-    </button>
   )
 }

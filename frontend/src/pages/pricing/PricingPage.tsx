@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { AlertCircle, Check, ChevronRight, Loader2, Sparkles, Crown, Zap } from 'lucide-react'
+import { AlertCircle, Check, ChevronRight, Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 import { useAuthContext } from '@/app/providers/AuthProvider'
@@ -15,34 +15,18 @@ import { trackEvent } from '@/shared/lib/analytics'
 import { DashboardNavbar } from '@/pages/dashboard/components/DashboardNavbar'
 import { usePageMeta } from '@/shared/lib/usePageMeta'
 import { openPaddleCheckout } from '@/features/billing/paddle'
+import { pageLink } from '@/pages/auth/AuthPageLayout'
 import type { PlanTier, PlanInfo } from '@/features/subscription/types'
 
-const PLAN_ICONS: Record<PlanTier, React.ReactNode> = {
-  free: <Zap className="w-6 h-6" />,
-  pro: <Sparkles className="w-6 h-6" />,
-  premium: <Crown className="w-6 h-6" />,
+// Plan stickers (DESIGN.md palette). Pro is the recommended plan: tilted and taped down.
+const PLAN_STYLE: Record<PlanTier, string> = {
+  free: 'bg-white md:rotate-[-0.6deg]',
+  pro: 'bg-sky md:rotate-[1deg]',
+  premium: 'bg-bubblegum md:rotate-[-0.8deg]',
 }
 
-const PLAN_COLORS: Record<PlanTier, { bg: string; border: string; icon: string; badge: string }> = {
-  free: {
-    bg: 'bg-slate-50 dark:bg-slate-800',
-    border: 'border-slate-200 dark:border-slate-700',
-    icon: 'text-slate-500',
-    badge: 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300',
-  },
-  pro: {
-    bg: 'bg-primary-50/50 dark:bg-primary-900/10',
-    border: 'border-primary-300 dark:border-primary-700 ring-2 ring-primary-200 dark:ring-primary-800',
-    icon: 'text-primary-600 dark:text-primary-400',
-    badge: 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300',
-  },
-  premium: {
-    bg: 'bg-amber-50/50 dark:bg-amber-900/10',
-    border: 'border-amber-300 dark:border-amber-700',
-    icon: 'text-amber-600 dark:text-amber-400',
-    badge: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300',
-  },
-}
+const featureItem = 'flex items-start gap-2.5 text-[15px] font-medium text-ink'
+const featureCheck = <Check className="mt-0.5 h-4 w-4 shrink-0 text-ink" strokeWidth={3} aria-hidden />
 
 // Declared outside component; receives `t` at call site
 function formatLimit(value: number, unlimitedLabel: string): string {
@@ -106,16 +90,7 @@ export function PricingPage() {
   const plans = plansData?.plans ?? []
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-surface-base grain">
-      <div
-        className="fixed inset-0 opacity-[0.03] dark:opacity-[0.06] pointer-events-none z-0"
-        style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)',
-          backgroundSize: '24px 24px',
-        }}
-        aria-hidden
-      />
-
+    <div className="min-h-screen flex flex-col">
       <DashboardNavbar
         user={user}
         isApiMode={mode === 'api'}
@@ -125,17 +100,17 @@ export function PricingPage() {
         onLogout={logout}
       />
 
-      <main className="relative z-10 flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 md:py-8">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 md:py-10">
         {/* Breadcrumb */}
         <nav className="mb-6" aria-label={t('nav.breadcrumb', 'Breadcrumb')}>
-          <ol className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
+          <ol className="flex items-center gap-1.5 text-sm text-muted">
             <li>
-              <Link to="/" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
+              <Link to="/" className="font-medium hover:text-fg rounded focus:outline-none focus-visible:ring-[3px] focus-visible:ring-sky active:opacity-70 transition-opacity duration-150">
                 {t('common.home')}
               </Link>
             </li>
-            <li><ChevronRight className="w-4 h-4 text-slate-400" aria-hidden /></li>
-            <li className="font-medium text-slate-800 dark:text-slate-100" aria-current="page">
+            <li><ChevronRight className="w-4 h-4 rtl:rotate-180" aria-hidden /></li>
+            <li className="font-bold text-fg" aria-current="page">
               {t('pricing.title')}
             </li>
           </ol>
@@ -143,17 +118,17 @@ export function PricingPage() {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-display font-bold tracking-tight text-slate-800 dark:text-slate-100 mb-2">
+          <h1 className="font-display text-[2rem] sm:text-[2.5rem] leading-[1.1] text-fg mb-3 [text-wrap:balance]">
             {t('pricing.title')}
           </h1>
-          <p className="text-slate-600 dark:text-slate-400">
+          <p className="text-base text-muted max-w-[52ch] mx-auto">
             {t('pricing.subtitle')}
           </p>
         </div>
 
         {/* Billing toggle */}
-        <div className="flex justify-center mb-8">
-          <div className="inline-flex rounded-lg bg-slate-100 dark:bg-slate-800 p-1">
+        <div className="flex justify-center mb-10">
+          <div className="inline-flex gap-1 rounded-[18px] border-[2.5px] border-edge bg-sheet p-1">
             <button
               type="button"
               aria-pressed={billingInterval === 'month'}
@@ -161,10 +136,8 @@ export function PricingPage() {
                 setBillingInterval('month')
                 trackEvent('pricing.billing_toggle', { interval: 'month' })
               }}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
-                billingInterval === 'month'
-                  ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400'
+              className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-[14px] px-4 text-sm font-bold transition-transform duration-150 active:scale-[0.97] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-sky ${
+                billingInterval === 'month' ? 'bg-fg text-canvas' : 'text-muted hover:text-fg'
               }`}
             >
               {t('pricing.monthly')}
@@ -176,14 +149,12 @@ export function PricingPage() {
                 setBillingInterval('year')
                 trackEvent('pricing.billing_toggle', { interval: 'year' })
               }}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
-                billingInterval === 'year'
-                  ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400'
+              className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-[14px] px-4 text-sm font-bold transition-transform duration-150 active:scale-[0.97] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-sky ${
+                billingInterval === 'year' ? 'bg-fg text-canvas' : 'text-muted hover:text-fg'
               }`}
             >
               {t('pricing.yearly')}
-              <span className="ml-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
+              <span className="rounded-full border-2 border-ink bg-mint px-1.5 text-xs font-extrabold text-ink">
                 {t('pricing.savePercent')}
               </span>
             </button>
@@ -192,13 +163,13 @@ export function PricingPage() {
 
         {/* Plans */}
         {isLoading ? (
-          <div className="flex justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+          <div className="flex justify-center py-12" role="status" aria-label={t('common.loading', 'Loading')}>
+            <Loader2 className="w-8 h-8 animate-spin text-muted" aria-hidden />
           </div>
         ) : isError || plans.length === 0 ? (
-          <div className="max-w-md mx-auto text-center bg-white dark:bg-slate-800 rounded-2xl shadow-elevation-md border border-slate-100 dark:border-slate-700/50 p-8">
-            <AlertCircle className="w-8 h-8 text-slate-400 mx-auto mb-3" aria-hidden />
-            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+          <div className="sheet max-w-md mx-auto text-center p-6 sm:p-8">
+            <AlertCircle className="w-8 h-8 text-muted mx-auto mb-3" aria-hidden />
+            <p className="text-base text-muted mb-5">
               {t('pricing.plansError', 'Could not load plans. Check your connection and try again.')}
             </p>
             <Button variant="secondary" size="sm" loading={isRefetching} onClick={() => refetch()}>
@@ -206,9 +177,8 @@ export function PricingPage() {
             </Button>
           </div>
         ) : (
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid gap-8 md:grid-cols-3 md:gap-6">
             {plans.map((plan) => {
-              const colors = PLAN_COLORS[plan.tier]
               const isCurrent = currentTier === plan.tier
               const price = billingInterval === 'month' ? plan.monthly_price : plan.yearly_price
               const perMonth = billingInterval === 'year' ? Math.round((plan.yearly_price / 12) * 100) / 100 : plan.monthly_price
@@ -216,23 +186,21 @@ export function PricingPage() {
               return (
                 <div
                   key={plan.tier}
-                  className={`relative rounded-2xl border ${colors.border} ${colors.bg} p-6 flex flex-col`}
+                  className={`sticker relative flex flex-col p-6 ${PLAN_STYLE[plan.tier]}`}
                 >
                   {plan.tier === 'pro' && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <span className="px-3 py-1 text-xs font-semibold rounded-full bg-primary-600 text-white">
-                        {t('pricing.popular')}
-                      </span>
-                    </div>
+                    // Washi tape marks the recommended plan
+                    <span className="tape bg-sun/80 -top-4 left-1/2 -translate-x-1/2 -rotate-3 w-auto min-w-[92px] px-4 flex items-center justify-center whitespace-nowrap text-xs font-extrabold text-ink">
+                      {t('pricing.popular')}
+                    </span>
                   )}
 
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className={colors.icon}>{PLAN_ICONS[plan.tier]}</span>
-                    <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+                  <div className="flex items-center gap-3 mb-3">
+                    <h2 className="font-display text-2xl leading-tight text-ink">
                       {plan.name}
-                    </h3>
+                    </h2>
                     {isCurrent && (
-                      <span className={`ml-auto text-xs font-medium px-2 py-0.5 rounded-full ${colors.badge}`}>
+                      <span className="ml-auto rounded-full border-2 border-ink bg-white px-2.5 py-0.5 text-xs font-bold text-ink">
                         {t('pricing.currentPlan')}
                       </span>
                     )}
@@ -240,19 +208,19 @@ export function PricingPage() {
 
                   <div className="mb-6">
                     {price === 0 ? (
-                      <div className="text-3xl font-bold text-slate-800 dark:text-slate-100">
+                      <div className="font-display text-4xl leading-tight text-ink">
                         {t('pricing.free')}
                       </div>
                     ) : (
                       <div>
-                        <span className="text-3xl font-bold text-slate-800 dark:text-slate-100">
+                        <span className="font-display text-4xl leading-tight text-ink">
                           ${billingInterval === 'month' ? price : perMonth}
                         </span>
-                        <span className="text-slate-500 dark:text-slate-400 text-sm">
+                        <span className="ml-1 text-sm font-semibold text-ink/70">
                           {t('pricing.perMonth')}
                         </span>
                         {billingInterval === 'year' && (
-                          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                          <p className="text-sm font-semibold text-ink/70 mt-1">
                             ${price}{t('pricing.perYear')}
                           </p>
                         )}
@@ -261,38 +229,40 @@ export function PricingPage() {
                   </div>
 
                   {/* Features */}
-                  <ul className="space-y-3 mb-6 flex-1">
-                    <li className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
-                      <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-                      {formatLimit(plan.limits.ai_generations_per_month, t('common.unlimited'))} {t('pricing.features.aiGenerations')}
+                  <ul className="space-y-3 mb-6 flex-1 border-t-2 border-ink/15 pt-5">
+                    <li className={featureItem}>
+                      {featureCheck}
+                      <span>{formatLimit(plan.limits.ai_generations_per_month, t('common.unlimited'))} {t('pricing.features.aiGenerations')}</span>
                     </li>
-                    <li className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
-                      <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-                      {formatLimit(plan.limits.max_decks, t('common.unlimited'))} {t('pricing.features.maxDecks')}
+                    <li className={featureItem}>
+                      {featureCheck}
+                      <span>{formatLimit(plan.limits.max_decks, t('common.unlimited'))} {t('pricing.features.maxDecks')}</span>
                     </li>
-                    <li className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
-                      <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-                      {formatLimit(plan.limits.max_cards_per_deck, t('common.unlimited'))} {t('pricing.features.maxCardsPerDeck')}
+                    <li className={featureItem}>
+                      {featureCheck}
+                      <span>{formatLimit(plan.limits.max_cards_per_deck, t('common.unlimited'))} {t('pricing.features.maxCardsPerDeck')}</span>
                     </li>
-                    <li className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
-                      <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-                      {formatLimit(plan.limits.max_total_cards, t('common.unlimited'))} {t('pricing.features.maxTotalCards')}
+                    <li className={featureItem}>
+                      {featureCheck}
+                      <span>{formatLimit(plan.limits.max_total_cards, t('common.unlimited'))} {t('pricing.features.maxTotalCards')}</span>
                     </li>
                     {plan.limits.pdf_ai_generation && (
-                      <li className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
-                        <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-                        {t('pricing.features.pdfAi')}
-                        {plan.limits.pdf_max_pages > 0 && (
-                          <span className="text-xs text-slate-500 dark:text-slate-400">
-                            ({t('pricing.features.pdfMaxPages', { count: plan.limits.pdf_max_pages })})
-                          </span>
-                        )}
+                      <li className={featureItem}>
+                        {featureCheck}
+                        <span>
+                          {t('pricing.features.pdfAi')}
+                          {plan.limits.pdf_max_pages > 0 && (
+                            <span className="ml-1 text-sm text-ink/70">
+                              ({t('pricing.features.pdfMaxPages', { count: plan.limits.pdf_max_pages })})
+                            </span>
+                          )}
+                        </span>
                       </li>
                     )}
                     {plan.limits.advanced_analytics && (
-                      <li className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
-                        <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-                        {t('pricing.features.analytics')}
+                      <li className={featureItem}>
+                        {featureCheck}
+                        <span>{t('pricing.features.analytics')}</span>
                       </li>
                     )}
                   </ul>
@@ -300,22 +270,19 @@ export function PricingPage() {
                   {/* CTA */}
                   {plan.tier === 'free' ? (
                     isCurrent ? (
-                      <div className="text-center text-sm text-slate-500 dark:text-slate-400 py-2.5">
+                      <div className="text-center text-sm font-bold text-ink/70 min-h-[48px] flex items-center justify-center">
                         {t('pricing.currentPlan')}
                       </div>
                     ) : isGuest ? (
-                      <Link
-                        to="/register"
-                        className="block text-center px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
-                      >
+                      <Link to="/register" className="btn-quiet w-full min-h-[48px] px-4 text-[15px]">
                         {t('pricing.getStarted')}
                       </Link>
                     ) : (
                       // No billing portal pre-Paddle: paid users see no action on the free card.
-                      <div className="py-2.5" aria-hidden />
+                      <div className="min-h-[48px]" aria-hidden />
                     )
                   ) : isCurrent ? (
-                    <div className="text-center text-sm text-slate-500 dark:text-slate-400 py-2.5">
+                    <div className="text-center text-sm font-bold text-ink/70 min-h-[48px] flex items-center justify-center">
                       {t('pricing.currentPlan')}
                     </div>
                   ) : (
@@ -323,11 +290,7 @@ export function PricingPage() {
                       type="button"
                       onClick={() => handleUpgrade(plan.tier, plan)}
                       disabled={checkoutTier !== null}
-                      className={`w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 disabled:opacity-60 disabled:cursor-not-allowed ${
-                        plan.tier === 'pro'
-                          ? 'bg-primary-600 hover:bg-primary-700 text-white focus-visible:ring-primary-500'
-                          : 'bg-amber-500 hover:bg-amber-600 text-white focus-visible:ring-amber-500'
-                      }`}
+                      className={`${plan.tier === 'pro' ? 'btn-brand' : 'btn-quiet'} w-full min-h-[48px] px-4 text-[15px]`}
                     >
                       {checkoutTier === plan.tier && <Loader2 className="w-4 h-4 animate-spin" aria-hidden />}
                       {isGuest ? (
@@ -344,13 +307,13 @@ export function PricingPage() {
         )}
 
         {/* Trust note */}
-        <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
+        <p className="mt-10 text-center text-sm text-muted">
           {t('pricing.cancelAnytime', 'Cancel anytime.')}{' '}
           <a
             href="https://esli.app/refund"
             target="_blank"
             rel="noopener noreferrer"
-            className="underline hover:text-primary-600 dark:hover:text-primary-400 transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            className={pageLink}
           >
             {t('pricing.refundPolicy', 'Refund policy')}
           </a>

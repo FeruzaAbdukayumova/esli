@@ -29,7 +29,7 @@ export function ChatInput({ onSend, disabled, placeholder }: ChatInputProps) {
   }
 
   return (
-    <div className="flex items-end gap-2 p-3 border-t border-slate-200 dark:border-slate-600">
+    <div className="flex items-end gap-2 p-3 border-t-2 border-line">
       <textarea
         ref={inputRef}
         value={text}
@@ -38,15 +38,15 @@ export function ChatInput({ onSend, disabled, placeholder }: ChatInputProps) {
         placeholder={placeholder || t('chat.placeholder')}
         disabled={disabled}
         rows={1}
-        className="flex-1 resize-none rounded-lg border border-slate-300 dark:border-slate-500 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 max-h-20"
+        className="field flex-1 min-h-[44px] max-h-24 resize-none py-2.5 leading-snug"
       />
       <button
         onClick={handleSend}
         disabled={disabled || !text.trim()}
-        className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-lg bg-primary-600 hover:bg-primary-700 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800"
+        className="btn-ink flex-shrink-0 w-11 h-11 rounded-[14px] focus-visible:ring-offset-sheet"
         aria-label={t('chat.send', 'Send message')}
       >
-        <Send className="w-4 h-4" />
+        <Send className="w-4 h-4" aria-hidden />
       </button>
     </div>
   )

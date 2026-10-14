@@ -1,7 +1,6 @@
 import { useState, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  Sparkles,
   Loader2,
   CheckCircle2,
   AlertTriangle,
@@ -15,6 +14,7 @@ import { RichTextDisplay } from '@/shared/ui/RichTextDisplay'
 import { stripHtml } from '@/shared/lib/htmlUtils'
 import { Modal } from '@/shared/ui/Modal'
 import { Button } from '@/shared/ui/Button'
+import { labelCls } from './deckStyles'
 
 type Step = 'prompt' | 'generating' | 'preview' | 'applying' | 'done'
 
@@ -176,11 +176,11 @@ export function BulkAIEditModal({
       <div className="mb-6 pr-10">
         <h2
           id="bulk-ai-edit-title"
-          className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1"
+          className="font-display text-2xl text-fg mb-1"
         >
           {t('ai.bulkEditTitle')}
         </h2>
-        <p className="text-sm text-slate-600 dark:text-slate-400">
+        <p className="text-sm text-muted">
           {t('ai.bulkEditSubtitle', { count: selectedCards.length })}
         </p>
       </div>
@@ -191,7 +191,7 @@ export function BulkAIEditModal({
           <div>
             <label
               htmlFor="ai-edit-instruction"
-              className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
+              className={labelCls}
             >
               {t('ai.bulkEditInstruction')}
             </label>
@@ -202,16 +202,16 @@ export function BulkAIEditModal({
               rows={3}
               maxLength={500}
               data-autofocus
-              className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 resize-none"
+              className="field resize-none"
               placeholder={t('ai.bulkEditInstructionPlaceholder')}
             />
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 text-right">
+            <p className="mt-1 text-xs text-muted text-right tabular-nums">
               {instruction.length}/500
             </p>
           </div>
 
           {/* AI usage counter */}
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-xs text-muted">
             {aiLimit === -1
               ? t('subscription.aiUsageUnlimited', { used: aiUsed })
               : t('subscription.aiUsage', { used: aiUsed, limit: aiLimit })}
@@ -225,18 +225,17 @@ export function BulkAIEditModal({
           )}
 
           {error && (
-            <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
-              <AlertTriangle className="w-4 h-4 shrink-0" />
+            <div role="alert" className="flex items-center gap-2 text-sm font-medium text-again">
+              <AlertTriangle className="w-4 h-4 shrink-0" aria-hidden />
               {error}
             </div>
           )}
 
-          <div className="flex justify-end gap-3 pt-2">
-            <Button variant="secondary" onClick={handleClose}>
+          <div className="flex flex-wrap justify-end gap-3 pt-2">
+            <Button variant="ghost" onClick={handleClose}>
               {t('common.cancel')}
             </Button>
             <Button onClick={handleGenerate} disabled={isAtLimit || !instruction.trim()}>
-              <Sparkles className="w-4 h-4" />
               {t('ai.bulkEditGenerate')}
             </Button>
           </div>
@@ -246,11 +245,11 @@ export function BulkAIEditModal({
       {/* ---- Generating step ---- */}
       {step === 'generating' && (
         <div className="flex flex-col items-center justify-center py-12 gap-4">
-          <Loader2 className="w-8 h-8 animate-spin text-primary-600 dark:text-primary-400" />
-          <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+          <Loader2 className="w-8 h-8 animate-spin text-fg" aria-hidden />
+          <p className="text-sm font-bold text-fg text-center">
             {t('ai.bulkEditGenerating', { count: selectedCards.length })}
           </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-xs text-muted text-center">
             {t('ai.bulkEditGeneratingWait')}
           </p>
           <Button variant="secondary" onClick={handleCancelGeneration} className="mt-2">
@@ -263,26 +262,17 @@ export function BulkAIEditModal({
       {step === 'preview' && (
         <div className="space-y-4">
           {/* Accept/Reject controls */}
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm font-bold text-fg">
               {t('ai.bulkEditAccepted', { count: acceptedCount })}
             </p>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={acceptAll}
-                className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
-              >
+            <div className="flex gap-1">
+              <Button variant="ghost" size="sm" onClick={acceptAll}>
                 {t('ai.bulkEditAcceptAll')}
-              </button>
-              <span className="text-slate-300 dark:text-slate-600">|</span>
-              <button
-                type="button"
-                onClick={rejectAll}
-                className="text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
-              >
+              </Button>
+              <Button variant="ghost" size="sm" onClick={rejectAll} className="text-muted">
                 {t('ai.bulkEditRejectAll')}
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -298,49 +288,47 @@ export function BulkAIEditModal({
               return (
                 <div
                   key={edited.id}
-                  className={`border rounded-lg overflow-hidden transition-colors ${
-                    accepted
-                      ? 'border-primary-300 dark:border-primary-600'
-                      : 'border-slate-200 dark:border-slate-600 opacity-60'
+                  className={`rounded-[18px] border-2 overflow-hidden transition-opacity duration-150 ${
+                    accepted ? 'border-edge' : 'border-edge/40 opacity-60'
                   }`}
                 >
                   {/* Card header with checkbox */}
-                  <div className="flex items-center gap-3 px-4 py-2 bg-slate-50 dark:bg-slate-700/50">
+                  <div className="flex items-center gap-3 px-4 py-2 bg-fg/[0.04] border-b-2 border-line">
                     <input
                       type="checkbox"
                       checked={accepted}
                       onChange={() => toggleAccepted(edited.id)}
-                      className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-primary-600 focus:ring-primary-500"
+                      className="w-5 h-5 shrink-0 cursor-pointer accent-brand rounded focus:outline-none focus-visible:ring-[3px] focus-visible:ring-sky"
                     />
-                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400 truncate">
+                    <span className="text-xs font-bold text-muted truncate">
                       {stripHtml(original.frontText || '').slice(0, 60)}{stripHtml(original.frontText || '').length > 60 ? '...' : ''}
                     </span>
                   </div>
 
                   {/* Diff content */}
-                  <div className="grid grid-cols-2 divide-x divide-slate-200 dark:divide-slate-600">
+                  <div className="grid grid-cols-2 divide-x-2 divide-line">
                     {/* Original column */}
                     <div className="p-3 space-y-2">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                      <p className="text-xs font-bold text-muted">
                         {t('ai.bulkEditOriginal')}
                       </p>
-                      <div className={`text-sm text-slate-700 dark:text-slate-300 ${frontChanged ? 'bg-red-50 dark:bg-red-900/20 px-1.5 py-0.5 rounded' : ''}`}>
+                      <div className={`text-sm font-medium text-fg ${frontChanged ? 'bg-again/15 px-1.5 py-0.5 rounded-md line-through decoration-again/60' : ''}`}>
                         <RichTextDisplay content={original.frontText || ''} />
                       </div>
-                      <div className={`text-sm text-slate-500 dark:text-slate-400 ${backChanged ? 'bg-red-50 dark:bg-red-900/20 px-1.5 py-0.5 rounded' : ''}`}>
+                      <div className={`text-sm text-muted ${backChanged ? 'bg-again/15 px-1.5 py-0.5 rounded-md line-through decoration-again/60' : ''}`}>
                         <RichTextDisplay content={original.backText || ''} />
                       </div>
                     </div>
 
                     {/* Edited column */}
                     <div className="p-3 space-y-2">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                      <p className="text-xs font-bold text-muted">
                         {t('ai.bulkEditEdited')}
                       </p>
-                      <div className={`text-sm text-slate-700 dark:text-slate-300 ${frontChanged ? 'bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded' : ''}`}>
+                      <div className={`text-sm font-medium text-fg ${frontChanged ? 'bg-grass/20 px-1.5 py-0.5 rounded-md' : ''}`}>
                         <RichTextDisplay content={edited.frontText || ''} />
                       </div>
-                      <div className={`text-sm text-slate-500 dark:text-slate-400 ${backChanged ? 'bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded' : ''}`}>
+                      <div className={`text-sm text-muted ${backChanged ? 'bg-grass/20 px-1.5 py-0.5 rounded-md' : ''}`}>
                         <RichTextDisplay content={edited.backText || ''} />
                       </div>
                     </div>
@@ -351,28 +339,23 @@ export function BulkAIEditModal({
           </div>
 
           {error && (
-            <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
-              <AlertTriangle className="w-4 h-4 shrink-0" />
+            <div role="alert" className="flex items-center gap-2 text-sm font-medium text-again">
+              <AlertTriangle className="w-4 h-4 shrink-0" aria-hidden />
               {error}
             </div>
           )}
 
           {/* Actions */}
-          <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-600">
-            <button
-              type="button"
-              onClick={handleBackToPrompt}
-              className="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t-2 border-line">
+            <Button variant="ghost" size="sm" onClick={handleBackToPrompt} className="-ml-3 text-muted">
+              <RefreshCw className="w-4 h-4" aria-hidden />
               {t('ai.bulkEditTryAgain')}
-            </button>
-            <div className="flex gap-3">
-              <Button variant="secondary" onClick={handleClose}>
+            </Button>
+            <div className="flex gap-3 ml-auto">
+              <Button variant="ghost" onClick={handleClose}>
                 {t('common.cancel')}
               </Button>
               <Button onClick={handleApply} disabled={acceptedCount === 0}>
-                <Sparkles className="w-4 h-4" />
                 {t('ai.bulkEditApply', { count: acceptedCount })}
               </Button>
             </div>
@@ -383,8 +366,8 @@ export function BulkAIEditModal({
       {/* ---- Applying step ---- */}
       {step === 'applying' && (
         <div className="flex flex-col items-center justify-center py-12 gap-4">
-          <Loader2 className="w-8 h-8 animate-spin text-primary-600 dark:text-primary-400" />
-          <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+          <Loader2 className="w-8 h-8 animate-spin text-fg" aria-hidden />
+          <p className="text-sm font-bold text-fg">
             {t('ai.bulkEditApplying')}
           </p>
         </div>
@@ -392,14 +375,14 @@ export function BulkAIEditModal({
 
       {/* ---- Done step ---- */}
       {step === 'done' && (
-        <div className="flex flex-col items-center justify-center py-12 gap-4">
-          <div className="p-3 rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-            <CheckCircle2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+        <div className="flex flex-col items-center justify-center py-12 gap-4 text-center">
+          <div className="sticker !shadow-sticker-sm bg-mint !rounded-full p-3 -rotate-3">
+            <CheckCircle2 className="w-8 h-8 text-ink" aria-hidden />
           </div>
-          <p className="text-lg font-medium text-slate-800 dark:text-slate-100">
+          <p className="font-display text-xl text-fg">
             {t('ai.bulkEditDone', { count: appliedCount })}
           </p>
-          <div className="flex gap-3 mt-2">
+          <div className="flex flex-wrap justify-center gap-3 mt-2">
             <Button
               variant="secondary"
               onClick={() => {

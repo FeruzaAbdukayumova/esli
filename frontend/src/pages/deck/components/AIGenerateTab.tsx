@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { trackEvent } from '@/shared/lib/analytics'
 import {
-  Sparkles,
+  Lightbulb,
   Loader2,
   CheckCircle2,
   AlertTriangle,
@@ -21,6 +21,8 @@ import { useTier } from '@/features/subscription/useTier'
 import { UpgradePrompt } from '@/features/subscription/components/UpgradePrompt'
 import type { CreateCardInput } from '@/features/decks/types'
 import type { Card } from '@/features/decks/types'
+import { Button } from '@/shared/ui/Button'
+import { segOn, segOff, labelCls, cellInput, iconBtnDanger } from './deckStyles'
 
 type Step = 'prompt' | 'generating' | 'preview' | 'saving' | 'done'
 type InputMode = 'topic' | 'pdf'
@@ -198,12 +200,9 @@ export function AIGenerateTab({
       <div>
         {/* Usage counter */}
         {aiLimit !== -1 && (
-          <div className="mb-4 flex items-center gap-2 text-sm">
-            <Sparkles className="w-4 h-4 text-primary-500" />
-            <span className="text-slate-600 dark:text-slate-400">
-              {t('subscription.aiUsage', { used: aiUsed, limit: aiLimit })}
-            </span>
-          </div>
+          <p className="mb-4 text-sm font-medium text-muted">
+            {t('subscription.aiUsage', { used: aiUsed, limit: aiLimit })}
+          </p>
         )}
 
         {isAtLimit && (
@@ -216,39 +215,30 @@ export function AIGenerateTab({
 
         <div className="space-y-4">
           {/* Mode toggle */}
-          <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-700 rounded-lg w-fit">
+          <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => setInputMode('topic')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
-                inputMode === 'topic'
-                  ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-sm'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-              }`}
+              aria-pressed={inputMode === 'topic'}
+              className={`${inputMode === 'topic' ? segOn : segOff} min-h-[40px] px-3.5 text-sm`}
             >
-              <Sparkles className="w-3.5 h-3.5" />
+              <Lightbulb className="w-4 h-4" aria-hidden />
               {t('ai.topic')}
             </button>
             <button
               type="button"
               onClick={() => setInputMode('pdf')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
-                inputMode === 'pdf'
-                  ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-sm'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-              }`}
+              aria-pressed={inputMode === 'pdf'}
+              className={`${inputMode === 'pdf' ? segOn : segOff} min-h-[40px] px-3.5 text-sm`}
             >
-              <FileText className="w-3.5 h-3.5" />
+              <FileText className="w-4 h-4" aria-hidden />
               {t('ai.pdf')}
             </button>
           </div>
 
           {inputMode === 'topic' ? (
             <div>
-              <label
-                htmlFor="ai-topic"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
-              >
+              <label htmlFor="ai-topic" className={labelCls}>
                 {t('ai.topicLabel')}
               </label>
               <textarea
@@ -257,10 +247,10 @@ export function AIGenerateTab({
                 onChange={(e) => setTopic(e.target.value)}
                 rows={3}
                 maxLength={500}
-                className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 resize-none"
+                className="field resize-none"
                 placeholder={t('ai.topicPlaceholder')}
               />
-              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 text-right">
+              <p className="mt-1 text-xs text-muted text-right tabular-nums">
                 {topic.length}/500
               </p>
             </div>
@@ -281,13 +271,13 @@ export function AIGenerateTab({
                       fileInputRef.current?.click()
                     }
                   }}
-                  className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-8 text-center cursor-pointer hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-50/50 dark:hover:bg-primary-900/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                  className="rounded-[18px] border-[2.5px] border-dashed border-edge/60 p-8 text-center cursor-pointer transition-[background-color,border-color] duration-150 hover:border-edge hover:bg-fg/[0.04] active:bg-fg/[0.07] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-sky"
                 >
-                  <Upload className="w-8 h-8 mx-auto mb-3 text-slate-400 dark:text-slate-500" />
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <Upload className="w-8 h-8 mx-auto mb-3 text-muted" aria-hidden />
+                  <p className="text-sm font-bold text-fg">
                     {t('ai.dropPdfHere')}
                   </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  <p className="text-xs text-muted mt-1">
                     {t('ai.maxFileSize')}
                   </p>
                   <input
@@ -302,35 +292,32 @@ export function AIGenerateTab({
                   />
                 </div>
               ) : (
-                <div className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50">
-                  <FileText className="w-5 h-5 text-primary-500 shrink-0" />
+                <div className="sticker !rounded-[16px] !shadow-sticker-sm bg-white flex items-center gap-3 p-3">
+                  <FileText className="w-5 h-5 text-ink shrink-0" aria-hidden />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">
+                    <p className="text-sm font-bold text-ink truncate">
                       {pdfFile.name}
                     </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-xs text-ink/65">
                       {(pdfFile.size / 1024 / 1024).toFixed(1)} MB
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setPdfFile(null)}
-                    className="p-1 rounded text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                    className="min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl text-ink/60 hover:text-again hover:bg-ink/10 active:scale-95 transition-[transform,color,background-color] duration-150 focus:outline-none focus-visible:ring-[3px] focus-visible:ring-sky"
                     aria-label={t('common.delete')}
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-4 h-4" aria-hidden />
                   </button>
                 </div>
               )}
 
               {/* Optional focus topic for PDF */}
               <div className="mt-3">
-                <label
-                  htmlFor="ai-pdf-topic"
-                  className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
-                >
+                <label htmlFor="ai-pdf-topic" className={labelCls}>
                   {t('ai.focusTopic')}{' '}
-                  <span className="text-slate-400 dark:text-slate-500 font-normal">
+                  <span className="text-muted font-medium">
                     ({t('ai.focusTopicOptional')})
                   </span>
                 </label>
@@ -340,7 +327,7 @@ export function AIGenerateTab({
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
                   maxLength={500}
-                  className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200"
+                  className="field"
                   placeholder={t('ai.focusTopicPlaceholder')}
                 />
               </div>
@@ -348,10 +335,7 @@ export function AIGenerateTab({
           )}
 
           <div>
-            <label
-              htmlFor="ai-count"
-              className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
-            >
+            <label htmlFor="ai-count" className={labelCls}>
               {t('ai.numberOfCards')}
             </label>
             <input
@@ -375,33 +359,28 @@ export function AIGenerateTab({
                 setCount(clamped)
                 setCountInput(String(clamped))
               }}
-              className="w-32 px-4 py-2.5 min-h-[44px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200"
+              className="field !w-32"
             />
           </div>
         </div>
 
         {generateError && (
-          <div className="mt-4 flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
-            <AlertTriangle className="w-4 h-4 shrink-0" />
+          <div role="alert" className="mt-4 flex items-center gap-2 text-sm font-medium text-again">
+            <AlertTriangle className="w-4 h-4 shrink-0" aria-hidden />
             {generateError}
           </div>
         )}
 
-        <div className="flex items-center justify-end gap-3 pt-4 mt-4 border-t border-slate-200 dark:border-slate-600">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-          >
+        <div className="flex flex-wrap items-center justify-end gap-3 pt-4 mt-4 border-t-2 border-line">
+          <Button variant="ghost" onClick={onClose}>
             {t('common.cancel')}
-          </button>
+          </Button>
           <button
             type="button"
             onClick={handleGenerate}
             disabled={!canGenerate}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            className="btn-ink min-h-[46px] px-5 text-[15px]"
           >
-            <Sparkles className="w-4 h-4" />
             {t('ai.generate')}
           </button>
         </div>
@@ -412,23 +391,19 @@ export function AIGenerateTab({
   // ---- Generating step ----
   if (step === 'generating') {
     return (
-      <div className="flex flex-col items-center justify-center py-12 gap-4">
-        <Loader2 className="w-8 h-8 animate-spin text-primary-600 dark:text-primary-400" />
-        <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+      <div className="flex flex-col items-center justify-center py-12 gap-4 text-center" aria-live="polite">
+        <Loader2 className="w-8 h-8 animate-spin text-fg" aria-hidden />
+        <p className="text-sm font-bold text-fg">
           {inputMode === 'pdf' && pdfFile
             ? t('ai.analyzingPdf', { count })
             : t('ai.generatingCards', { count, topic: topic.slice(0, 60) + (topic.length > 60 ? '...' : '') })}
         </p>
-        <p className="text-xs text-slate-500 dark:text-slate-400">
+        <p className="text-xs text-muted">
           {t('ai.generatingWait')}
         </p>
-        <button
-          type="button"
-          onClick={handleCancelGeneration}
-          className="mt-2 px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-        >
+        <Button variant="secondary" size="sm" onClick={handleCancelGeneration} className="mt-2">
           {t('common.cancel')}
-        </button>
+        </Button>
       </div>
     )
   }
@@ -437,61 +412,58 @@ export function AIGenerateTab({
   if (step === 'preview') {
     return (
       <div>
-        {/* Cards table */}
-        <div className="border border-slate-200 dark:border-slate-600 rounded-lg overflow-hidden mb-4">
+        {/* Generated cards: each row is editable before saving */}
+        <div className="rounded-[18px] border-2 border-edge/80 overflow-hidden mb-4">
           <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 dark:bg-slate-700 sticky top-0">
+              <thead className="bg-sheet sticky top-0 border-b-2 border-line">
                 <tr>
-                  <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 w-8">
+                  <th className="px-3 py-2 text-left text-xs font-bold text-muted w-8">
                     #
                   </th>
-                  <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-primary-600 dark:text-primary-400">
+                  <th className="px-3 py-2 text-left text-xs font-bold text-fg">
                     {t('deck.frontLabel')}
                   </th>
-                  <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-primary-600 dark:text-primary-400">
+                  <th className="px-3 py-2 text-left text-xs font-bold text-fg">
                     {t('deck.backLabel')}
                   </th>
                   <th className="px-3 py-2 w-10" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-slate-600">
+              <tbody className="divide-y divide-line">
                 {generatedCards.map((card, i) => (
-                  <tr
-                    key={i}
-                    className="hover:bg-slate-50 dark:hover:bg-slate-700/30"
-                  >
-                    <td className="px-3 py-2 text-xs text-slate-400 dark:text-slate-500">
+                  <tr key={i}>
+                    <td className="px-3 py-2 text-xs text-muted tabular-nums">
                       {i + 1}
                     </td>
-                    <td className="px-3 py-2">
+                    <td className="px-2 py-1.5">
                       <input
                         type="text"
                         value={card.frontText}
                         onChange={(e) =>
                           updateCard(i, 'frontText', e.target.value)
                         }
-                        className="w-full px-2 py-1 text-sm rounded border border-transparent hover:border-slate-300 dark:hover:border-slate-600 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 bg-transparent text-slate-800 dark:text-slate-100 transition-colors"
+                        className={cellInput}
                       />
                     </td>
-                    <td className="px-3 py-2">
+                    <td className="px-2 py-1.5">
                       <input
                         type="text"
                         value={card.backText}
                         onChange={(e) =>
                           updateCard(i, 'backText', e.target.value)
                         }
-                        className="w-full px-2 py-1 text-sm rounded border border-transparent hover:border-slate-300 dark:hover:border-slate-600 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 bg-transparent text-slate-700 dark:text-slate-200 transition-colors"
+                        className={cellInput}
                       />
                     </td>
-                    <td className="px-3 py-2">
+                    <td className="px-2 py-1.5">
                       <button
                         type="button"
                         onClick={() => removeCard(i)}
-                        className="p-1 rounded text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                        className={iconBtnDanger}
                         aria-label={t('ai.removeCard')}
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="w-4 h-4" aria-hidden />
                       </button>
                     </td>
                   </tr>
@@ -502,45 +474,33 @@ export function AIGenerateTab({
         </div>
 
         {/* Summary */}
-        <div className="flex items-center gap-3 mb-4 text-sm">
-          <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-            <Sparkles className="w-4 h-4 text-primary-500" />
-            {t('ai.cardsGenerated', { count: generatedCards.length })}
-          </span>
-        </div>
+        <p className="mb-4 text-sm font-bold text-fg">
+          {t('ai.cardsGenerated', { count: generatedCards.length })}
+        </p>
 
         {saveError && (
-          <div className="mb-4 flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
-            <AlertTriangle className="w-4 h-4 shrink-0" />
+          <div role="alert" className="mb-4 flex items-center gap-2 text-sm font-medium text-again">
+            <AlertTriangle className="w-4 h-4 shrink-0" aria-hidden />
             {saveError}
           </div>
         )}
 
         {/* Actions */}
-        <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-600">
-          <button
-            type="button"
-            onClick={handleBackToPrompt}
-            className="inline-flex items-center gap-1.5 text-sm rounded text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t-2 border-line">
+          <Button variant="ghost" size="sm" onClick={handleBackToPrompt} className="-ml-3 text-muted">
+            <RefreshCw className="w-4 h-4" aria-hidden />
             {t('ai.editAndRegenerate')}
-          </button>
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-            >
+          </Button>
+          <div className="flex gap-3 ml-auto">
+            <Button variant="ghost" onClick={onClose}>
               {t('common.cancel')}
-            </button>
+            </Button>
             <button
               type="button"
               onClick={handleSave}
               disabled={isPending || generatedCards.length === 0}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              className="btn-ink min-h-[46px] px-5 text-[15px]"
             >
-              <Sparkles className="w-4 h-4" />
               {t('ai.addCards', { count: generatedCards.length })}
             </button>
           </div>
@@ -552,9 +512,9 @@ export function AIGenerateTab({
   // ---- Saving step ----
   if (step === 'saving') {
     return (
-      <div className="flex flex-col items-center justify-center py-12 gap-4">
-        <Loader2 className="w-8 h-8 animate-spin text-primary-600 dark:text-primary-400" />
-        <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+      <div className="flex flex-col items-center justify-center py-12 gap-4" aria-live="polite">
+        <Loader2 className="w-8 h-8 animate-spin text-fg" aria-hidden />
+        <p className="text-sm font-bold text-fg">
           {t('ai.addingCards', { count: generatedCards.length })}
         </p>
       </div>
@@ -563,26 +523,18 @@ export function AIGenerateTab({
 
   // ---- Done step ----
   return (
-    <div className="flex flex-col items-center justify-center py-12 gap-4">
-      <div className="p-3 rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-        <CheckCircle2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+    <div className="flex flex-col items-center justify-center py-12 gap-4 text-center">
+      <div className="sticker !shadow-sticker-sm bg-mint !rounded-full p-3 -rotate-3">
+        <CheckCircle2 className="w-8 h-8 text-ink" aria-hidden />
       </div>
-      <p className="text-lg font-medium text-slate-800 dark:text-slate-100">
+      <p className="font-display text-xl text-fg">
         {t('ai.addedCards', { count: savedCount })}
       </p>
-      <div className="flex gap-3 mt-2">
-        <button
-          type="button"
-          onClick={resetToPrompt}
-          className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-        >
+      <div className="flex flex-wrap justify-center gap-3 mt-2">
+        <Button variant="secondary" onClick={resetToPrompt}>
           {t('ai.regenerate')}
-        </button>
-        <button
-          type="button"
-          onClick={onClose}
-          className="px-4 py-2 rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-        >
+        </Button>
+        <button type="button" onClick={onClose} className="btn-ink min-h-[46px] px-5 text-[15px]">
           {t('common.done')}
         </button>
       </div>

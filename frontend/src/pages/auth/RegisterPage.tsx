@@ -13,6 +13,7 @@ import {
   type PasswordStrength,
 } from '@/shared/lib/validation'
 import { usePageMeta } from '@/shared/lib/usePageMeta'
+import { inputBase, inputError, inputValid, inputDefault } from '@/shared/ui/Input'
 import { AuthPageLayout } from './AuthPageLayout'
 
 const getStrengthLabels = (t: (key: string) => string): Record<PasswordStrength, string> => ({
@@ -24,19 +25,13 @@ const getStrengthLabels = (t: (key: string) => string): Record<PasswordStrength,
 })
 
 const STRENGTH_COLORS: Record<PasswordStrength, string> = {
-  none: 'bg-slate-200 dark:bg-slate-600',
-  weak: 'bg-red-500 dark:bg-red-400',
-  fair: 'bg-amber-500 dark:bg-amber-400',
-  good: 'bg-lime-500 dark:bg-lime-400',
-  strong: 'bg-green-600 dark:bg-green-500',
+  none: 'bg-line',
+  weak: 'bg-again',
+  fair: 'bg-sun',
+  good: 'bg-sky',
+  strong: 'bg-grass',
 }
 
-const inputBase =
-  'w-full px-4 py-2.5 sm:py-3 min-h-[44px] rounded-lg border bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:shadow-focus-primary dark:focus:shadow-focus-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:opacity-60 disabled:cursor-not-allowed hover:border-slate-400 dark:hover:border-slate-500'
-
-const inputError = 'border-red-500 dark:border-red-400'
-const inputValid = 'border-green-500 dark:border-green-400'
-const inputDefault = 'border-slate-300 dark:border-slate-600'
 
 export const RegisterPage = () => {
   const { t } = useTranslation()
@@ -135,7 +130,7 @@ export const RegisterPage = () => {
 
 
   const toggleBtnClass =
-    'absolute right-2.5 top-1/2 -translate-y-1/2 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center -my-1 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-0'
+    'absolute right-1 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-[12px] text-muted hover:text-fg active:scale-[0.92] transition-[transform,color] duration-150 focus:outline-none focus-visible:ring-[3px] focus-visible:ring-sky'
 
   return (
     <AuthPageLayout
@@ -149,7 +144,7 @@ export const RegisterPage = () => {
           type="button"
           onClick={() => handleOAuth('google')}
           disabled={oauthLoading !== null}
-          className="w-full flex items-center justify-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+          className="btn-quiet w-full min-h-[48px] px-4 text-[15px]"
           aria-label={t('auth.signUpWithGoogle')}
         >
           {oauthLoading === 'google' ? (
@@ -160,12 +155,12 @@ export const RegisterPage = () => {
           <span>{t('auth.signUpWithGoogle')}</span>
         </button>
       </div>
-      <div className="relative mb-4">
+      <div className="relative my-5">
         <div className="absolute inset-0 flex items-center" aria-hidden>
-          <div className="w-full border-t border-slate-200 dark:border-slate-600" />
+          <div className="w-full border-t-2 border-line" />
         </div>
-        <div className="relative flex justify-center text-xs">
-          <span className="bg-white dark:bg-slate-800 px-2 text-slate-500 dark:text-slate-400">{t('auth.orContinueWithEmail')}</span>
+        <div className="relative flex justify-center text-sm">
+          <span className="bg-sheet px-3 font-medium text-muted">{t('auth.orContinueWithEmail')}</span>
         </div>
       </div>
 
@@ -182,7 +177,7 @@ export const RegisterPage = () => {
         style={{ pointerEvents: isRegistering ? 'none' : undefined }}
       >
         <div>
-          <label htmlFor={usernameId} className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+          <label htmlFor={usernameId} className="block text-sm font-bold text-fg mb-1.5">
             {t('auth.username')}
           </label>
           <div className="relative">
@@ -202,7 +197,7 @@ export const RegisterPage = () => {
               className={`${inputBase} pr-10 ${usernameError ? inputError : usernameValid ? inputValid : inputDefault}`}
             />
             {usernameValid && (
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600 dark:text-green-400 animate-checkmark-pop" aria-hidden>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-grass animate-checkmark-pop" aria-hidden>
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
@@ -210,14 +205,14 @@ export const RegisterPage = () => {
             )}
           </div>
           {usernameError && (
-            <p id={usernameErrorId} className="mt-1.5 text-sm text-red-600 dark:text-red-400 transition-colors duration-200 animate-fade-in" role="alert">
+            <p id={usernameErrorId} className="mt-1.5 text-sm font-medium text-again" role="alert">
               {usernameError}
             </p>
           )}
         </div>
 
         <div>
-          <label htmlFor={emailId} className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+          <label htmlFor={emailId} className="block text-sm font-bold text-fg mb-1.5">
             {t('auth.email')}
           </label>
           <div className="relative">
@@ -238,7 +233,7 @@ export const RegisterPage = () => {
               className={`${inputBase} pr-10 ${emailError ? inputError : emailValid ? inputValid : inputDefault}`}
             />
             {emailValid && (
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600 dark:text-green-400 animate-checkmark-pop" aria-hidden>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-grass animate-checkmark-pop" aria-hidden>
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
@@ -246,14 +241,14 @@ export const RegisterPage = () => {
             )}
           </div>
           {emailError && (
-            <p id={emailErrorId} className="mt-1.5 text-sm text-red-600 dark:text-red-400 transition-colors duration-200 animate-fade-in" role="alert">
+            <p id={emailErrorId} className="mt-1.5 text-sm font-medium text-again" role="alert">
               {emailError}
             </p>
           )}
         </div>
 
         <div>
-          <label htmlFor={passwordId} className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+          <label htmlFor={passwordId} className="block text-sm font-bold text-fg mb-1.5">
             {t('auth.password')}
           </label>
           <div className="relative">
@@ -292,36 +287,34 @@ export const RegisterPage = () => {
                 {[1, 2, 3, 4].map((i) => (
                   <div
                     key={i}
-                    className={`h-1 flex-1 rounded-full transition-colors duration-200 ${
+                    className={`h-1.5 flex-1 rounded-full ${
                       (strength === 'strong' && i <= 4) || (strength === 'good' && i <= 3) || (strength === 'fair' && i <= 2) || (strength === 'weak' && i <= 1)
                         ? STRENGTH_COLORS[strength]
-                        : 'bg-slate-200 dark:bg-slate-600'
+                        : 'bg-line'
                     }`}
                   />
                 ))}
               </div>
               {strength !== 'none' && (
                 <span
-                  className={`text-xs font-medium ${
-                    strength === 'weak' ? 'text-red-600 dark:text-red-400' : strength === 'fair' ? 'text-amber-600 dark:text-amber-400' : strength === 'good' ? 'text-lime-600 dark:text-lime-400' : 'text-green-600 dark:text-green-400'
-                  }`}
+                  className="text-xs font-bold text-fg"
                 >
                   {getStrengthLabels(t)[strength]}
                 </span>
               )}
             </div>
           )}
-          <ul id={requirementsId} className="mt-2 space-y-1 text-xs text-slate-600 dark:text-slate-400" aria-label={t('auth.passwordRequirementsLabel')}>
+          <ul id={requirementsId} className="mt-2 space-y-1 text-xs text-muted" aria-label={t('auth.passwordRequirementsLabel')}>
             {getPasswordRequirements(t).map((req) => {
               const met = req.test(password)
               return (
-                <li key={req.id} className={`flex items-center gap-2 transition-colors duration-200 ${met ? 'text-green-600 dark:text-green-400' : ''}`}>
+                <li key={req.id} className={`flex items-center gap-2 ${met ? 'text-fg font-medium' : ''}`}>
                   {met ? (
-                    <svg className="w-4 h-4 shrink-0 text-green-600 dark:text-green-400 animate-checkmark-pop" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                    <svg className="w-4 h-4 shrink-0 text-grass animate-checkmark-pop" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
                   ) : (
-                    <span className="w-4 h-4 shrink-0 rounded-full border-2 border-slate-300 dark:border-slate-500" aria-hidden />
+                    <span className="w-4 h-4 shrink-0 rounded-full border-2 border-line" aria-hidden />
                   )}
                   <span>{req.label}</span>
                 </li>
@@ -329,14 +322,14 @@ export const RegisterPage = () => {
             })}
           </ul>
           {passwordError && (
-            <p id={passwordErrorId} className="mt-1.5 text-sm text-red-600 dark:text-red-400 transition-colors duration-200 animate-fade-in" role="alert">
+            <p id={passwordErrorId} className="mt-1.5 text-sm font-medium text-again" role="alert">
               {passwordError}
             </p>
           )}
         </div>
 
         <div>
-          <label htmlFor={confirmId} className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+          <label htmlFor={confirmId} className="block text-sm font-bold text-fg mb-1.5">
             {t('auth.confirmPassword')}
           </label>
           <div className="relative">
@@ -357,7 +350,7 @@ export const RegisterPage = () => {
               className={`${inputBase} pr-11 ${confirmError ? inputError : passwordsMatch ? inputValid : inputDefault}`}
             />
             {passwordsMatch && confirmPassword.length > 0 && (
-              <span className="absolute right-10 top-1/2 -translate-y-1/2 text-green-600 dark:text-green-400 animate-checkmark-pop" aria-hidden>
+              <span className="absolute right-10 top-1/2 -translate-y-1/2 text-grass animate-checkmark-pop" aria-hidden>
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
@@ -377,7 +370,7 @@ export const RegisterPage = () => {
             </button>
           </div>
           {confirmError && (
-            <p id={confirmErrorId} className="mt-1.5 text-sm text-red-600 dark:text-red-400 transition-colors duration-200 animate-fade-in" role="alert">
+            <p id={confirmErrorId} className="mt-1.5 text-sm font-medium text-again" role="alert">
               {confirmError}
             </p>
           )}
@@ -385,11 +378,11 @@ export const RegisterPage = () => {
 
         {registerError && (
           <div
-            className="flex items-start gap-3 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 text-red-600 dark:text-red-400 text-sm transition-colors duration-200 animate-fade-in"
+            className="flex items-start gap-3 p-3 rounded-[14px] border-2 border-again bg-again/10 text-fg text-sm font-medium"
             role="alert"
             aria-live="assertive"
           >
-            <svg className="w-5 h-5 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+            <svg className="w-5 h-5 shrink-0 mt-0.5 text-again" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
             </svg>
             <span>{getRegisterErrorMessage(registerError)}</span>
@@ -399,13 +392,13 @@ export const RegisterPage = () => {
         <button
           type="submit"
           disabled={isRegistering}
-          className="w-full min-h-[44px] py-3 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white font-medium transition-[color,background-color,transform] duration-200 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-800 disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100 flex items-center justify-center gap-2"
+          className="btn-brand w-full min-h-[52px] px-5 text-base"
           aria-busy={isRegistering}
           aria-label={isRegistering ? t('auth.registering') : t('auth.register')}
         >
           {isRegistering ? (
             <>
-              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden>
+              <svg className="animate-spin h-5 w-5 text-ink" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden>
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
               </svg>
