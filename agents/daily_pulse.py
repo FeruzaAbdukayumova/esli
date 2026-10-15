@@ -15,10 +15,10 @@ from pathlib import Path
 
 # ── Config ──────────────────────────────────────────────────────────────────
 API_URL             = "https://api.esli.app"
-AGENT_EMAIL         = "agent@esli.app"
-AGENT_PASSWORD      = "EsliAgent2026!Secure"
-TELEGRAM_BOT_TOKEN  = "8482322806:AAHrjiG1OUg1CZqj0VRbe8o7eV1JT9PuxpU"
-TELEGRAM_CHAT_ID    = "8467827240"
+AGENT_EMAIL         = os.environ.get("ESLI_AGENT_EMAIL", "agent@esli.app")
+AGENT_PASSWORD      = os.environ["ESLI_AGENT_PASSWORD"]
+TELEGRAM_BOT_TOKEN  = os.environ["TELEGRAM_BOT_TOKEN"]
+TELEGRAM_CHAT_ID    = os.environ["TELEGRAM_CHAT_ID"]
 
 REPORTS_DIR = Path(__file__).parent / "reports" / "daily-pulse"
 
