@@ -21,7 +21,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.db.models.subscription import Subscription
 from app.db.models.user import User
-from app.services.subscription_service import get_user_subscription
+from app.services.subscription_service import (
+    create_free_subscription,
+    get_user_subscription,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -271,7 +274,15 @@ async def _find_subscription_for_event(
             user_id = uuid.UUID(user_id_str)
         except ValueError:
             return None
-        return await get_user_subscription(db, user_id)
+        sub = await get_user_subscription(db, user_id)
+        if sub:
+            return sub
+        # Users created before signup started creating a free row (or whose
+        # row went missing) would otherwise pay and stay on Free. Create the
+        # row on the fly, but only for a user that actually exists.
+        if await db.get(User, user_id) is None:
+            return None
+        return await create_free_subscription(db, user_id)
 
     return None
 

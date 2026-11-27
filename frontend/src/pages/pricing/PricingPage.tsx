@@ -6,7 +6,7 @@ import toast from 'react-hot-toast'
 import { useAuthContext } from '@/app/providers/AuthProvider'
 import { useDeckRepo } from '@/features/decks/repo'
 import { useAuth } from '@/features/auth/hooks/useAuth'
-import { usePlans } from '@/features/subscription/hooks'
+import { usePlans, usePortalSession, useSubscription } from '@/features/subscription/hooks'
 import { Button } from '@/shared/ui/Button'
 import { PromoCodeInput } from '@/features/subscription/components/PromoCodeInput'
 import { useTier } from '@/features/subscription/useTier'
@@ -49,6 +49,32 @@ export function PricingPage() {
   const { data: plansData, isLoading, isError, refetch, isRefetching } = usePlans()
   const [billingInterval, setBillingInterval] = useState<'month' | 'year'>('month')
   const [checkoutTier, setCheckoutTier] = useState<PlanTier | null>(null)
+  const { data: subscription } = useSubscription()
+  const portal = usePortalSession()
+  // A paying user must change or cancel their plan in Paddle's portal.
+  // Opening a second checkout would start a second subscription (double charge).
+  const hasPaidSubscription = subscription?.has_paid_subscription === true
+
+  const openPortal = () => {
+    if (portal.isPending) return
+    trackEvent('pricing.manage_click', { tier: currentTier })
+    portal.mutate(undefined, {
+      onError: () =>
+        toast.error(t('pricing.portalError', 'Could not open billing settings. Please try again.')),
+    })
+  }
+
+  const manageButton = (
+    <button
+      type="button"
+      onClick={openPortal}
+      disabled={portal.isPending}
+      className="btn-quiet w-full min-h-[48px] px-4 text-[15px]"
+    >
+      {portal.isPending && <Loader2 className="w-4 h-4 animate-spin" aria-hidden />}
+      {t('pricing.manageSubscription', 'Manage subscription')}
+    </button>
+  )
 
   const { hasGuestDecksToSave, isSyncing, saveGuestDecks } = useGuestSync()
 
@@ -60,6 +86,10 @@ export function PricingPage() {
       return
     }
     if (tier !== 'pro' && tier !== 'premium') return
+    if (hasPaidSubscription) {
+      openPortal()
+      return
+    }
 
     const priceId = billingInterval === 'month' ? plan.monthly_price_id : plan.yearly_price_id
     const token = plansData?.paddle_client_token
@@ -277,14 +307,20 @@ export function PricingPage() {
                       <Link to="/register" className="btn-quiet w-full min-h-[48px] px-4 text-[15px]">
                         {t('pricing.getStarted')}
                       </Link>
+                    ) : hasPaidSubscription ? (
+                      manageButton
                     ) : (
-                      // No billing portal pre-Paddle: paid users see no action on the free card.
+                      // Promo users have nothing to manage on the free card.
                       <div className="min-h-[48px]" aria-hidden />
                     )
+                  ) : isCurrent && hasPaidSubscription ? (
+                    manageButton
                   ) : isCurrent ? (
                     <div className="text-center text-sm font-bold text-ink/70 min-h-[48px] flex items-center justify-center">
                       {t('pricing.currentPlan')}
                     </div>
+                  ) : hasPaidSubscription ? (
+                    manageButton
                   ) : (
                     <button
                       type="button"

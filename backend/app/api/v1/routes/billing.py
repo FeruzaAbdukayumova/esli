@@ -113,6 +113,11 @@ async def get_subscription(
         promo_expires_at=(
             sub.promo_expires_at.isoformat() if sub and sub.promo_expires_at else None
         ),
+        has_paid_subscription=bool(
+            sub
+            and sub.paddle_subscription_id
+            and sub.status in ("active", "trialing", "past_due", "paused")
+        ),
     )
 
 

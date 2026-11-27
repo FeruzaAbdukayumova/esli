@@ -16,6 +16,7 @@ export interface SubscriptionInfo {
   usage: UsageSummary
   promo_tier: PlanTier | null
   promo_expires_at: string | null
+  has_paid_subscription: boolean
 }
 
 export interface PlanLimits {

@@ -28,6 +28,10 @@ class SubscriptionResponse(BaseModel):
     usage: UsageSummary
     promo_tier: str | None = None
     promo_expires_at: str | None = None
+    # True when the user has a real Paddle subscription (not just a promo
+    # tier). The app uses it to show "Manage subscription" instead of a
+    # second checkout, which would double-charge.
+    has_paid_subscription: bool = False
 
 
 class PlanLimits(BaseModel):
