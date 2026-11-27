@@ -3,7 +3,7 @@
   "category_tags": "toefl,vocabulary,test-prep",
   "cards": [
     { "front": "Abolish (verb)", "back": "To formally put an end to a system, practice, or institution. Example: 'Several countries have abolished the death penalty in recent decades.'" },
-    { "front": "Aggregate (noun)", "back": "A whole formed by combining several separate elements. Example: 'The aggregate of research findings supports the theory of climate change.'" },
+    { "front": "Aggregate (noun)", "back": "A whole formed by combining several separate elements. Example: 'In aggregate, the research findings strongly support the link between diet and heart disease.'" },
     { "front": "Albeit (conjunction)", "back": "Although; even though. Example: 'The experiment produced results, albeit not the ones the researchers had anticipated.'" },
     { "front": "Anthropology (noun)", "back": "The study of human societies, cultures, and their development. Example: 'Her coursework in anthropology examined kinship structures in indigenous communities.'" },
     { "front": "Assimilate (verb)", "back": "To absorb and integrate information, ideas, or culture. Example: 'Immigrants often assimilate the customs of their adopted country over time.'" },
@@ -40,7 +40,7 @@
     { "front": "Inherent (adjective)", "back": "Existing as a natural or permanent quality of something. Example: 'There are inherent limitations in using self-reported surveys to measure behavioral changes.'" },
     { "front": "Irrigation (noun)", "back": "The supply of water to land or crops through artificial channels. Example: 'Ancient Mesopotamian civilizations developed sophisticated irrigation systems to support agriculture.'" },
     { "front": "Linguistic (adjective)", "back": "Relating to language or the scientific study of language. Example: 'The researcher examined the linguistic diversity of communities along the Silk Road.'" },
-    { "front": "Magnitude (noun)", "back": "The great size or importance of something. Example: 'Scientists measured the magnitude of the earthquake at 7.2 on the Richter scale.'" },
+    { "front": "Magnitude (noun)", "back": "The great size or importance of something; a measure of the strength of an earthquake. Example: 'The magnitude 7.2 earthquake damaged buildings across the entire region.'" },
     { "front": "Metabolism (noun)", "back": "The chemical processes in a living organism that maintain life. Example: 'Cold-blooded animals have a slower metabolism than warm-blooded species.'" },
     { "front": "Migrate (verb)", "back": "To move from one region or habitat to another, especially seasonally. Example: 'Millions of wildebeest migrate across the Serengeti each year in search of fresh grazing land.'" },
     { "front": "Phenomenon (noun)", "back": "A fact or situation that is observed to exist or happen. Example: 'The Northern Lights are a natural phenomenon caused by solar particles entering the atmosphere.'" },
