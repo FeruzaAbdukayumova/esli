@@ -52,3 +52,9 @@ Global rules:
 **Runs:** daily + weekly cron (already running)
 **Job:** `daily-pulse.py` (morning metrics digest) + `weekly-growth.py` (30-day trends + recommendations). One-way reports, no approval needed.
 **Output:** `agents/reports/daily-pulse/` + `agents/reports/weekly-growth/` + Telegram digests.
+
+## Deck Editor (in-app content)
+**Runs:** on demand via the `deck-editor` skill (`.claude/skills/deck-editor/`)
+**Job:** Own the quality of the premade public decks. Audit them against `.claude/skills/deck-editor/quality-bar.md`, fix weak cards, fill gaps with new decks, and pick hero cards for Instagram promotion. Hands post production to the Social agent / Instagram skills.
+**Output:** `agents/reports/decks/` (audits), `agents/content/decks/` (new deck drafts), fixture fixes on `decks/*` branches.
+**Guardrails:** Never seeds or touches the prod DB (`--reset` breaks public deck links). Never publishes. No em dashes in card text.
