@@ -24,3 +24,9 @@ Subscription payments via Paddle (merchant of record).
 - Webhook now creates the missing subscription row for a user that exists but has none, instead of dropping the payment.
 - Paid users see "Manage subscription" (Paddle portal) instead of "Upgrade", which used to open a second checkout and would double-charge.
 - `/billing/subscription` returns `has_paid_subscription`.
+
+## Payouts (2026-11-27)
+
+- No payout method in Paddle yet. Revenue waits in the Paddle balance until one is set.
+- Plan: Payoneer. Backup: SWIFT to a USD account at an Uzbek bank.
+- Payoneer signup from 2026-04-30 was likely never finished; login and password reset fail. Support contacted 2026-11-27, waiting for reply.

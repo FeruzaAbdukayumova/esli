@@ -17,6 +17,7 @@ import { ProfilePage } from '@/pages/profile/ProfilePage'
 import { PricingPage } from '@/pages/pricing/PricingPage'
 import { SubscriptionSuccessPage } from '@/pages/subscription/SubscriptionSuccessPage'
 import { SubscriptionCanceledPage } from '@/pages/subscription/SubscriptionCanceledPage'
+import { CheckoutPage } from '@/pages/subscription/CheckoutPage'
 // Admin section is lazy-loaded: it pulls in recharts and is invisible to normal users.
 const AdminLayout = lazy(() => import('@/layouts/AdminLayout').then((m) => ({ default: m.AdminLayout })))
 const AdminDashboardPage = lazy(() => import('@/pages/admin/AdminDashboardPage').then((m) => ({ default: m.AdminDashboardPage })))
@@ -58,6 +59,11 @@ export const router = createBrowserRouter([
   {
     path: '/auth/callback/:provider',
     element: <OAuthCallbackPage />,
+  },
+  {
+    // Paddle default payment link (payment links, payment-method update emails)
+    path: '/checkout',
+    element: <CheckoutPage />,
   },
   {
     path: '/auth/extension-done',
