@@ -5,11 +5,19 @@ Creates a system user and inserts shared public decks from JSON fixtures.
 Idempotent — skips decks that already exist (matched by title + system user).
 
 Usage (from backend dir):
-    python3 -m app.db.seeds.seed_decks           # add new decks only
-    python3 -m app.db.seeds.seed_decks --reset    # delete old shared decks, then re-seed
+    python3 -m app.db.seeds.seed_decks                   # add new decks only
+    python3 -m app.db.seeds.seed_decks --update          # DRY RUN: show what would change
+    python3 -m app.db.seeds.seed_decks --update --apply  # update existing decks in place
+    python3 -m app.db.seeds.seed_decks --reset           # delete old shared decks, then re-seed
+
+--update keeps deck IDs (public links, sitemap URLs and copy counts survive).
+Decks are matched by title, cards by front text: changed backs are updated,
+new cards are added, cards no longer in the fixture are removed. Decks owned by
+the system user that are not in the fixtures are reported, never deleted.
+Users' copied decks are separate decks and are never touched.
 
 Or with Railway:
-    railway run python -m app.db.seeds.seed_decks --reset
+    railway run python -m app.db.seeds.seed_decks --update
 """
 from __future__ import annotations
 
@@ -18,6 +26,7 @@ import json
 import os
 import sys
 import uuid
+from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -30,8 +39,6 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 load_dotenv(Path(__file__).resolve().parents[3] / ".env")
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
-if not DATABASE_URL:
-    raise RuntimeError("DATABASE_URL not set. Check your .env file.")
 
 SYSTEM_EMAIL = "system@flashcards.app"
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
@@ -81,8 +88,10 @@ class Card(Base):
     updated_at = Column(DateTime(timezone=True))
 
 
-engine = create_async_engine(DATABASE_URL, echo=False)
-AsyncSessionLocal = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
+def make_engine():
+    if not DATABASE_URL:
+        raise RuntimeError("DATABASE_URL not set. Check your .env file.")
+    return create_async_engine(DATABASE_URL, echo=False)
 
 
 async def get_or_create_system_user(session: AsyncSession):
@@ -168,6 +177,148 @@ async def seed_deck(session: AsyncSession, user_id: str, fixture_path: Path) -> 
     return True
 
 
+def plan_card_changes(existing, fixture_cards):
+    """Diff the cards in the DB against a fixture.
+
+    existing: list of (card_id, front, back) currently in the deck.
+    fixture_cards: list of {"front", "back"} dicts from the JSON fixture.
+    Returns (updates, inserts, deletes):
+      updates: [(card_id, front, new_back)] for cards whose back changed
+      inserts: [card_dict] for fixture cards with no matching front
+      deletes: [(card_id, front)] for DB cards no longer in the fixture
+    """
+    by_front = defaultdict(list)
+    for card_id, front, back in existing:
+        by_front[front].append((card_id, back))
+
+    updates, inserts = [], []
+    for card in fixture_cards:
+        bucket = by_front.get(card["front"])
+        if bucket:
+            card_id, back = bucket.pop(0)
+            if back != card["back"]:
+                updates.append((card_id, card["front"], card["back"]))
+        else:
+            inserts.append(card)
+
+    deletes = [(card_id, front) for front, items in by_front.items() for card_id, _ in items]
+    return updates, inserts, deletes
+
+
+async def get_system_user_id(session: AsyncSession):
+    result = await session.execute(
+        text("SELECT id FROM users WHERE email = :email"),
+        {"email": SYSTEM_EMAIL},
+    )
+    row = result.fetchone()
+    return str(row[0]) if row else None
+
+
+async def update_deck(session: AsyncSession, user_id, fixture_path: Path, apply: bool) -> str:
+    """Update one shared deck in place. Returns 'new', 'changed' or 'same'."""
+    with open(fixture_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    title = data["title"]
+    tags = data.get("category_tags", "")
+
+    row = None
+    if user_id:
+        result = await session.execute(
+            text("SELECT id, category_tags FROM decks WHERE title = :title AND owner_id = :owner_id"),
+            {"title": title, "owner_id": user_id},
+        )
+        row = result.fetchone()
+
+    if not row:
+        print(f"  NEW: {title} ({len(data['cards'])} cards)")
+        if apply:
+            await seed_deck(session, user_id, fixture_path)
+        return "new"
+
+    deck_id, current_tags = str(row[0]), row[1] or ""
+    result = await session.execute(
+        text("SELECT id, front_text, back_text FROM cards WHERE deck_id = :deck_id ORDER BY created_at, id"),
+        {"deck_id": deck_id},
+    )
+    existing = [(str(r[0]), r[1], r[2]) for r in result.fetchall()]
+    updates, inserts, deletes = plan_card_changes(existing, data["cards"])
+    tags_changed = current_tags != tags
+
+    if not (updates or inserts or deletes or tags_changed):
+        print(f"  SAME: {title}")
+        return "same"
+
+    print(f"  UPDATE: {title}: {len(updates)} changed, {len(inserts)} added, {len(deletes)} removed"
+          + (", tags changed" if tags_changed else ""))
+    for _, front, _ in updates:
+        print(f"      ~ {front}")
+    for card in inserts:
+        print(f"      + {card['front']}")
+    for _, front in deletes:
+        print(f"      - {front}")
+
+    if not apply:
+        return "changed"
+
+    now = datetime.now(timezone.utc)
+    for card_id, _, back in updates:
+        await session.execute(
+            text("UPDATE cards SET back_text = :back, updated_at = :now WHERE id = :id"),
+            {"back": back, "now": now, "id": card_id},
+        )
+    for card in inserts:
+        await session.execute(
+            text(
+                "INSERT INTO cards (id, deck_id, front_text, back_text, ease_factor, interval, repetitions, created_at, updated_at) "
+                "VALUES (:id, :deck_id, :front, :back, 2.5, 0, 0, :now, :now)"
+            ),
+            {"id": str(uuid.uuid4()), "deck_id": deck_id, "front": card["front"], "back": card["back"], "now": now},
+        )
+    for card_id, _ in deletes:
+        await session.execute(text("DELETE FROM cards WHERE id = :id"), {"id": card_id})
+    await session.execute(
+        text("UPDATE decks SET category_tags = :tags, updated_at = :now WHERE id = :id"),
+        {"tags": tags, "now": now, "id": deck_id},
+    )
+    return "changed"
+
+
+async def report_orphan_decks(session: AsyncSession, user_id, fixture_titles):
+    if not user_id:
+        return
+    result = await session.execute(
+        text("SELECT title FROM decks WHERE owner_id = :owner_id AND is_shared = TRUE"),
+        {"owner_id": user_id},
+    )
+    orphans = sorted(r[0] for r in result.fetchall() if r[0] not in fixture_titles)
+    for title in orphans:
+        print(f"  NOT IN FIXTURES (left untouched): {title}")
+
+
+async def run_update(session_factory, fixture_files, apply: bool):
+    print("Updating premade decks in place" + ("" if apply else " (DRY RUN, nothing is written)") + "...")
+    print()
+    counts = defaultdict(int)
+    async with session_factory() as session:
+        async with session.begin():
+            user_id = await get_system_user_id(session)
+            if not user_id:
+                print("  System user not found." + (" Creating it." if apply else ""))
+                if apply:
+                    user_id = await get_or_create_system_user(session)
+            titles = set()
+            for fixture_path in fixture_files:
+                with open(fixture_path, "r", encoding="utf-8") as f:
+                    titles.add(json.load(f)["title"])
+                counts[await update_deck(session, user_id, fixture_path, apply)] += 1
+            await report_orphan_decks(session, user_id, titles)
+    print()
+    verb = "Applied" if apply else "Would apply"
+    print(f"{verb}: {counts['changed']} updated, {counts['new']} new, {counts['same']} unchanged.")
+    if not apply and (counts["changed"] or counts["new"]):
+        print("Run again with --update --apply to write these changes.")
+
+
 async def reset_shared_decks(session: AsyncSession, user_id: str):
     """Delete all shared decks (and their cards) owned by the system user."""
     result = await session.execute(
@@ -195,6 +346,24 @@ async def reset_shared_decks(session: AsyncSession, user_id: str):
 
 async def main():
     reset = "--reset" in sys.argv
+    update = "--update" in sys.argv
+    apply = "--apply" in sys.argv
+    if update and reset:
+        print("Use either --update or --reset, not both.")
+        return
+    if apply and not update:
+        print("--apply only works together with --update.")
+        return
+
+    engine = make_engine()
+    AsyncSessionLocal = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
+
+    if update:
+        fixture_files = sorted(FIXTURES_DIR.glob("*.json"))
+        await run_update(AsyncSessionLocal, fixture_files, apply)
+        await engine.dispose()
+        return
+
     print("Seeding premade decks...")
     if reset:
         print("  (--reset flag: will delete existing shared decks first)")

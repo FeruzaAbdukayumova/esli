@@ -36,6 +36,7 @@ Skills are built organically as recurring workflows emerge.
 ### Skills to Build (backlog)
 - **QA/testing sweep** - Systematically test the app for bugs, UX issues, edge cases
 - **UX audit** - Review pages/flows and suggest improvements
+- **Deck Editor** - built: `.claude/skills/deck-editor/`
 - **Marketing content** - Generate marketing copy, social posts, landing page improvements
 - **User friction finder** - Identify where users would struggle and suggest fixes
 - **Release checklist** - Pre-deploy validation workflow
